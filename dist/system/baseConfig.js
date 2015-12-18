@@ -31,7 +31,7 @@ System.register(['./authUtils'], function (_export) {
           this._current = {
             httpInterceptor: true,
             loginOnSignup: true,
-            baseUrl: '/',
+            baseUrl: null,
             loginRedirect: '/#customer',
             logoutRedirect: '/',
             signupRedirect: '/login',

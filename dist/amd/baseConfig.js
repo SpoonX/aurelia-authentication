@@ -32,7 +32,7 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
       this._current = {
         httpInterceptor: true,
         loginOnSignup: true,
-        baseUrl: '/',
+        baseUrl: null,
         loginRedirect: '/#customer',
         logoutRedirect: '/',
         signupRedirect: '/login',

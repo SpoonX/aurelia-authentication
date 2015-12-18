@@ -1,18 +1,19 @@
 import authUtils from './authUtils';
+
 export class BaseConfig {
   configure(incomingConfig) {
     authUtils.merge(this._current, incomingConfig);
-  };
+  }
 
   get current() {
     return this._current;
-  };
+  }
 
   constructor() {
     this._current = {
       httpInterceptor: true,
       loginOnSignup: true,
-      baseUrl: '/',
+      baseUrl: null,
       loginRedirect: '/#customer',
       logoutRedirect: '/',
       signupRedirect: '/login',
@@ -152,6 +153,5 @@ export class BaseConfig {
         }
       }
     };
-
   }
 }

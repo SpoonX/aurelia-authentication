@@ -33,7 +33,7 @@ var BaseConfig = (function () {
     this._current = {
       httpInterceptor: true,
       loginOnSignup: true,
-      baseUrl: '/',
+      baseUrl: null,
       loginRedirect: '/#customer',
       logoutRedirect: '/',
       signupRedirect: '/login',

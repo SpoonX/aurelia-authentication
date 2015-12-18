@@ -26,7 +26,7 @@ Obviously, the prerequisites ([NodeJs](https://nodejs.org/), [Gulp](http://gulpj
 
 # Installation
 ```
-jspm install aurelia-auth
+jspm install github:spoonx/aurelia-auth
 ```
 
 # How to use aurelia-auth?
@@ -102,7 +102,7 @@ export function configure(aurelia) {
     .standardConfiguration()
     .developmentLogging()
     .plugin('aurelia-animator-css')
-    .plugin('aurelia-auth', (baseConfig)=>{
+    .plugin('spoonx/aurelia-auth', (baseConfig)=>{
          baseConfig.configure(config);
     });
   aurelia.start().then(a => a.setRoot());
@@ -117,7 +117,7 @@ import 'bootstrap';
 
 import {inject} from 'aurelia-framework';
 import {Router} from 'aurelia-router';
-import {FetchConfig} from 'aurelia-auth';
+import {FetchConfig} from 'spoonx/aurelia-auth';
 @inject(Router,FetchConfig, AppRouterConfig )
 export class App {
 
@@ -145,7 +145,7 @@ Button actions are passed to the corresponding view model via a simple click.del
 
 The login view model will speak directly with the aurelia-auth service, which is made available via constructor injection.
 ```js
-import {AuthService} from 'aurelia-auth';
+import {AuthService} from 'spoonx/aurelia-auth';
 import {inject} from 'aurelia-framework';
 @inject(AuthService)
 

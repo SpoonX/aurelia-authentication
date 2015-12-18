@@ -1,8 +1,11 @@
+# Aurelia-auth
 
-#### Sample app: [aurelia-auth.opinionatedapps.com](http://aureliauth.opinionatedapps.com)
-#### Sources sample app: [github.com/paulvanbladel/aurelia-auth-sample] (https://github.com/paulvanbladel/aurelia-auth-sample)
+> Makes setting up authentication for your Aurelia app simple.
+
 ## What is aurelia-auth?
-aurelia-auth is a token-based authentication plugin for [Aurelia](http://aurelia.io/) with support for popular social authentication providers (Google, Twitter, Facebook, LinkedIn, Windows Live, FourSquare, Yahoo, Github, Instagram ) and a local stragegy, i.e. simple username (email) and password.
+This is a largely refactored module based on [paul van bladel's aurelia-auth](https://github.com/paulvanbladel/aurelia-auth/).
+
+aurelia-auth is a token-based authentication plugin for [Aurelia](http://aurelia.io/) with support for popular social authentication providers (Google, Twitter, Facebook, LinkedIn, Windows Live, FourSquare, Yahoo, Github, Instagram) and a local stragegy, i.e. simple username / email and password.
 
 aurelia-auth is a port of the great [Satellizer](https://github.com/sahat/satellizer/) library to ES6 and packaged as an Aurelia plugin.
 
@@ -126,32 +129,6 @@ export class App {
   activate(){
     this.fetchConfig.configure();
   }
-}
-```
-
-## Configure Http Client 
-Allthough the Fetch Client is the preferred 'http client' for aurelia, there is also support for aurelia-http-client.
-The configuration of aurelia-http-client is similar to aurelia-fetch-client.
-In your aurelia app file, inject the `HttpClientConfig`.
-In the activate step, invoke the `configure()` method to send Authorization tokens with every HttpClient request.
-
-```
-import {inject} from 'aurelia-framework';
-import HttpClientConfig from 'aurelia-auth/app.httpClient.config';
-
-@inject(Router,HttpClientConfig,AppRouterConfig )
-export class App {
-
-  constructor(router, httpClientConfig){
-    this.router = router;
-    this.httpClientConfig = httpClientConfig;
-  }
-
-  activate(){
-    this.httpClientConfig.configure();
-  }
-
-  ...
 }
 ```
 

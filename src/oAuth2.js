@@ -1,17 +1,17 @@
 import {inject} from 'aurelia-framework';
-import {authUtils} from './authUtils';
+import authUtils from './authUtils';
 import {Storage} from './storage';
 import {Popup} from './popup';
 import {BaseConfig} from './baseConfig';
-import {HttpClient} from 'aurelia-http-client';
+import {Rest} from 'spoonx/aurelia-api';
 
-@inject(Storage, Popup, HttpClient, BaseConfig)
+@inject(Storage, Popup, Rest, BaseConfig)
 export class OAuth2 {
-  constructor(storage, popup, http, config) {
-    this.storage = storage;
-    this.config = config.current;
-    this.popup = popup;
-    this.http = http;
+  constructor(storage, popup, rest, config) {
+    this.storage  = storage;
+    this.config   = config.current;
+    this.popup    = popup;
+    this.rest     = rest;
     this.defaults = {
       url: null,
       name: null,
@@ -52,11 +52,11 @@ export class OAuth2 {
     return openPopup
       .then((oauthData) => {
         if (self.defaults.responseType === 'token' ||
-            self.defaults.responseType === 'id_token%20token' ||
-            self.defaults.responseType === 'token%20id_token'
-           ) {
-             return oauthData;
-           }
+          self.defaults.responseType === 'id_token%20token' ||
+          self.defaults.responseType === 'token%20id_token'
+        ) {
+          return oauthData;
+        }
         if (oauthData.state && oauthData.state !== self.storage.get(stateName)) {
           return Promise.reject('OAuth 2.0 state parameter mismatch.');
         }
@@ -65,7 +65,7 @@ export class OAuth2 {
   }
 
   exchangeForToken(oauthData, userData) {
-    var data = authUtils.extend({}, userData, {
+    let data = authUtils.extend({}, userData, {
       code: oauthData.code,
       clientId: this.defaults.clientId,
       redirectUri: this.defaults.redirectUri
@@ -79,31 +79,24 @@ export class OAuth2 {
       data[param] = oauthData[param];
     });
 
-    var exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
+    let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
+    let credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
-
-    return this.http.createRequest(exchangeForTokenUrl)
-      .asPost()
-      .withContent(data)
-      .withCredentials(this.config.withCredentials)
-      .send()
-      .then(response => {
-        return response;
-      });
+    return this.rest.post(exchangeForTokenUrl, data, {credentials: credentials});
   }
 
   buildQueryString() {
     var keyValuePairs = [];
-    var urlParams = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
+    var urlParams     = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
     authUtils.forEach(urlParams, (params) => {
 
       authUtils.forEach(this.defaults[params], (paramName) => {
         var camelizedName = authUtils.camelCase(paramName);
-        var paramValue = authUtils.isFunction(this.defaults[paramName]) ? this.defaults[paramName]() : this.defaults[camelizedName];
+        var paramValue    = authUtils.isFunction(this.defaults[paramName]) ? this.defaults[paramName]() : this.defaults[camelizedName];
 
         if (paramName === 'state') {
           var stateName = this.defaults.name + '_state';
-          paramValue = encodeURIComponent(this.storage.get(stateName));
+          paramValue    = encodeURIComponent(this.storage.get(stateName));
         }
 
         if (paramName === 'scope' && Array.isArray(paramValue)) {

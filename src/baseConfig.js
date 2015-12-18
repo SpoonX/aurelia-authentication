@@ -1,4 +1,4 @@
-import {authUtils} from './authUtils';
+import authUtils from './authUtils';
 
 export class BaseConfig {
   configure(incomingConfig) {
@@ -13,7 +13,7 @@ export class BaseConfig {
     this._current = {
       httpInterceptor: true,
       loginOnSignup: true,
-      baseUrl: '/',
+      baseUrl: null,
       loginRedirect: '/#customer',
       logoutRedirect: '/',
       signupRedirect: '/login',

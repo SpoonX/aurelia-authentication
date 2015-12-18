@@ -1,13 +1,13 @@
 import {inject} from 'aurelia-framework';
 import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
-import {authUtils} from './authUtils';
+import authUtils from './authUtils';
 
 @inject(Storage, BaseConfig)
 export class Authentication {
   constructor(storage, config) {
-    this.storage = storage;
-    this.config = config.current;
+    this.storage   = storage;
+    this.config    = config.current;
     this.tokenName = this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
   }
 
@@ -40,14 +40,13 @@ export class Authentication {
 
     if (token && token.split('.').length === 3) {
       var base64Url = token.split('.')[1];
-      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       return JSON.parse(decodeURIComponent(escape(window.atob(base64))));
     }
   }
 
-  setToken(response, redirect) {
-
-    var tokenName = this.tokenName;
+  setTokenFromResponse(response, redirect) {
+    var tokenName   = this.tokenName;
     var accessToken = response && response.access_token;
     var token;
 
@@ -60,15 +59,14 @@ export class Authentication {
     }
 
     if (!token && response) {
-      token = this.config.tokenRoot && response.content[this.config.tokenRoot] ? response.content[this.config.tokenRoot][this.config.tokenName] : response.content[this.config.tokenName];
+      token = this.config.tokenRoot && response[this.config.tokenRoot] ? response[this.config.tokenRoot][this.config.tokenName] : response[this.config.tokenName];
     }
 
     if (!token) {
       var tokenPath = this.config.tokenRoot ? this.config.tokenRoot + '.' + this.config.tokenName : this.config.tokenName;
 
-      throw new Error('Expecting a token named "' + tokenPath + '" but instead got: ' + JSON.stringify(response.content));
+      throw new Error('Expecting a token named "' + tokenPath + '" but instead got: ' + JSON.stringify(response));
     }
-
 
     this.storage.set(tokenName, token);
 
@@ -97,8 +95,8 @@ export class Authentication {
     }
 
     var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var exp = JSON.parse(window.atob(base64)).exp;
+    var base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var exp       = JSON.parse(window.atob(base64)).exp;
 
     if (exp) {
       return Math.round(new Date().getTime() / 1000) <= exp;

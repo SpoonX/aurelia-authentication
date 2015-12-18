@@ -73,9 +73,11 @@ var authUtils = {
 
   joinUrl: function(baseUrl, url) {
     if (/^(?:[a-z]+:)?\/\//i.test(url)) {
+      console.log('Doing this');
       return url;
     }
 
+    console.log('not really though', baseUrl, url);
     var joined = [baseUrl, url].join('/');
 
     var normalize = function(str) {

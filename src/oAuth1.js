@@ -1,17 +1,17 @@
 import {inject} from 'aurelia-framework';
-import {authUtils} from './authUtils';
+import authUtils from './authUtils';
 import {Storage} from './storage';
 import {Popup} from './popup';
 import {BaseConfig} from './baseConfig';
-import {HttpClient} from 'aurelia-http-client';
+import {Rest} from 'spoonx/aurelia-api';
 
-@inject(Storage, Popup, HttpClient, BaseConfig)
+@inject(Storage, Popup, Rest, BaseConfig)
 export class OAuth1 {
-  constructor(storage, popup, http, config) {
-    this.storage = storage;
-    this.config = config.current;
-    this.popup = popup;
-    this.http = http;
+  constructor(storage, popup, rest, config) {
+    this.storage  = storage;
+    this.config   = config.current;
+    this.popup    = popup;
+    this.rest     = rest;
     this.defaults = {
       url: null,
       name: null,
@@ -30,15 +30,13 @@ export class OAuth1 {
       this.popup = this.popup.open('', this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri);
     }
     var self = this;
-    return this.http.createRequest(serverUrl)
-      .asPost()
-      .send()
+    return this.rest.post(serverUrl)
       .then(response => {
         if (self.config.platform === 'mobile') {
           self.popup = self.popup.open(
             [
               self.defaults.authorizationEndpoint,
-              self.buildQueryString(response.content)
+              self.buildQueryString(response)
             ].join('?'),
             self.defaults.name,
             self.defaults.popupOptions,
@@ -46,12 +44,11 @@ export class OAuth1 {
         } else {
           self.popup.popupWindow.location = [
             self.defaults.authorizationEndpoint,
-            self.buildQueryString(response.content)
+            self.buildQueryString(response)
           ].join('?');
         }
 
         var popupListener = self.config.platform === 'mobile' ? self.popup.eventListener(self.defaults.redirectUri) : self.popup.pollPopup();
-
 
         return popupListener.then((response) => {
           return self.exchangeForToken(response, userData);
@@ -60,17 +57,11 @@ export class OAuth1 {
   }
 
   exchangeForToken(oauthData, userData) {
-    var data = authUtils.extend({}, userData, oauthData);
-    var exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
-    return this.http.createRequest(exchangeForTokenUrl)
-      .asPost()
-      .withCredentials(this.config.withCredentials)
-      .withContent(data)
-      .send()
-      .then(response => {
-        return response;
-      });
+    let data                = authUtils.extend({}, userData, oauthData);
+    let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
+    let credentials         = this.config.withCredentials ? 'include' : 'same-origin';
 
+    return this.rest.post(exchangeForTokenUrl, data, {credentials: credentials});
   }
 
   buildQueryString(obj) {

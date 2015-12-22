@@ -20,6 +20,15 @@ export class AuthService {
     return this.rest.find(this.auth.getProfileUrl());
   }
 
+  setMe(profile) {
+    return this.rest.update(this.auth.getProfileUrl(), profile)
+      .then(response => {
+        return response;
+      }).catch(err => {
+        console.dir(err.stack);
+      });
+  }
+
   isAuthenticated() {
     return this.auth.isAuthenticated();
   }

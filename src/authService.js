@@ -21,12 +21,7 @@ export class AuthService {
   }
 
   setMe(profile) {
-    return this.rest.update(this.auth.getProfileUrl(), profile)
-      .then(response => {
-        return response;
-      }).catch(err => {
-        console.dir(err.stack);
-      });
+    return this.rest.update(this.auth.getProfileUrl(), profile);
   }
 
   isAuthenticated() {
@@ -78,10 +73,7 @@ export class AuthService {
         this.auth.setTokenFromResponse(response);
 
         return response;
-      }).catch(err => {
-        console.dir(err.stack);
       });
-
   }
 
   logout(redirectUri) {
@@ -95,7 +87,7 @@ export class AuthService {
     }
 
     return provider.open(this.config.providers[name], userData || {})
-      .then((response) => {
+      .then(response => {
         this.auth.setTokenFromResponse(response, redirect);
         return response;
       });
@@ -105,15 +97,9 @@ export class AuthService {
     var unlinkUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.config.unlinkUrl) : this.config.unlinkUrl;
 
     if (this.config.unlinkMethod === 'get') {
-      return this.rest.find(unlinkUrl + provider)
-        .then(response => {
-          return response;
-        });
+      return this.rest.find(unlinkUrl + provider);
     } else if (this.config.unlinkMethod === 'post') {
-      return this.rest.post(unlinkUrl, provider)
-        .then(response => {
-          return response;
-        });
+      return this.rest.post(unlinkUrl, provider);
     }
   }
 }

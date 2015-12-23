@@ -17,9 +17,11 @@ export class FetchConfig {
     var auth = this.auth;
     var config = this.config;
     var storage = this.storage;
+    var baseUrl = this.httpClient.baseUrl;
 
     this.httpClient.configure(httpConfig => {
       httpConfig
+        .withBaseUrl(baseUrl)
         .withInterceptor({
           request(request) {
             if (auth.isAuthenticated() && config.httpInterceptor) {

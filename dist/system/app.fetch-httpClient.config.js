@@ -36,9 +36,10 @@ System.register(['aurelia-fetch-client', './authentication', './baseConfig', 'au
             var auth = this.auth;
             var config = this.config;
             var storage = this.storage;
+            var baseUrl = this.httpClient.baseUrl;
 
             this.httpClient.configure(function (httpConfig) {
-              httpConfig.withInterceptor({
+              httpConfig.withBaseUrl(baseUrl).withInterceptor({
                 request: function request(_request) {
                   if (auth.isAuthenticated() && config.httpInterceptor) {
                     var tokenName = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : config.tokenName;

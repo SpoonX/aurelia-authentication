@@ -41,6 +41,11 @@ System.register(['aurelia-framework', './authentication', './baseConfig', './oAu
             return this.rest.find(this.auth.getProfileUrl());
           }
         }, {
+          key: 'setMe',
+          value: function setMe(profile) {
+            return this.rest.update(this.auth.getProfileUrl(), profile);
+          }
+        }, {
           key: 'isAuthenticated',
           value: function isAuthenticated() {
             return this.auth.isAuthenticated();
@@ -96,8 +101,6 @@ System.register(['aurelia-framework', './authentication', './baseConfig', './oAu
               _this2.auth.setTokenFromResponse(response);
 
               return response;
-            })['catch'](function (err) {
-              console.dir(err.stack);
             });
           }
         }, {
@@ -126,13 +129,9 @@ System.register(['aurelia-framework', './authentication', './baseConfig', './oAu
             var unlinkUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.config.unlinkUrl) : this.config.unlinkUrl;
 
             if (this.config.unlinkMethod === 'get') {
-              return this.rest.find(unlinkUrl + provider).then(function (response) {
-                return response;
-              });
+              return this.rest.find(unlinkUrl + provider);
             } else if (this.config.unlinkMethod === 'post') {
-              return this.rest.post(unlinkUrl, provider).then(function (response) {
-                return response;
-              });
+              return this.rest.post(unlinkUrl, provider);
             }
           }
         }]);

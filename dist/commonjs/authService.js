@@ -43,6 +43,11 @@ var AuthService = (function () {
       return this.rest.find(this.auth.getProfileUrl());
     }
   }, {
+    key: 'setMe',
+    value: function setMe(profile) {
+      return this.rest.update(this.auth.getProfileUrl(), profile);
+    }
+  }, {
     key: 'isAuthenticated',
     value: function isAuthenticated() {
       return this.auth.isAuthenticated();
@@ -98,8 +103,6 @@ var AuthService = (function () {
         _this2.auth.setTokenFromResponse(response);
 
         return response;
-      })['catch'](function (err) {
-        console.dir(err.stack);
       });
     }
   }, {
@@ -128,13 +131,9 @@ var AuthService = (function () {
       var unlinkUrl = this.config.baseUrl ? _authUtils2['default'].joinUrl(this.config.baseUrl, this.config.unlinkUrl) : this.config.unlinkUrl;
 
       if (this.config.unlinkMethod === 'get') {
-        return this.rest.find(unlinkUrl + provider).then(function (response) {
-          return response;
-        });
+        return this.rest.find(unlinkUrl + provider);
       } else if (this.config.unlinkMethod === 'post') {
-        return this.rest.post(unlinkUrl, provider).then(function (response) {
-          return response;
-        });
+        return this.rest.post(unlinkUrl, provider);
       }
     }
   }]);

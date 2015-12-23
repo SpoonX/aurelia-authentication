@@ -6,7 +6,7 @@ export {FetchConfig} from './app.fetch-httpClient.config';
 export function configure(aurelia, config) {
   aurelia.globalResources('./authFilter');
 
-  var baseConfig = aurelia.container.get(BaseConfig);
+  let baseConfig = aurelia.container.get(BaseConfig);
   if (typeof config === 'function') {
     config(baseConfig);
   } else if (typeof config === 'object') {

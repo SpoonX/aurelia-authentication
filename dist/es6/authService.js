@@ -20,6 +20,10 @@ export class AuthService {
     return this.rest.find(this.auth.getProfileUrl());
   }
 
+  setMe(profile) {
+    return this.rest.update(this.auth.getProfileUrl(), profile);
+  }
+
   isAuthenticated() {
     return this.auth.isAuthenticated();
   }
@@ -29,15 +33,15 @@ export class AuthService {
   }
 
   signup(displayName, email, password) {
-    var signupUrl = this.auth.getSignupUrl();
-    var content;
+    let signupUrl = this.auth.getSignupUrl();
+    let content;
     if (typeof arguments[0] === 'object') {
       content = arguments[0];
     } else {
       content = {
         'displayName': displayName,
-        'email'      : email,
-        'password'   : password
+        'email': email,
+        'password': password
       };
     }
     return this.rest.post(signupUrl, content)
@@ -53,13 +57,13 @@ export class AuthService {
   }
 
   login(email, password) {
-    var loginUrl = this.auth.getLoginUrl();
-    var content;
+    let loginUrl = this.auth.getLoginUrl();
+    let content;
     if (typeof arguments[1] !== 'string') {
       content = arguments[0];
     } else {
       content = {
-        'email'   : email,
+        'email': email,
         'password': password
       };
     }
@@ -69,10 +73,7 @@ export class AuthService {
         this.auth.setTokenFromResponse(response);
 
         return response;
-      }).catch(err => {
-        console.dir(err.stack);
       });
-
   }
 
   logout(redirectUri) {
@@ -80,31 +81,25 @@ export class AuthService {
   }
 
   authenticate(name, redirect, userData) {
-    var provider = this.oAuth2;
+    let provider = this.oAuth2;
     if (this.config.providers[name].type === '1.0') {
       provider = this.oAuth1;
     }
 
     return provider.open(this.config.providers[name], userData || {})
-      .then((response) => {
+      .then(response => {
         this.auth.setTokenFromResponse(response, redirect);
         return response;
       });
   }
 
   unlink(provider) {
-    var unlinkUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.config.unlinkUrl) : this.config.unlinkUrl;
+    let unlinkUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.config.unlinkUrl) : this.config.unlinkUrl;
 
     if (this.config.unlinkMethod === 'get') {
-      return this.rest.find(unlinkUrl + provider)
-        .then(response => {
-          return response;
-        });
+      return this.rest.find(unlinkUrl + provider);
     } else if (this.config.unlinkMethod === 'post') {
-      return this.rest.post(unlinkUrl, provider)
-        .then(response => {
-          return response;
-        });
+      return this.rest.post(unlinkUrl, provider);
     }
   }
 }

@@ -8,70 +8,26 @@ export class Storage {
   }
 
   get(key) {
-    switch (this.config.storage) {
-    case 'localStorage':
-      if ('localStorage' in window && window['localStorage'] !== null) {
-        return localStorage.getItem(key);
-      } else {
-        console.warn('Warning: Local Storage is disabled or unavailable');
-        return undefined;
-      }
-      break;
+    let storageKey = this.config.storage;
 
-    case 'sessionStorage':
-      if ('sessionStorage' in window && window['sessionStorage'] !== null) {
-        return sessionStorage.getItem(key);
-      } else {
-        console.warn('Warning: Session Storage is disabled or unavailable.  will not work correctly.');
-        return undefined;
-      }
-      break;
+    if (window[storageKey]) {
+      return window[storageKey].getItem(key);
     }
   }
 
   set(key, value) {
-    switch (this.config.storage) {
-    case 'localStorage':
-      if ('localStorage' in window && window['localStorage'] !== null) {
-        return localStorage.setItem(key, value);
+    let storageKey = this.config.storage;
 
-      } else {
-        console.warn('Warning: Local Storage is disabled or unavailable.  will not work correctly.');
-        return undefined;
-      }
-      break;
-
-    case 'sessionStorage':
-      if ('sessionStorage' in window && window['sessionStorage'] !== null) {
-        return sessionStorage.setItem(key, value);
-      } else {
-        console.warn('Warning: Session Storage is disabled or unavailable.  will not work correctly.');
-        return undefined;
-      }
-      break;
+    if (window[storageKey]) {
+      return window[storageKey].setItem(key, value);
     }
   }
 
   remove(key) {
-    switch (this.config.storage) {
-    case 'localStorage':
-      if ('localStorage' in window && window['localStorage'] !== null) {
-        return localStorage.removeItem(key);
-      } else {
-        console.warn('Warning: Local Storage is disabled or unavailable.  will not work correctly.');
-        return undefined;
-      }
-      break;
+    let storageKey = this.config.storage;
 
-    case 'sessionStorage':
-      if ('sessionStorage' in window && window['sessionStorage'] !== null) {
-        return sessionStorage.removeItem(key);
-
-      } else {
-        console.warn('Warning: Session Storage is disabled or unavailable.  will not work correctly.');
-        return undefined;
-      }
-      break;
+    if (window[storageKey]) {
+      return window[storageKey].removeItem(key);
     }
   }
 }

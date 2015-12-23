@@ -52,7 +52,7 @@ define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', '
 
         var url = this.defaults.authorizationEndpoint + '?' + this.buildQueryString();
 
-        var openPopup;
+        var openPopup = undefined;
         if (this.config.platform === 'mobile') {
           openPopup = this.popup.open(url, this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri).eventListener(this.defaults.redirectUri);
         } else {
@@ -99,8 +99,8 @@ define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', '
 
         var keyValuePairs = [];
         var urlParams = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
-        _authUtils2['default'].forEach(urlParams, function (params) {
 
+        _authUtils2['default'].forEach(urlParams, function (params) {
           _authUtils2['default'].forEach(_this.defaults[params], function (paramName) {
             var camelizedName = _authUtils2['default'].camelCase(paramName);
             var paramValue = _authUtils2['default'].isFunction(_this.defaults[paramName]) ? _this.defaults[paramName]() : _this.defaults[camelizedName];

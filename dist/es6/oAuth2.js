@@ -31,7 +31,7 @@ export class OAuth2 {
 
   open(options, userData) {
     authUtils.extend(this.defaults, options);
-    var stateName = this.defaults.name + '_state';
+    let stateName = this.defaults.name + '_state';
 
     if (authUtils.isFunction(this.defaults.state)) {
       this.storage.set(stateName, this.defaults.state());
@@ -39,16 +39,16 @@ export class OAuth2 {
       this.storage.set(stateName, this.defaults.state);
     }
 
-    var url = this.defaults.authorizationEndpoint + '?' + this.buildQueryString();
+    let url = this.defaults.authorizationEndpoint + '?' + this.buildQueryString();
 
-    var openPopup;
+    let openPopup;
     if (this.config.platform === 'mobile') {
       openPopup = this.popup.open(url, this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri).eventListener(this.defaults.redirectUri);
     } else {
       openPopup = this.popup.open(url, this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri).pollPopup();
     }
 
-    var self = this;
+    let self = this;
     return openPopup
       .then((oauthData) => {
         if (self.defaults.responseType === 'token' ||
@@ -80,22 +80,22 @@ export class OAuth2 {
     });
 
     let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
-    let credentials = this.config.withCredentials ? 'include' : 'same-origin';
+    let credentials         = this.config.withCredentials ? 'include' : 'same-origin';
 
     return this.rest.post(exchangeForTokenUrl, data, {credentials: credentials});
   }
 
   buildQueryString() {
-    var keyValuePairs = [];
-    var urlParams     = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
-    authUtils.forEach(urlParams, (params) => {
+    let keyValuePairs = [];
+    let urlParams     = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
 
+    authUtils.forEach(urlParams, (params) => {
       authUtils.forEach(this.defaults[params], (paramName) => {
-        var camelizedName = authUtils.camelCase(paramName);
-        var paramValue    = authUtils.isFunction(this.defaults[paramName]) ? this.defaults[paramName]() : this.defaults[camelizedName];
+        let camelizedName = authUtils.camelCase(paramName);
+        let paramValue    = authUtils.isFunction(this.defaults[paramName]) ? this.defaults[paramName]() : this.defaults[camelizedName];
 
         if (paramName === 'state') {
-          var stateName = this.defaults.name + '_state';
+          let stateName = this.defaults.name + '_state';
           paramValue    = encodeURIComponent(this.storage.get(stateName));
         }
 

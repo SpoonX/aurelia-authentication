@@ -1,13 +1,10 @@
-### 0.11.5 (2015-12-08)
-* Updated dependencies
+### 0.1.1 (2015-12-24)
 
-### 0.11.4 (2015-11-25)
-* Improved logout logic
-* Logout now returns and resolves a promise
 
-### 0.11.3 (2015-11-17)
-* Updated dependencies for beta
+#### Features
 
-### 0.11.2 (2015-11-17)
-* Updated dependencies.
-* Sync package.json version with git tags.
+* **fetch-client:** Recover baseUrl from singleton ([8281d906](git+https://github.com/spoonx/aurelia-auth.git/commit/8281d9062e7a695402992f0db068c020efbeb3e1))
+* **lint:** Added linting ([5cf127b2](git+https://github.com/spoonx/aurelia-auth.git/commit/5cf127b20b673c63d3b78d8b5c00e69b296312bf))
+
+
+

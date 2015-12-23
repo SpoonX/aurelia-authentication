@@ -31,12 +31,11 @@ var AuthorizeStep = (function () {
         return i.config.auth;
       })) {
         if (!isLoggedIn) {
-          console.log("login route : " + loginRoute);
           return next.cancel(new _aureliaRouter.Redirect(loginRoute));
         }
       } else if (isLoggedIn && routingContext.getAllInstructions().some(function (i) {
         return i.fragment;
-      }) == loginRoute) {
+      }) === loginRoute) {
         var loginRedirect = this.auth.getLoginRedirect();
         return next.cancel(new _aureliaRouter.Redirect(loginRedirect));
       }

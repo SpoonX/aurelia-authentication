@@ -73,7 +73,7 @@ System.register(['aurelia-framework', './baseConfig', './storage', './authUtils'
           value: function setTokenFromResponse(response, redirect) {
             var tokenName = this.tokenName;
             var accessToken = response && response.access_token;
-            var token;
+            var token = undefined;
 
             if (accessToken) {
               if (authUtils.isObject(accessToken) && authUtils.isObject(accessToken.data)) {

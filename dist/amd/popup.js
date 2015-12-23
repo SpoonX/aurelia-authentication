@@ -90,8 +90,11 @@ define(['exports', './authUtils', './baseConfig', 'aurelia-framework'], function
         var _this = this;
 
         var self = this;
-        var promise = new Promise(function (resolve, reject) {
+
+        return new Promise(function (resolve, reject) {
           _this.polling = setInterval(function () {
+            var errorData = undefined;
+
             try {
               var documentOrigin = document.location.host;
               var popupWindowOrigin = self.popupWindow.location.host;
@@ -115,28 +118,32 @@ define(['exports', './authUtils', './baseConfig', 'aurelia-framework'], function
                 self.popupWindow.close();
                 clearInterval(self.polling);
               }
-            } catch (error) {}
+            } catch (error) {
+              errorData = error;
+            }
 
             if (!self.popupWindow) {
               clearInterval(self.polling);
               reject({
+                error: errorData,
                 data: 'Provider Popup Blocked'
               });
             } else if (self.popupWindow.closed) {
               clearInterval(self.polling);
               reject({
+                error: errorData,
                 data: 'Problem poll popup'
               });
             }
           }, 35);
         });
-        return promise;
       }
     }, {
       key: 'prepareOptions',
       value: function prepareOptions(options) {
         var width = options.width || 500;
         var height = options.height || 500;
+
         return _authUtils2['default'].extend({
           width: width,
           height: height,

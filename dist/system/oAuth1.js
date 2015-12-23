@@ -59,8 +59,8 @@ System.register(['aurelia-framework', './authUtils', './storage', './popup', './
 
               var popupListener = self.config.platform === 'mobile' ? self.popup.eventListener(self.defaults.redirectUri) : self.popup.pollPopup();
 
-              return popupListener.then(function (response) {
-                return self.exchangeForToken(response, userData);
+              return popupListener.then(function (result) {
+                return self.exchangeForToken(result, userData);
               });
             });
           }

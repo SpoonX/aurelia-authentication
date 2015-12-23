@@ -8,23 +8,25 @@ import {Storage} from './storage';
 export class FetchConfig {
   constructor(httpClient, authService, storage, config) {
     this.httpClient = httpClient;
-    this.auth = authService;
-    this.storage = storage;
-    this.config = config.current;
+    this.auth       = authService;
+    this.storage    = storage;
+    this.config     = config.current;
   }
 
   configure() {
-    var auth = this.auth;
-    var config = this.config;
-    var storage = this.storage;
+    let auth    = this.auth;
+    let config  = this.config;
+    let storage = this.storage;
+    let baseUrl = this.httpClient.baseUrl;
 
     this.httpClient.configure(httpConfig => {
       httpConfig
+        .withBaseUrl(baseUrl)
         .withInterceptor({
           request(request) {
             if (auth.isAuthenticated() && config.httpInterceptor) {
-              var tokenName = config.tokenPrefix ? `${config.tokenPrefix}_${config.tokenName}` : config.tokenName;
-              var token = storage.get(tokenName);
+              let tokenName = config.tokenPrefix ? `${config.tokenPrefix}_${config.tokenName}` : config.tokenName;
+              let token     = storage.get(tokenName);
 
               if (config.authHeader && config.authToken) {
                 token = `${config.authToken} ${token}`;

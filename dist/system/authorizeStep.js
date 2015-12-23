@@ -1,7 +1,7 @@
 System.register(['aurelia-framework', './authentication', 'aurelia-router'], function (_export) {
   'use strict';
 
-  var inject, Authentication, Redirect, Router, AuthorizeStep;
+  var inject, Authentication, Redirect, AuthorizeStep;
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -14,7 +14,6 @@ System.register(['aurelia-framework', './authentication', 'aurelia-router'], fun
       Authentication = _authentication.Authentication;
     }, function (_aureliaRouter) {
       Redirect = _aureliaRouter.Redirect;
-      Router = _aureliaRouter.Router;
     }],
     execute: function () {
       AuthorizeStep = (function () {
@@ -34,12 +33,11 @@ System.register(['aurelia-framework', './authentication', 'aurelia-router'], fun
               return i.config.auth;
             })) {
               if (!isLoggedIn) {
-                console.log("login route : " + loginRoute);
                 return next.cancel(new Redirect(loginRoute));
               }
             } else if (isLoggedIn && routingContext.getAllInstructions().some(function (i) {
               return i.fragment;
-            }) == loginRoute) {
+            }) === loginRoute) {
               var loginRedirect = this.auth.getLoginRedirect();
               return next.cancel(new Redirect(loginRedirect));
             }

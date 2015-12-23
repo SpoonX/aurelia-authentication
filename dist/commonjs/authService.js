@@ -43,6 +43,11 @@ var AuthService = (function () {
       return this.rest.find(this.auth.getProfileUrl());
     }
   }, {
+    key: 'setMe',
+    value: function setMe(profile) {
+      return this.rest.update(this.auth.getProfileUrl(), profile);
+    }
+  }, {
     key: 'isAuthenticated',
     value: function isAuthenticated() {
       return this.auth.isAuthenticated();
@@ -58,7 +63,7 @@ var AuthService = (function () {
       var _this = this;
 
       var signupUrl = this.auth.getSignupUrl();
-      var content;
+      var content = undefined;
       if (typeof arguments[0] === 'object') {
         content = arguments[0];
       } else {
@@ -84,7 +89,7 @@ var AuthService = (function () {
       var _this2 = this;
 
       var loginUrl = this.auth.getLoginUrl();
-      var content;
+      var content = undefined;
       if (typeof arguments[1] !== 'string') {
         content = arguments[0];
       } else {
@@ -98,8 +103,6 @@ var AuthService = (function () {
         _this2.auth.setTokenFromResponse(response);
 
         return response;
-      })['catch'](function (err) {
-        console.dir(err.stack);
       });
     }
   }, {
@@ -128,13 +131,9 @@ var AuthService = (function () {
       var unlinkUrl = this.config.baseUrl ? _authUtils2['default'].joinUrl(this.config.baseUrl, this.config.unlinkUrl) : this.config.unlinkUrl;
 
       if (this.config.unlinkMethod === 'get') {
-        return this.rest.find(unlinkUrl + provider).then(function (response) {
-          return response;
-        });
+        return this.rest.find(unlinkUrl + provider);
       } else if (this.config.unlinkMethod === 'post') {
-        return this.rest.post(unlinkUrl, provider).then(function (response) {
-          return response;
-        });
+        return this.rest.post(unlinkUrl, provider);
       }
     }
   }]);

@@ -5,12 +5,14 @@ System.register(['./baseConfig', './authService', './authorizeStep', './app.fetc
 
   _export('configure', configure);
 
-  function configure(aurelia, configCallback) {
+  function configure(aurelia, config) {
     aurelia.globalResources('./authFilter');
 
     var baseConfig = aurelia.container.get(BaseConfig);
-    if (configCallback !== undefined && typeof configCallback === 'function') {
-      configCallback(baseConfig);
+    if (typeof config === 'function') {
+      config(baseConfig);
+    } else if (typeof config === 'object') {
+      baseConfig.configure(config);
     }
   }
 

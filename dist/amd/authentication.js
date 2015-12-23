@@ -68,7 +68,7 @@ define(['exports', 'aurelia-framework', './baseConfig', './storage', './authUtil
       value: function setTokenFromResponse(response, redirect) {
         var tokenName = this.tokenName;
         var accessToken = response && response.access_token;
-        var token;
+        var token = undefined;
 
         if (accessToken) {
           if (_authUtils2['default'].isObject(accessToken) && _authUtils2['default'].isObject(accessToken.data)) {

@@ -36,19 +36,19 @@ export class Authentication {
   }
 
   getPayload() {
-    var token = this.storage.get(this.tokenName);
+    let token = this.storage.get(this.tokenName);
 
     if (token && token.split('.').length === 3) {
-      var base64Url = token.split('.')[1];
-      var base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      let base64Url = token.split('.')[1];
+      let base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       return JSON.parse(decodeURIComponent(escape(window.atob(base64))));
     }
   }
 
   setTokenFromResponse(response, redirect) {
-    var tokenName   = this.tokenName;
-    var accessToken = response && response.access_token;
-    var token;
+    let tokenName   = this.tokenName;
+    let accessToken = response && response.access_token;
+    let token;
 
     if (accessToken) {
       if (authUtils.isObject(accessToken) && authUtils.isObject(accessToken.data)) {
@@ -63,7 +63,7 @@ export class Authentication {
     }
 
     if (!token) {
-      var tokenPath = this.config.tokenRoot ? this.config.tokenRoot + '.' + this.config.tokenName : this.config.tokenName;
+      let tokenPath = this.config.tokenRoot ? this.config.tokenRoot + '.' + this.config.tokenName : this.config.tokenName;
 
       throw new Error('Expecting a token named "' + tokenPath + '" but instead got: ' + JSON.stringify(response));
     }
@@ -82,7 +82,7 @@ export class Authentication {
   }
 
   isAuthenticated() {
-    var token = this.storage.get(this.tokenName);
+    let token = this.storage.get(this.tokenName);
 
     // There's no token, so user is not authenticated.
     if (!token) {
@@ -94,9 +94,9 @@ export class Authentication {
       return true;
     }
 
-    var base64Url = token.split('.')[1];
-    var base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var exp       = JSON.parse(window.atob(base64)).exp;
+    let base64Url = token.split('.')[1];
+    let base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    let exp       = JSON.parse(window.atob(base64)).exp;
 
     if (exp) {
       return Math.round(new Date().getTime() / 1000) <= exp;

@@ -50,7 +50,7 @@ define(['exports', 'aurelia-framework', './authentication', './baseConfig', './o
         var _this = this;
 
         var signupUrl = this.auth.getSignupUrl();
-        var content;
+        var content = undefined;
         if (typeof arguments[0] === 'object') {
           content = arguments[0];
         } else {
@@ -76,7 +76,7 @@ define(['exports', 'aurelia-framework', './authentication', './baseConfig', './o
         var _this2 = this;
 
         var loginUrl = this.auth.getLoginUrl();
-        var content;
+        var content = undefined;
         if (typeof arguments[1] !== 'string') {
           content = arguments[0];
         } else {

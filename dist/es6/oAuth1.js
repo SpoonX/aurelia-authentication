@@ -24,12 +24,12 @@ export class OAuth1 {
   open(options, userData) {
     authUtils.extend(this.defaults, options);
 
-    var serverUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
+    let serverUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
 
     if (this.config.platform !== 'mobile') {
       this.popup = this.popup.open('', this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri);
     }
-    var self = this;
+    let self = this;
     return this.rest.post(serverUrl)
       .then(response => {
         if (self.config.platform === 'mobile') {
@@ -48,10 +48,10 @@ export class OAuth1 {
           ].join('?');
         }
 
-        var popupListener = self.config.platform === 'mobile' ? self.popup.eventListener(self.defaults.redirectUri) : self.popup.pollPopup();
+        let popupListener = self.config.platform === 'mobile' ? self.popup.eventListener(self.defaults.redirectUri) : self.popup.pollPopup();
 
-        return popupListener.then((response) => {
-          return self.exchangeForToken(response, userData);
+        return popupListener.then((result) => {
+          return self.exchangeForToken(result, userData);
         });
       });
   }
@@ -65,7 +65,7 @@ export class OAuth1 {
   }
 
   buildQueryString(obj) {
-    var str = [];
+    let str = [];
 
     authUtils.forEach(obj, function(value, key) {
       str.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));

@@ -61,7 +61,7 @@ System.register(['aurelia-framework', './authUtils', './storage', './popup', './
 
             var url = this.defaults.authorizationEndpoint + '?' + this.buildQueryString();
 
-            var openPopup;
+            var openPopup = undefined;
             if (this.config.platform === 'mobile') {
               openPopup = this.popup.open(url, this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri).eventListener(this.defaults.redirectUri);
             } else {
@@ -108,8 +108,8 @@ System.register(['aurelia-framework', './authUtils', './storage', './popup', './
 
             var keyValuePairs = [];
             var urlParams = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
-            authUtils.forEach(urlParams, function (params) {
 
+            authUtils.forEach(urlParams, function (params) {
               authUtils.forEach(_this.defaults[params], function (paramName) {
                 var camelizedName = authUtils.camelCase(paramName);
                 var paramValue = authUtils.isFunction(_this.defaults[paramName]) ? _this.defaults[paramName]() : _this.defaults[camelizedName];

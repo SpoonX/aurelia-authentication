@@ -20,8 +20,11 @@ export class AuthService {
     return this.rest.find(this.auth.getProfileUrl());
   }
 
-  setMe(profile) {
-    return this.rest.update(this.auth.getProfileUrl(), profile);
+  updateMe(body, criteria=null) {
+    if (typeof criteria === 'string' || typeof criteria === 'number') {
+      criteria = {id: criteria};
+    }   
+    return this.rest.update(this.auth.getProfileUrl(), criteria, body);
   }
 
   isAuthenticated() {

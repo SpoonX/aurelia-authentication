@@ -21,7 +21,7 @@ export class AuthService {
   }
 
   setMe(profile) {
-    return this.rest.update(this.auth.getProfileUrl(), profile);
+    return this.rest.update(this.auth.getProfileUrl(), null, profile);
   }
 
   isAuthenticated() {

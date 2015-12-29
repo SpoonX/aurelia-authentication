@@ -1,3 +1,10 @@
+### 0.1.2 (2015-12-29)
+
+
+#### Refactor
+
+* **authentication:** Made response token configurable ([8281d906](git+https://github.com/spoonx/aurelia-auth.git/commit/d166129d8501d66bca66c1a69e55a40281fa8c00))
+
 ### 0.1.1 (2015-12-24)
 
 

@@ -67,7 +67,7 @@ define(['exports', 'aurelia-framework', './baseConfig', './storage', './authUtil
       key: 'setTokenFromResponse',
       value: function setTokenFromResponse(response, redirect) {
         var tokenName = this.tokenName;
-        var accessToken = response && response.access_token;
+        var accessToken = response && response[this.config.responseTokenProp];
         var token = undefined;
 
         if (accessToken) {

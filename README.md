@@ -262,6 +262,7 @@ Via the above mentioned configuration virtually all aspects of the authenticatio
   unlinkUrl: '/auth/unlink/',
   unlinkMethod: 'get',
   authHeader: 'Authorization',
+  responseTokenProp: 'access_token',
   authToken: 'Bearer',
   withCredentials: true,
   platform: 'browser',

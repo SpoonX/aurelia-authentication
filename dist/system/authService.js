@@ -41,9 +41,14 @@ System.register(['aurelia-framework', './authentication', './baseConfig', './oAu
             return this.rest.find(this.auth.getProfileUrl());
           }
         }, {
-          key: 'setMe',
-          value: function setMe(profile) {
-            return this.rest.update(this.auth.getProfileUrl(), profile);
+          key: 'updateMe',
+          value: function updateMe(body) {
+            var criteria = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+            if (typeof criteria === 'string' || typeof criteria === 'number') {
+              criteria = { id: criteria };
+            }
+            return this.rest.update(this.auth.getProfileUrl(), criteria, body);
           }
         }, {
           key: 'isAuthenticated',

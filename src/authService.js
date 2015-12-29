@@ -20,10 +20,10 @@ export class AuthService {
     return this.rest.find(this.auth.getProfileUrl());
   }
 
-  updateMe(body, criteria=null) {
+  updateMe(body, criteria = null) {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
       criteria = {id: criteria};
-    }   
+    }
     return this.rest.update(this.auth.getProfileUrl(), criteria, body);
   }
 

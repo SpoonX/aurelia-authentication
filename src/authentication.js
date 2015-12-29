@@ -47,7 +47,7 @@ export class Authentication {
 
   setTokenFromResponse(response, redirect) {
     let tokenName   = this.tokenName;
-    let accessToken = response && response.access_token;
+    let accessToken = response && response[this.config.responseTokenProp];
     let token;
 
     if (accessToken) {

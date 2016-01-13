@@ -16,11 +16,14 @@ export class AuthService {
     this.config = config.current;
   }
 
-  getMe() {
-    return this.rest.find(this.auth.getProfileUrl());
+  getMe(criteria) {
+    if (typeof criteria === 'string' || typeof criteria === 'number') {
+      criteria = {id: criteria};
+    }
+    return this.rest.find(this.auth.getProfileUrl(), criteria);
   }
 
-  updateMe(body, criteria = null) {
+  updateMe(body, criteria) {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
       criteria = {id: criteria};
     }

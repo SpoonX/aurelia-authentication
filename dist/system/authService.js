@@ -37,14 +37,15 @@ System.register(['aurelia-framework', './authentication', './baseConfig', './oAu
 
         _createClass(AuthService, [{
           key: 'getMe',
-          value: function getMe() {
-            return this.rest.find(this.auth.getProfileUrl());
+          value: function getMe(criteria) {
+            if (typeof criteria === 'string' || typeof criteria === 'number') {
+              criteria = { id: criteria };
+            }
+            return this.rest.find(this.auth.getProfileUrl(), criteria);
           }
         }, {
           key: 'updateMe',
-          value: function updateMe(body) {
-            var criteria = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-
+          value: function updateMe(body, criteria) {
             if (typeof criteria === 'string' || typeof criteria === 'number') {
               criteria = { id: criteria };
             }

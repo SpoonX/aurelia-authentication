@@ -1,3 +1,19 @@
+### 0.12.1 (2016-01-13)
+
+
+#### Features
+
+* **authService:** getMe with optional criteria ([99b8ed62](git+https://github.com/spoonx/aurelia-auth.git/commit/99b8ed620317202d29d5f804e237b2b8b8ebe82b))
+
+
+### 0.12.0 (2016-01-02)
+
+
+#### Bug Fixes
+
+* **project:** Version bump to higher than all previous ones ([c4ceae9b](git+https://github.com/spoonx/aurelia-auth.git/commit/c4ceae9b18422dd7ca2adc3e26dc88a4f8cefb8c))
+
+
 ### 0.1.2 (2015-12-29)
 
 

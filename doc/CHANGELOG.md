@@ -1,3 +1,11 @@
+### 0.12.3 (2016-01-14)
+
+
+#### Features
+
+* **project:** Added typescript definition file ([28804352](git+https://github.com/spoonx/aurelia-auth.git/commit/28804352ebff34b617d0afb2600ad94887f99810))
+
+
 ### 0.12.2 (2016-01-14)
 
 

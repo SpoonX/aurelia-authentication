@@ -1,3 +1,11 @@
+### 0.12.4 (2016-01-14)
+
+
+#### Bug Fixes
+
+* **typescript:** Update d.ts ([edbd7304](git+https://github.com/spoonx/aurelia-auth.git/commit/edbd7304))
+
+
 ### 0.12.3 (2016-01-14)
 
 

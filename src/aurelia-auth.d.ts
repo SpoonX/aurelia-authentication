@@ -167,6 +167,7 @@ declare module 'aurelia-auth/baseConfig' {
       tokenRoot: boolean;
       tokenName: string;
       tokenPrefix: string;
+      responseTokenProp: string;
       unlinkUrl: string;
       unlinkMethod: string;
       authHeader: string;
@@ -208,7 +209,7 @@ declare module 'aurelia-auth/authentication' {
       getProfileUrl(): any;
       getToken(): any;
       getPayload(): any;
-      setToken(response: any, redirect: any): void;
+      setTokenFromResponse(response: any, redirect: any): void;
       removeToken(): void;
       isAuthenticated(): boolean;
       logout(redirect: any): any;
@@ -227,21 +228,6 @@ declare module 'aurelia-auth/app.fetch-httpClient.config' {
       storage: Storage;
       config:IBaseConfig;
       constructor(httpClient: HttpClient, authService: Authentication, storage: Storage, config: BaseConfig);
-      configure(): void;
-  }
-
-}
-declare module 'aurelia-auth/app.httpClient.config' {
-  import { HttpClient } from 'aurelia-http-client';
-  import { BaseConfig } from 'aurelia-auth/baseConfig';
-  import { Authentication } from 'aurelia-auth/authentication';
-  import { Storage } from 'aurelia-auth/storage';
-  export default class HttpCilentConfig {
-      http: HttpClient;
-      auth: Authentication;
-      storage: Storage;
-      config: IBaseConfig;
-      constructor(http: HttpClient, auth: Authentication, storage: Storage, config: BaseConfig);
       configure(): void;
   }
 
@@ -272,14 +258,14 @@ declare module 'aurelia-auth/popup' {
 declare module 'aurelia-auth/oAuth1' {
   import { Storage } from 'aurelia-auth/storage';
   import { Popup } from 'aurelia-auth/popup';
-  import { HttpClient } from "aurelia-http-client";
+  import { Rest } from "spoonx/aurelia-api";
   export class OAuth1 {
       storage: Storage;
       config: any;
       popup: Popup;
-      http: HttpClient;
+      rest: Rest;
       defaults: any;
-      constructor(storage: any, popup: any, http: any, config: any);
+      constructor(storage: any, popup: any, rest: Rest, config: any);
       private open(options, userData);
       private exchangeForToken(oauthData, userData);
       buildQueryString(obj: any): string;
@@ -290,14 +276,14 @@ declare module 'aurelia-auth/oAuth2' {
   import { Storage } from 'aurelia-auth/storage';
   import { Popup } from 'aurelia-auth/popup';
   import { BaseConfig, IBaseConfig } from 'aurelia-auth/baseConfig';
-  import { HttpClient } from "aurelia-http-client";
+  import { Rest } from "spoonx/aurelia-api";
   export class OAuth2 {
       storage: Storage;
       config: BaseConfig;
       popup: Popup;
-      http: HttpClient;
+      rest: Rest;
       defaults: IDefaults;
-      constructor(storage: Storage, popup: Popup, http: HttpClient, config: BaseConfig);
+      constructor(storage: Storage, popup: Popup, rest: Rest, config: BaseConfig);
       open(options: any, userData: any): any;
       private exchangeForToken(oauthData, userData);
       buildQueryString(): string;
@@ -323,13 +309,14 @@ declare module 'aurelia-auth/oAuth2' {
 }
 declare module 'aurelia-auth/authService' {
   export class AuthService {
-      http: any;
+      rest: any;
       auth: any;
       oAuth1: any;
       oAuth2: any;
       config: any;
-      constructor(http: any, auth: any, oAuth1: any, oAuth2: any, config: any);
-      getMe(): any;
+      constructor(rest: any, auth: any, oAuth1: any, oAuth2: any, config: any);
+      getMe(criteria: any): any;
+      updateMe(body: any, criteria: any): any;
       isAuthenticated(): any;
       getTokenPayload(): any;
       signup(displayName: any, email: any, password: any): any;

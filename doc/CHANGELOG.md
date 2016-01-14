@@ -1,3 +1,16 @@
+### 0.12.2 (2016-01-14)
+
+
+#### Bug Fixes
+
+* **authentication:** Catch corrupt json ([b971cfc1](git+https://github.com/spoonx/aurelia-auth.git/commit/b971cfc184fd01c6f7da42d09aa446c41373ff7e))
+
+
+#### Features
+
+* **authService:** getMe with optional criteria ([99b8ed62](git+https://github.com/spoonx/aurelia-auth.git/commit/99b8ed620317202d29d5f804e237b2b8b8ebe82b))
+
+
 ### 0.12.1 (2016-01-13)
 
 

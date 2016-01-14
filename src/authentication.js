@@ -41,7 +41,14 @@ export class Authentication {
     if (token && token.split('.').length === 3) {
       let base64Url = token.split('.')[1];
       let base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(decodeURIComponent(escape(window.atob(base64))));
+
+      try {
+        let parsed = JSON.parse(decodeURIComponent(escape(window.atob(base64))));
+      } catch (error) {
+        return;
+      }
+
+      return parsed;
     }
   }
 
@@ -94,9 +101,13 @@ export class Authentication {
       return true;
     }
 
-    let base64Url = token.split('.')[1];
-    let base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    let exp       = JSON.parse(window.atob(base64)).exp;
+    try {
+      let base64Url = token.split('.')[1];
+      let base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      let exp       = JSON.parse(window.atob(base64)).exp;
+    } catch (error) {
+      return false;
+    }
 
     if (exp) {
       return Math.round(new Date().getTime() / 1000) <= exp;

@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-framework', './authentication', './baseConfig', './oAuth1', './oAuth2', './authUtils', 'spoonx/aurelia-api'], function (exports, _aureliaFramework, _authentication, _baseConfig, _oAuth1, _oAuth2, _authUtils, _spoonxAureliaApi) {
+define(['exports', 'aurelia-framework', './authentication', './baseConfig', './oAuth1', './oAuth2', './authUtils'], function (exports, _aureliaFramework, _authentication, _baseConfig, _oAuth1, _oAuth2, _authUtils) {
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -14,14 +14,14 @@ define(['exports', 'aurelia-framework', './authentication', './baseConfig', './o
   var _authUtils2 = _interopRequireDefault(_authUtils);
 
   var AuthService = (function () {
-    function AuthService(rest, auth, oAuth1, oAuth2, config) {
+    function AuthService(auth, oAuth1, oAuth2, config) {
       _classCallCheck(this, _AuthService);
 
-      this.rest = rest;
       this.auth = auth;
       this.oAuth1 = oAuth1;
       this.oAuth2 = oAuth2;
       this.config = config.current;
+      this.client = this.config.client;
     }
 
     _createClass(AuthService, [{
@@ -30,7 +30,7 @@ define(['exports', 'aurelia-framework', './authentication', './baseConfig', './o
         if (typeof criteria === 'string' || typeof criteria === 'number') {
           criteria = { id: criteria };
         }
-        return this.rest.find(this.auth.getProfileUrl(), criteria);
+        return this.client.find(this.auth.getProfileUrl(), criteria);
       }
     }, {
       key: 'updateMe',
@@ -38,7 +38,7 @@ define(['exports', 'aurelia-framework', './authentication', './baseConfig', './o
         if (typeof criteria === 'string' || typeof criteria === 'number') {
           criteria = { id: criteria };
         }
-        return this.rest.update(this.auth.getProfileUrl(), criteria, body);
+        return this.client.update(this.auth.getProfileUrl(), criteria, body);
       }
     }, {
       key: 'isAuthenticated',
@@ -66,7 +66,7 @@ define(['exports', 'aurelia-framework', './authentication', './baseConfig', './o
             'password': password
           };
         }
-        return this.rest.post(signupUrl, content).then(function (response) {
+        return this.client.post(signupUrl, content).then(function (response) {
           if (_this.config.loginOnSignup) {
             _this.auth.setTokenFromResponse(response);
           } else if (_this.config.signupRedirect) {
@@ -92,7 +92,7 @@ define(['exports', 'aurelia-framework', './authentication', './baseConfig', './o
           };
         }
 
-        return this.rest.post(loginUrl, content).then(function (response) {
+        return this.client.post(loginUrl, content).then(function (response) {
           _this2.auth.setTokenFromResponse(response);
 
           return response;
@@ -124,15 +124,15 @@ define(['exports', 'aurelia-framework', './authentication', './baseConfig', './o
         var unlinkUrl = this.config.baseUrl ? _authUtils2['default'].joinUrl(this.config.baseUrl, this.config.unlinkUrl) : this.config.unlinkUrl;
 
         if (this.config.unlinkMethod === 'get') {
-          return this.rest.find(unlinkUrl + provider);
+          return this.client.find(unlinkUrl + provider);
         } else if (this.config.unlinkMethod === 'post') {
-          return this.rest.post(unlinkUrl, provider);
+          return this.client.post(unlinkUrl, provider);
         }
       }
     }]);
 
     var _AuthService = AuthService;
-    AuthService = (0, _aureliaFramework.inject)(_spoonxAureliaApi.Rest, _authentication.Authentication, _oAuth1.OAuth1, _oAuth2.OAuth2, _baseConfig.BaseConfig)(AuthService) || AuthService;
+    AuthService = (0, _aureliaFramework.inject)(_authentication.Authentication, _oAuth1.OAuth1, _oAuth2.OAuth2, _baseConfig.BaseConfig)(AuthService) || AuthService;
     return AuthService;
   })();
 

@@ -1,4 +1,4 @@
-define(['exports', './baseConfig', './authService', './authorizeStep', './app.fetch-httpClient.config'], function (exports, _baseConfig, _authService, _authorizeStep, _appFetchHttpClientConfig) {
+define(['exports', './baseConfig', './app.fetch-httpClient.config', 'spoonx/aurelia-api', 'aurelia-fetch-client', './authService', './authorizeStep'], function (exports, _baseConfig, _appFetchHttpClientConfig, _spoonxAureliaApi, _aureliaFetchClient, _authService, _authorizeStep) {
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -28,10 +28,27 @@ define(['exports', './baseConfig', './authService', './authorizeStep', './app.fe
     aurelia.globalResources('./authFilter');
 
     var baseConfig = aurelia.container.get(_baseConfig.BaseConfig);
+    var fetchConfig = aurelia.container.get(_appFetchHttpClientConfig.FetchConfig);
+    var clientConfig = aurelia.container.get(_spoonxAureliaApi.Config);
+
     if (typeof config === 'function') {
       config(baseConfig);
     } else if (typeof config === 'object') {
       baseConfig.configure(config);
     }
+
+    if (Array.isArray(baseConfig.current.configureEndpoints)) {
+      baseConfig.current.configureEndpoints.forEach(function (endpointToPatch) {
+        fetchConfig.configure(endpointToPatch);
+      });
+    }
+
+    var client = clientConfig.getEndpoint(baseConfig.current.endpoint);
+
+    if (!(client instanceof _spoonxAureliaApi.Rest)) {
+      client = new _spoonxAureliaApi.Rest(aurelia.container.get(_aureliaFetchClient.HttpClient));
+    }
+
+    baseConfig.current.client = client;
   }
 });

@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', './baseConfig', 'spoonx/aurelia-api'], function (exports, _aureliaFramework, _authUtils, _storage, _popup, _baseConfig, _spoonxAureliaApi) {
+define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', './baseConfig'], function (exports, _aureliaFramework, _authUtils, _storage, _popup, _baseConfig) {
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -14,13 +14,13 @@ define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', '
   var _authUtils2 = _interopRequireDefault(_authUtils);
 
   var OAuth1 = (function () {
-    function OAuth1(storage, popup, rest, config) {
+    function OAuth1(storage, popup, config) {
       _classCallCheck(this, _OAuth1);
 
       this.storage = storage;
       this.config = config.current;
       this.popup = popup;
-      this.rest = rest;
+      this.client = this.config.client;
       this.defaults = {
         url: null,
         name: null,
@@ -41,7 +41,7 @@ define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', '
           this.popup = this.popup.open('', this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri);
         }
         var self = this;
-        return this.rest.post(serverUrl).then(function (response) {
+        return this.client.post(serverUrl).then(function (response) {
           if (self.config.platform === 'mobile') {
             self.popup = self.popup.open([self.defaults.authorizationEndpoint, self.buildQueryString(response)].join('?'), self.defaults.name, self.defaults.popupOptions, self.defaults.redirectUri);
           } else {
@@ -62,7 +62,7 @@ define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', '
         var exchangeForTokenUrl = this.config.baseUrl ? _authUtils2['default'].joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
         var credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
-        return this.rest.post(exchangeForTokenUrl, data, { credentials: credentials });
+        return this.client.post(exchangeForTokenUrl, data, { credentials: credentials });
       }
     }, {
       key: 'buildQueryString',
@@ -78,7 +78,7 @@ define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', '
     }]);
 
     var _OAuth1 = OAuth1;
-    OAuth1 = (0, _aureliaFramework.inject)(_storage.Storage, _popup.Popup, _spoonxAureliaApi.Rest, _baseConfig.BaseConfig)(OAuth1) || OAuth1;
+    OAuth1 = (0, _aureliaFramework.inject)(_storage.Storage, _popup.Popup, _baseConfig.BaseConfig)(OAuth1) || OAuth1;
     return OAuth1;
   })();
 

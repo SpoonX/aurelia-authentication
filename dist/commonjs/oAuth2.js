@@ -22,16 +22,14 @@ var _popup = require('./popup');
 
 var _baseConfig = require('./baseConfig');
 
-var _spoonxAureliaApi = require('spoonx/aurelia-api');
-
 var OAuth2 = (function () {
-  function OAuth2(storage, popup, rest, config) {
+  function OAuth2(storage, popup, config) {
     _classCallCheck(this, _OAuth2);
 
     this.storage = storage;
     this.config = config.current;
+    this.client = this.config.client;
     this.popup = popup;
-    this.rest = rest;
     this.defaults = {
       url: null,
       name: null,
@@ -101,7 +99,7 @@ var OAuth2 = (function () {
       var exchangeForTokenUrl = this.config.baseUrl ? _authUtils2['default'].joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
       var credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
-      return this.rest.post(exchangeForTokenUrl, data, { credentials: credentials });
+      return this.client.post(exchangeForTokenUrl, data, { credentials: credentials });
     }
   }, {
     key: 'buildQueryString',
@@ -140,7 +138,7 @@ var OAuth2 = (function () {
   }]);
 
   var _OAuth2 = OAuth2;
-  OAuth2 = (0, _aureliaFramework.inject)(_storage.Storage, _popup.Popup, _spoonxAureliaApi.Rest, _baseConfig.BaseConfig)(OAuth2) || OAuth2;
+  OAuth2 = (0, _aureliaFramework.inject)(_storage.Storage, _popup.Popup, _baseConfig.BaseConfig)(OAuth2) || OAuth2;
   return OAuth2;
 })();
 

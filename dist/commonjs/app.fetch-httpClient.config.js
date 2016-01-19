@@ -18,11 +18,14 @@ var _aureliaFramework = require('aurelia-framework');
 
 var _storage = require('./storage');
 
+var _spoonxAureliaApi = require('spoonx/aurelia-api');
+
 var FetchConfig = (function () {
-  function FetchConfig(httpClient, authService, storage, config) {
+  function FetchConfig(httpClient, clientConfig, authService, storage, config) {
     _classCallCheck(this, _FetchConfig);
 
     this.httpClient = httpClient;
+    this.clientConfig = clientConfig;
     this.auth = authService;
     this.storage = storage;
     this.config = config.current;
@@ -30,35 +33,68 @@ var FetchConfig = (function () {
 
   _createClass(FetchConfig, [{
     key: 'configure',
-    value: function configure() {
+    value: function configure(client) {
+      var _this = this;
+
+      if (Array.isArray(client)) {
+        var _ret = (function () {
+          var configuredClients = [];
+          client.forEach(function (toConfigure) {
+            configuredClients.push(_this.configure(toConfigure));
+          });
+
+          return {
+            v: configuredClients
+          };
+        })();
+
+        if (typeof _ret === 'object') return _ret.v;
+      }
+
+      if (typeof client === 'string') {
+        client = this.clientConfig.getEndpoint(client).client;
+      } else if (client instanceof _spoonxAureliaApi.Rest) {
+        client = client.client;
+      } else if (!(client instanceof _aureliaFetchClient.HttpClient)) {
+        client = this.httpClient;
+      }
+
+      client.configure(function (httpConfig) {
+        httpConfig.withBaseUrl(client.baseUrl).withInterceptor(_this.interceptor);
+      });
+
+      return client;
+    }
+  }, {
+    key: 'interceptor',
+    get: function get() {
       var auth = this.auth;
       var config = this.config;
       var storage = this.storage;
-      var baseUrl = this.httpClient.baseUrl;
 
-      this.httpClient.configure(function (httpConfig) {
-        httpConfig.withBaseUrl(baseUrl).withInterceptor({
-          request: function request(_request) {
-            if (auth.isAuthenticated() && config.httpInterceptor) {
-              var tokenName = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : config.tokenName;
-              var token = storage.get(tokenName);
-
-              if (config.authHeader && config.authToken) {
-                token = config.authToken + ' ' + token;
-              }
-
-              _request.headers.append(config.authHeader, token);
-            }
-
+      return {
+        request: function request(_request) {
+          if (!auth.isAuthenticated() || !config.httpInterceptor) {
             return _request;
           }
-        });
-      });
+
+          var tokenName = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : config.tokenName;
+          var token = storage.get(tokenName);
+
+          if (config.authHeader && config.authToken) {
+            token = config.authToken + ' ' + token;
+          }
+
+          _request.headers.append(config.authHeader, token);
+
+          return _request;
+        }
+      };
     }
   }]);
 
   var _FetchConfig = FetchConfig;
-  FetchConfig = (0, _aureliaFramework.inject)(_aureliaFetchClient.HttpClient, _authentication.Authentication, _storage.Storage, _baseConfig.BaseConfig)(FetchConfig) || FetchConfig;
+  FetchConfig = (0, _aureliaFramework.inject)(_aureliaFetchClient.HttpClient, _spoonxAureliaApi.Config, _authentication.Authentication, _storage.Storage, _baseConfig.BaseConfig)(FetchConfig) || FetchConfig;
   return FetchConfig;
 })();
 

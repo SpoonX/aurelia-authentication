@@ -29,6 +29,8 @@ System.register(['./authUtils'], function (_export) {
           _classCallCheck(this, BaseConfig);
 
           this._current = {
+            endpoint: null,
+            configureEndpoints: null,
             httpInterceptor: true,
             loginOnSignup: true,
             baseUrl: null,

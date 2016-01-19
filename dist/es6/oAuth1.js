@@ -3,15 +3,14 @@ import authUtils from './authUtils';
 import {Storage} from './storage';
 import {Popup} from './popup';
 import {BaseConfig} from './baseConfig';
-import {Rest} from 'spoonx/aurelia-api';
 
-@inject(Storage, Popup, Rest, BaseConfig)
+@inject(Storage, Popup, BaseConfig)
 export class OAuth1 {
-  constructor(storage, popup, rest, config) {
+  constructor(storage, popup, config) {
     this.storage  = storage;
     this.config   = config.current;
     this.popup    = popup;
-    this.rest     = rest;
+    this.client   = this.config.client;
     this.defaults = {
       url: null,
       name: null,
@@ -30,7 +29,7 @@ export class OAuth1 {
       this.popup = this.popup.open('', this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri);
     }
     let self = this;
-    return this.rest.post(serverUrl)
+    return this.client.post(serverUrl)
       .then(response => {
         if (self.config.platform === 'mobile') {
           self.popup = self.popup.open(
@@ -61,7 +60,7 @@ export class OAuth1 {
     let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
     let credentials         = this.config.withCredentials ? 'include' : 'same-origin';
 
-    return this.rest.post(exchangeForTokenUrl, data, {credentials: credentials});
+    return this.client.post(exchangeForTokenUrl, data, {credentials: credentials});
   }
 
   buildQueryString(obj) {

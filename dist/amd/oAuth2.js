@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', './baseConfig', 'spoonx/aurelia-api'], function (exports, _aureliaFramework, _authUtils, _storage, _popup, _baseConfig, _spoonxAureliaApi) {
+define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', './baseConfig'], function (exports, _aureliaFramework, _authUtils, _storage, _popup, _baseConfig) {
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -14,13 +14,13 @@ define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', '
   var _authUtils2 = _interopRequireDefault(_authUtils);
 
   var OAuth2 = (function () {
-    function OAuth2(storage, popup, rest, config) {
+    function OAuth2(storage, popup, config) {
       _classCallCheck(this, _OAuth2);
 
       this.storage = storage;
       this.config = config.current;
+      this.client = this.config.client;
       this.popup = popup;
-      this.rest = rest;
       this.defaults = {
         url: null,
         name: null,
@@ -90,7 +90,7 @@ define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', '
         var exchangeForTokenUrl = this.config.baseUrl ? _authUtils2['default'].joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
         var credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
-        return this.rest.post(exchangeForTokenUrl, data, { credentials: credentials });
+        return this.client.post(exchangeForTokenUrl, data, { credentials: credentials });
       }
     }, {
       key: 'buildQueryString',
@@ -129,7 +129,7 @@ define(['exports', 'aurelia-framework', './authUtils', './storage', './popup', '
     }]);
 
     var _OAuth2 = OAuth2;
-    OAuth2 = (0, _aureliaFramework.inject)(_storage.Storage, _popup.Popup, _spoonxAureliaApi.Rest, _baseConfig.BaseConfig)(OAuth2) || OAuth2;
+    OAuth2 = (0, _aureliaFramework.inject)(_storage.Storage, _popup.Popup, _baseConfig.BaseConfig)(OAuth2) || OAuth2;
     return OAuth2;
   })();
 

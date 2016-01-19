@@ -1,9 +1,9 @@
 var path = require('path');
-
 var appRoot = 'src/';
 
 module.exports = {
   root: appRoot,
+  tmp: path.resolve(__dirname + '/../.tmp'),
   source: appRoot + '**/*.js',
   html: appRoot + '**/*.html',
   style: 'styles/**/*.css',

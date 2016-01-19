@@ -1,5 +1,8 @@
 # Aurelia-auth
 
+[![Build Status](https://travis-ci.org/SpoonX/aurelia-auth.svg)](https://travis-ci.org/SpoonX/aurelia-auth)
+[![Join the chat at https://gitter.im/SpoonX/Dev](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SpoonX/Dev?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 > Makes setting up authentication for your Aurelia app simple.
 
 ## What is aurelia-auth?
@@ -21,15 +24,15 @@ The aurelia token will be sent automatically to your API when the user is authen
 
 ![Authentication header](./pictures/authHeader.png)
 
-# Installation prerequisites
-Obviously, the prerequisites ([NodeJs](https://nodejs.org/), [Gulp](http://gulpjs.com/)) from [Aurelia](http://aurelia.io/). Since aurelia-auth is an [Aurelia plugin](https://github.com/aurelia/skeleton-plugin) , we presume here you have your [Aurelia](http://aurelia.io/) project up and running.
+## Installation
+We assume that you know about ([NodeJs](https://nodejs.org/), [Gulp](http://gulpjs.com/)) and [Aurelia](http://aurelia.io/).
+Since aurelia-auth is an [Aurelia plugin](https://github.com/aurelia/skeleton-plugin), we also assume that you have your [Aurelia](http://aurelia.io/) project up and running.
 
-# Installation
 ```
 jspm install github:spoonx/aurelia-auth
 ```
 
-# How to use aurelia-auth?
+## How to use aurelia-auth?
 aurelia-auth does not contain any UI widgets. It's conceived as a simple service with following interface:
 ```
 login(email, password)
@@ -44,7 +47,7 @@ unlink(provider)
 ```
 Login is used for the local authentication strategy (email + password). Authenticate is for social media authentication. Authenticate is also used for linking a social media account to an existing account.
 
-## Add an aurelia-auth security configuration file
+### Add an aurelia-auth security configuration file
 Add an javascript file to your project where you will store the aurelia-auth  security configuration data. Call it for example authConfig.js.
 Since this file is available via the browser, it should never contain sensitive data. Note that for OAuth the clientId is non sensitive. The client secret is sensitive data and should be only available server side. The aurelia-auth config file is compatible with the original Satellizer config file, easing the migration of AngularJs projects to Aurelia.
 
@@ -93,7 +96,7 @@ export default config;
 ```
 The above configuration file can cope with a development and production version (not mandatory of course). The strategy is that when your run on localhost, the development configuration file is used, otherwise the production configuration file is taken.
 
-## Update the aurelia configuration file
+### Update the aurelia configuration file
 
 In your aurelia configuration file, add the plugin and inject the aurelia-auth security configuration file :
 ```js
@@ -111,8 +114,8 @@ export function configure(aurelia) {
 ```
 The above aurelia configuration file consumes the aurelia-auth security configuration file.
 
-## Configure the Fetch Client
-In your aurelia app file, inject the {FetchConfig} class from aurelia-auth. We need to explicitely opt-in for the configuration of your fetch client by calling the configure function of the FetchConfig class:
+### Configure the Fetch Client
+In your aurelia app file, inject the {FetchConfig} class from aurelia-auth. We need to explicitly opt-in for the configuration of your fetch client by calling the configure function of the FetchConfig class:
 ```
 import 'bootstrap';
 
@@ -133,7 +136,7 @@ export class App {
 }
 ```
 
-## Provide a UI for a login, signup and profile.
+### Provide a UI for a login, signup and profile.
 
 See aurelia-auth-samples for more details.
 
@@ -187,7 +190,7 @@ On the profile page, social media accounts can be linked and unlinked. For a nic
     <i class="ion-social-facebook"></i> Link Facebook Account
 </button>
 ```
-## Making the Aurelia Router authentication aware
+### Making the Aurelia Router authentication aware
 
 The logout and profile links are only shown when the user is authenticated, whereas the login link is only visible when the user is not authenticated.
 
@@ -228,7 +231,7 @@ configure(){
         config.map([
             { route: ['','welcome'],  moduleId: './welcome',      nav: true, title:'Welcome' },
             { route: 'flickr',        moduleId: './flickr',       nav: true, title:'Flickr' },
-            { route: 'customer',        moduleId: './customer',       nav: true, title:'CRM', auth:true },
+            { route: 'customer',      moduleId: './customer',     nav: true, title:'CRM', auth:true },
 
             ...
 
@@ -240,12 +243,24 @@ configure(){
 ```
 In the above example the customer route is only available for authenticated users.
 
-# Full configuration options.
+### Configuring the endpoint
+Aurelia-auth uses [aurelia-api](https://github.com/SpoonX/aurelia-api), which has support for [multiple endpoints](https://github.com/SpoonX/aurelia-api/blob/master/doc/getting-started.md#multiple-endpoints).
+By default, aurelia-orm uses the HttpClient from [aurelia-fetch-client](https://github.com/aurelia/fetch-client) when no specific endpoint has been configured, and if no [default endpoint](https://github.com/SpoonX/aurelia-api/blob/master/doc/getting-started.md#default-endpoint) was configured.
+So, if you want aurelia to use your **default** endpoint, you only have to configure aurelia-api.
+If you wish to use a **specific** endpoint to have aurelia-auth talk to, you have to set the `endpoint` config option to a string, being the endpoint name.
+
+#### Authorization header
+If you require more flexibility, and want to send the authorization header along to multiple endpoints, you can simply use the `configureEndpoints` config option.
+Set this to an array of endpoint names to configure, and aurelia-auth will do the rest, and make sure that all requests (when authenticated) get enriched with the authorization header.
+
+## Full configuration options.
 
 Via the above mentioned configuration virtually all aspects of the authentication process be tweaked:
 
 ```js
   httpInterceptor: true,
+  endpoint: null,
+  configureEndpoints: null,
   loginOnSignup: true,
   baseUrl: '/',
   loginRedirect: '/#customer',

@@ -1,3 +1,23 @@
+<a name"0.13.0"></a>
+## 0.13.0 (2016-01-19)
+
+
+#### Bug Fixes
+
+* **test:** Added tests ([846d1bf9](git+https://github.com/spoonx/aurelia-auth.git/commit/846d1bf9))
+* **typescript:** Update d.ts ([edbd7304](git+https://github.com/spoonx/aurelia-auth.git/commit/edbd7304))
+
+
+#### Features
+
+* **build:**
+  * Create typescript definitions file on build ([09f63b1b](git+https://github.com/spoonx/aurelia-auth.git/commit/09f63b1b))
+  * Added typescript ds file generating ([e5d4726a](git+https://github.com/spoonx/aurelia-auth.git/commit/e5d4726a))
+* **fetch-config:** Added endpoint configuring, and configurable client. ([c1e30f61](git+https://github.com/spoonx/aurelia-auth.git/commit/c1e30f61))
+* **project:** Added typescript definition file ([28804352](git+https://github.com/spoonx/aurelia-auth.git/commit/28804352))
+* **snyk:** Added snyk ([562ba14e](git+https://github.com/spoonx/aurelia-auth.git/commit/562ba14e))
+
+
 ### 0.12.4 (2016-01-14)
 
 

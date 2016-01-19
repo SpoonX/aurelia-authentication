@@ -22,16 +22,14 @@ var _popup = require('./popup');
 
 var _baseConfig = require('./baseConfig');
 
-var _spoonxAureliaApi = require('spoonx/aurelia-api');
-
 var OAuth1 = (function () {
-  function OAuth1(storage, popup, rest, config) {
+  function OAuth1(storage, popup, config) {
     _classCallCheck(this, _OAuth1);
 
     this.storage = storage;
     this.config = config.current;
     this.popup = popup;
-    this.rest = rest;
+    this.client = this.config.client;
     this.defaults = {
       url: null,
       name: null,
@@ -52,7 +50,7 @@ var OAuth1 = (function () {
         this.popup = this.popup.open('', this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri);
       }
       var self = this;
-      return this.rest.post(serverUrl).then(function (response) {
+      return this.client.post(serverUrl).then(function (response) {
         if (self.config.platform === 'mobile') {
           self.popup = self.popup.open([self.defaults.authorizationEndpoint, self.buildQueryString(response)].join('?'), self.defaults.name, self.defaults.popupOptions, self.defaults.redirectUri);
         } else {
@@ -73,7 +71,7 @@ var OAuth1 = (function () {
       var exchangeForTokenUrl = this.config.baseUrl ? _authUtils2['default'].joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
       var credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
-      return this.rest.post(exchangeForTokenUrl, data, { credentials: credentials });
+      return this.client.post(exchangeForTokenUrl, data, { credentials: credentials });
     }
   }, {
     key: 'buildQueryString',
@@ -89,7 +87,7 @@ var OAuth1 = (function () {
   }]);
 
   var _OAuth1 = OAuth1;
-  OAuth1 = (0, _aureliaFramework.inject)(_storage.Storage, _popup.Popup, _spoonxAureliaApi.Rest, _baseConfig.BaseConfig)(OAuth1) || OAuth1;
+  OAuth1 = (0, _aureliaFramework.inject)(_storage.Storage, _popup.Popup, _baseConfig.BaseConfig)(OAuth1) || OAuth1;
   return OAuth1;
 })();
 

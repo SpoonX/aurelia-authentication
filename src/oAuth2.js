@@ -3,16 +3,15 @@ import authUtils from './authUtils';
 import {Storage} from './storage';
 import {Popup} from './popup';
 import {BaseConfig} from './baseConfig';
-import {Rest} from 'spoonx/aurelia-api';
 
-@inject(Storage, Popup, Rest, BaseConfig)
+@inject(Storage, Popup, BaseConfig)
 export class OAuth2 {
-  constructor(storage, popup, rest, config) {
-    this.storage  = storage;
-    this.config   = config.current;
-    this.popup    = popup;
-    this.rest     = rest;
-    this.defaults = {
+  constructor(storage, popup, config) {
+    this.storage      = storage;
+    this.config       = config.current;
+    this.client       = this.config.client;
+    this.popup        = popup;
+    this.defaults     = {
       url: null,
       name: null,
       state: null,
@@ -82,7 +81,7 @@ export class OAuth2 {
     let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
     let credentials         = this.config.withCredentials ? 'include' : 'same-origin';
 
-    return this.rest.post(exchangeForTokenUrl, data, {credentials: credentials});
+    return this.client.post(exchangeForTokenUrl, data, {credentials: credentials});
   }
 
   buildQueryString() {

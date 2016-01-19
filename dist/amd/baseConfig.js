@@ -30,6 +30,8 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
       _classCallCheck(this, BaseConfig);
 
       this._current = {
+        endpoint: null,
+        configureEndpoints: null,
         httpInterceptor: true,
         loginOnSignup: true,
         baseUrl: null,

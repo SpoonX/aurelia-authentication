@@ -11,6 +11,9 @@ export class BaseConfig {
 
   constructor() {
     this._current = {
+      endpoint: null, // Endpoint to use for auth requests (local only). Null uses HttpClient.
+      configureEndpoints: null, // Null to skip, or array of endpoints to patch.
+      client: null, // Used internally. The used Rest instance; set during configuration (see index.js)
       httpInterceptor: true,
       loginOnSignup: true,
       baseUrl: null,

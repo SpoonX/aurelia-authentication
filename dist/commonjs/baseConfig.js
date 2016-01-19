@@ -31,6 +31,8 @@ var BaseConfig = (function () {
     _classCallCheck(this, BaseConfig);
 
     this._current = {
+      endpoint: null,
+      configureEndpoints: null,
       httpInterceptor: true,
       loginOnSignup: true,
       baseUrl: null,

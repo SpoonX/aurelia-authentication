@@ -1,7 +1,7 @@
-System.register(['aurelia-framework', './authUtils', './storage', './popup', './baseConfig', 'spoonx/aurelia-api'], function (_export) {
+System.register(['aurelia-framework', './authUtils', './storage', './popup', './baseConfig'], function (_export) {
   'use strict';
 
-  var inject, authUtils, Storage, Popup, BaseConfig, Rest, OAuth2;
+  var inject, authUtils, Storage, Popup, BaseConfig, OAuth2;
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -18,18 +18,16 @@ System.register(['aurelia-framework', './authUtils', './storage', './popup', './
       Popup = _popup.Popup;
     }, function (_baseConfig) {
       BaseConfig = _baseConfig.BaseConfig;
-    }, function (_spoonxAureliaApi) {
-      Rest = _spoonxAureliaApi.Rest;
     }],
     execute: function () {
       OAuth2 = (function () {
-        function OAuth2(storage, popup, rest, config) {
+        function OAuth2(storage, popup, config) {
           _classCallCheck(this, _OAuth2);
 
           this.storage = storage;
           this.config = config.current;
+          this.client = this.config.client;
           this.popup = popup;
-          this.rest = rest;
           this.defaults = {
             url: null,
             name: null,
@@ -99,7 +97,7 @@ System.register(['aurelia-framework', './authUtils', './storage', './popup', './
             var exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
             var credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
-            return this.rest.post(exchangeForTokenUrl, data, { credentials: credentials });
+            return this.client.post(exchangeForTokenUrl, data, { credentials: credentials });
           }
         }, {
           key: 'buildQueryString',
@@ -138,7 +136,7 @@ System.register(['aurelia-framework', './authUtils', './storage', './popup', './
         }]);
 
         var _OAuth2 = OAuth2;
-        OAuth2 = inject(Storage, Popup, Rest, BaseConfig)(OAuth2) || OAuth2;
+        OAuth2 = inject(Storage, Popup, BaseConfig)(OAuth2) || OAuth2;
         return OAuth2;
       })();
 

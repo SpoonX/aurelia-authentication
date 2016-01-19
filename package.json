@@ -92,8 +92,5 @@
         "main": "client/shim.min"
       }
     }
-  },
-  "dependencies": {
-    "gulp-notify": "^2.2.0"
   }
 }

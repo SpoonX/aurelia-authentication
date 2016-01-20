@@ -54,48 +54,49 @@ Since this file is available via the browser, it should never contain sensitive 
 Spoonx/aurelia-auth uses [aurelia-api](https://github.com/SpoonX/aurelia-api). Set here the aurelia-api endpoint for the authorization requests and specify all endpoints you want to have configured for authorized requests. The aurelia token will be added to requests to those endpoints.
 
 ```js
-var configForDevelopment = {
+var baseConfig = {
     endpoint: 'auth',
-    configureEndpoints: ['auth','protected-api'],
+    configureEndpoints: ['auth', 'protected-api']
+};
+
+var configForDevelopment = {
     providers: {
         google: {
             clientId: '239531826023-ibk10mb9p7ull54j55a61og5lvnjrff6.apps.googleusercontent.com'
         }
         ,
         linkedin:{
-            clientId:'778mif8zyqbei7'
+            clientId: '778mif8zyqbei7'
         },
         facebook:{
-            clientId:'1452782111708498'
+            clientId: '1452782111708498'
         }
     }
 };
 
 var configForProduction = {
-    endpoint: 'auth',
-    configureEndpoints: ['auth','protected-api'],
     providers: {
         google: {
             clientId: '239531826023-3ludu3934rmcra3oqscc1gid3l9o497i.apps.googleusercontent.com'
         }
         ,
-        linkedin:{
+        linkedin: {
             clientId:'7561959vdub4x1'
         },
-        facebook:{
+        facebook: {
             clientId:'1653908914832509'
         }
 
     }
 };
-var config ;
-if (window.location.hostname==='localhost') {
-    config = configForDevelopment;
-}
-else{
-    config = configForProduction;
-}
 
+var config;
+if (window.location.hostname === 'localhost') {
+    config = Object.assign({}, baseConfig, configForDevelopment};
+}
+else {
+    config = Object.assign({}, baseConfig, configForProduction};
+}
 
 export default config;
 
@@ -112,9 +113,9 @@ import authConfig from './authConfig';
 export function configure(aurelia) {
   aurelia.use
     /* Your other plugins and init code */
-    .plugin('spoonx/aurelia-api', configure => {
+    .plugin('spoonx/aurelia-api', configure=>{
       configure
-        .registerEndpoint('auth',https://myapi.org/auth)
+        .registerEndpoint('auth', 'https://myapi.org/auth')
         .registerEndpoint('protected-api', 'https://myapi.org/protected-api')
         .registerEndpoint('public-api', 'http://myapi.org/public-api');
     })
@@ -126,29 +127,6 @@ export function configure(aurelia) {
 }
 
 ```
-
-For more options see [./doc/configure-client](./doc/configure-client.md).
-=======
-In your aurelia configuration file, add the plugin and inject the aurelia-auth security configuration file for your protected and unprotected endpoints.
-
-```javascript
-import authConfig from './authConfig';
-
-...
-
-aurelia.use
-  /* Your other plugins and init code */
-  .plugin('spoonx/aurelia-api', configure => {
-    configure
-      .registerEndpoint('auth',https://myapi.org/auth)
-      .registerEndpoint('protected-api', 'https://myapi.org/protected-api')
-      .registerEndpoint('public-api', 'http://myapi.org/public-api');
-  })
-  .plugin('spoonx/aurelia-auth', baseConfig=>{
-      baseConfig.configure(authConfig);
-  });
-```
-For more options see [./doc/configure-client](./doc/configure-client.md).
 
 ### Provide a UI for a login, signup and profile.
 
@@ -167,16 +145,16 @@ import {AuthService} from 'spoonx/aurelia-auth';
 import {inject} from 'aurelia-framework';
 @inject(AuthService)
 
-export class Login{
-    constructor(auth){
+export class Login {
+    constructor(auth) {
         this.auth = auth;
     };
 
     heading = 'Login';
 
-    email='';
-    password='';
-    login(){
+    email    = '';
+    password = '';
+    login() {
         return this.auth.login(this.email, this.password)
         .then(response=>{
             console.log("success logged " + response);
@@ -186,9 +164,9 @@ export class Login{
         });
     };
 
-    authenticate(name){
+    authenticate(name) {
         return this.auth.authenticate(name, false, null)
-        .then((response)=>{
+        .then(response=>{
             console.log("auth response " + response);
         });
     }
@@ -243,9 +221,9 @@ configure(){
         config.addPipelineStep('authorize', AuthorizeStep); // Add a route filter to the authorize extensibility point.
 
         config.map([
-            { route: ['','welcome'],  moduleId: './welcome',      nav: true, title:'Welcome' },
-            { route: 'flickr',        moduleId: './flickr',       nav: true, title:'Flickr' },
-            { route: 'customer',      moduleId: './customer',     nav: true, title:'CRM', auth:true },
+            { route: ['','welcome'],  moduleId: './welcome',  nav: true, title: 'Welcome' },
+            { route: 'flickr',        moduleId: './flickr',   nav: true, title: 'Flickr' },
+            { route: 'customer',      moduleId: './customer', nav: true, title: 'CRM', auth: true },
 
             ...
 

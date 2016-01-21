@@ -1,3 +1,12 @@
+<a name"0.13.1"></a>
+### 0.13.1 (2016-01-21)
+
+
+#### Bug Fixes
+
+* **popup:** Referrence popupWindow on this; popupWindow is undefined. ([212117e9](git+https://github.com/spoonx/aurelia-auth.git/commit/212117e9))
+
+
 <a name"0.13.0"></a>
 ## 0.13.0 (2016-01-19)
 

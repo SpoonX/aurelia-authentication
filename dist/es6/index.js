@@ -25,17 +25,21 @@ export function configure(aurelia, config) {
     baseConfig.configure(config);
   }
 
+  // Array? Configure the provided endpoints.
   if (Array.isArray(baseConfig.current.configureEndpoints)) {
     baseConfig.current.configureEndpoints.forEach(endpointToPatch => {
       fetchConfig.configure(endpointToPatch);
     });
   }
 
+  // Let's see if there's a configured client.
   let client = clientConfig.getEndpoint(baseConfig.current.endpoint);
 
+  // No? Fine. Default to HttpClient. BC all the way.
   if (!(client instanceof Rest)) {
     client = new Rest(aurelia.container.get(HttpClient));
   }
 
+  // Set the client on the config, for use throughout the plugin.
   baseConfig.current.client = client;
 }

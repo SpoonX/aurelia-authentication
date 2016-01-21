@@ -25,9 +25,8 @@ export class Popup {
   }
 
   eventListener(redirectUri) {
-    let self    = this;
     let promise = new Promise((resolve, reject) => {
-      self.popupWindow.addEventListener('loadstart', (event) => {
+      this.popupWindow.addEventListener('loadstart', (event) => {
         if (event.url.indexOf(redirectUri) !== 0) {
           return;
         }
@@ -51,7 +50,7 @@ export class Popup {
             resolve(qs);
           }
 
-          self.popupWindow.close();
+          this.popupWindow.close();
         }
       });
 
@@ -67,23 +66,22 @@ export class Popup {
         });
       });
     });
+
     return promise;
   }
 
   pollPopup() {
-    let self = this;
-
     return new Promise((resolve, reject) => {
       this.polling = setInterval(() => {
         let errorData;
 
         try {
           let documentOrigin    = document.location.host;
-          let popupWindowOrigin = self.popupWindow.location.host;
+          let popupWindowOrigin = this.popupWindow.location.host;
 
-          if (popupWindowOrigin === documentOrigin && (self.popupWindow.location.search || self.popupWindow.location.hash)) {
-            let queryParams = self.popupWindow.location.search.substring(1).replace(/\/$/, '');
-            let hashParams  = self.popupWindow.location.hash.substring(1).replace(/[\/$]/, '');
+          if (popupWindowOrigin === documentOrigin && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
+            let queryParams = this.popupWindow.location.search.substring(1).replace(/\/$/, '');
+            let hashParams  = this.popupWindow.location.hash.substring(1).replace(/[\/$]/, '');
             let hash        = authUtils.parseQueryString(hashParams);
             let qs          = authUtils.parseQueryString(queryParams);
 
@@ -97,21 +95,21 @@ export class Popup {
               resolve(qs);
             }
 
-            self.popupWindow.close();
-            clearInterval(self.polling);
+            this.popupWindow.close();
+            clearInterval(this.polling);
           }
         } catch (error) {
           errorData = error;
         }
 
-        if (!self.popupWindow) {
-          clearInterval(self.polling);
+        if (!this.popupWindow) {
+          clearInterval(this.polling);
           reject({
             error: errorData,
             data: 'Provider Popup Blocked'
           });
-        } else if (self.popupWindow.closed) {
-          clearInterval(self.polling);
+        } else if (this.popupWindow.closed) {
+          clearInterval(this.polling);
           reject({
             error: errorData,
             data: 'Problem poll popup'

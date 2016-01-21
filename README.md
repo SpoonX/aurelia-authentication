@@ -105,7 +105,9 @@ The above configuration file can cope with a development and production version 
 
 ### Update the aurelia configuration file
 
-In your aurelia configuration file, add the plugin and inject the aurelia-auth security configuration file for your protected and unprotected endpoints. 
+In your aurelia configuration file, add the plugin and inject the aurelia-auth security configuration file.
+
+While not mandantory, spoonx/aureli-auth is easiest to use in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api). Aurelia-api allows to setup several endpoints for Rest services. This can be used to seperate public and protected routes. For that, we first need to register the endpoints with aurelia-api. Bellow we setup the endpoints 'auth' and 'protected-api'. These will be setup in the proceeding spoonx/aurelia-auth-plugin configuration for authorized access (specified in above authConfig.js example). The endpoint 'public-api' bellow could be used for public access only, since we didn't add it above to the 'configureEndpoints' array and thus the access token will not be added by aurelia-auth.
 
 ```javascript
 import authConfig from './authConfig';
@@ -113,12 +115,16 @@ import authConfig from './authConfig';
 export function configure(aurelia) {
   aurelia.use
     /* Your other plugins and init code */
+    .standardConfiguration()
+    .developmentLogging()    
+    /* setup the api endpoints first (if desired) */
     .plugin('spoonx/aurelia-api', configure=>{
       configure
         .registerEndpoint('auth', 'https://myapi.org/auth')
         .registerEndpoint('protected-api', 'https://myapi.org/protected-api')
         .registerEndpoint('public-api', 'http://myapi.org/public-api');
     })
+    /* configure spoonx/aurelia-auth */
     .plugin('spoonx/aurelia-auth', baseConfig=>{
         baseConfig.configure(authConfig);
     });

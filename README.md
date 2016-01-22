@@ -20,7 +20,7 @@ Basically, aurelia-auth does not use any cookies but relies on a JWT (json web t
 
 Both **local storage** as well as **session storage** can be used (via the aurelia-auth security configuration file).
 
-The aurelia token will be sent automatically to your API when the user is authenticated.
+Spoonx/aurelia-auth makes use of [aurelia-api](https://github.com/SpoonX/aurelia-api) for convenient use of the aurelia-fetch-client. Options are available to directly use aurelia-fetch-client instead. If configured, the aurelia token will be sent automatically to your protected API when the user is authenticated.
 
 ![Authentication header](./pictures/authHeader.png)
 
@@ -51,7 +51,14 @@ Login is used for the local authentication strategy (email + password). Authenti
 Add an javascript file to your project where you will store the aurelia-auth  security configuration data. Call it for example authConfig.js.
 Since this file is available via the browser, it should never contain sensitive data. Note that for OAuth the clientId is non sensitive. The client secret is sensitive data and should be only available server side. The aurelia-auth config file is compatible with the original Satellizer config file, easing the migration of AngularJs projects to Aurelia.
 
+Spoonx/aurelia-auth uses [aurelia-api](https://github.com/SpoonX/aurelia-api). Set here the aurelia-api endpoint for the authorization requests and specify all endpoints you want to have configured for authorized requests. The aurelia token will be added to requests to those endpoints.
+
 ```js
+var baseConfig = {
+    endpoint: 'auth',
+    configureEndpoints: ['auth', 'protected-api']
+};
+
 var configForDevelopment = {
     providers: {
         google: {
@@ -59,10 +66,10 @@ var configForDevelopment = {
         }
         ,
         linkedin:{
-            clientId:'778mif8zyqbei7'
+            clientId: '778mif8zyqbei7'
         },
         facebook:{
-            clientId:'1452782111708498'
+            clientId: '1452782111708498'
         }
     }
 };
@@ -73,23 +80,23 @@ var configForProduction = {
             clientId: '239531826023-3ludu3934rmcra3oqscc1gid3l9o497i.apps.googleusercontent.com'
         }
         ,
-        linkedin:{
+        linkedin: {
             clientId:'7561959vdub4x1'
         },
-        facebook:{
+        facebook: {
             clientId:'1653908914832509'
         }
 
     }
 };
-var config ;
-if (window.location.hostname==='localhost') {
-    config = configForDevelopment;
-}
-else{
-    config = configForProduction;
-}
 
+var config;
+if (window.location.hostname === 'localhost') {
+    config = Object.assign({}, baseConfig, configForDevelopment};
+}
+else {
+    config = Object.assign({}, baseConfig, configForProduction};
+}
 
 export default config;
 
@@ -98,42 +105,33 @@ The above configuration file can cope with a development and production version 
 
 ### Update the aurelia configuration file
 
-In your aurelia configuration file, add the plugin and inject the aurelia-auth security configuration file :
-```js
-import config from './authConfig';
+In your aurelia configuration file, add the plugin and inject the aurelia-auth security configuration file.
+
+While not mandantory, spoonx/aureli-auth is easiest to use in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api). Aurelia-api allows to setup several endpoints for Rest services. This can be used to seperate public and protected routes. For that, we first need to register the endpoints with aurelia-api. Bellow we setup the endpoints 'auth' and 'protected-api'. These will be setup in the proceeding spoonx/aurelia-auth-plugin configuration for authorized access (specified in above authConfig.js example). The endpoint 'public-api' bellow could be used for public access only, since we didn't add it above to the 'configureEndpoints' array and thus the access token will not be added by aurelia-auth.
+
+```javascript
+import authConfig from './authConfig';
+
 export function configure(aurelia) {
   aurelia.use
+    /* Your other plugins and init code */
     .standardConfiguration()
-    .developmentLogging()
-    .plugin('aurelia-animator-css')
-    .plugin('spoonx/aurelia-auth', (baseConfig)=>{
-         baseConfig.configure(config);
+    .developmentLogging()    
+    /* setup the api endpoints first (if desired) */
+    .plugin('spoonx/aurelia-api', configure=>{
+      configure
+        .registerEndpoint('auth', 'https://myapi.org/auth')
+        .registerEndpoint('protected-api', 'https://myapi.org/protected-api')
+        .registerEndpoint('public-api', 'http://myapi.org/public-api');
+    })
+    /* configure spoonx/aurelia-auth */
+    .plugin('spoonx/aurelia-auth', baseConfig=>{
+        baseConfig.configure(authConfig);
     });
-  aurelia.start().then(a => a.setRoot());
+
+    aurelia.start().then(a => a.setRoot());
 }
-```
-The above aurelia configuration file consumes the aurelia-auth security configuration file.
 
-### Configure the Fetch Client
-In your aurelia app file, inject the {FetchConfig} class from aurelia-auth. We need to explicitly opt-in for the configuration of your fetch client by calling the configure function of the FetchConfig class:
-```
-import 'bootstrap';
-
-import {inject} from 'aurelia-framework';
-import {Router} from 'aurelia-router';
-import {FetchConfig} from 'spoonx/aurelia-auth';
-@inject(Router,FetchConfig, AppRouterConfig )
-export class App {
-
-  constructor(router, fetchConfig, appRouterConfig){
-    this.router = router;
-    this.fetchConfig = fetchConfig;
-  }
-  
-  activate(){
-    this.fetchConfig.configure();
-  }
-}
 ```
 
 ### Provide a UI for a login, signup and profile.
@@ -153,16 +151,16 @@ import {AuthService} from 'spoonx/aurelia-auth';
 import {inject} from 'aurelia-framework';
 @inject(AuthService)
 
-export class Login{
-    constructor(auth){
+export class Login {
+    constructor(auth) {
         this.auth = auth;
     };
 
     heading = 'Login';
 
-    email='';
-    password='';
-    login(){
+    email    = '';
+    password = '';
+    login() {
         return this.auth.login(this.email, this.password)
         .then(response=>{
             console.log("success logged " + response);
@@ -172,9 +170,9 @@ export class Login{
         });
     };
 
-    authenticate(name){
+    authenticate(name) {
         return this.auth.authenticate(name, false, null)
-        .then((response)=>{
+        .then(response=>{
             console.log("auth response " + response);
         });
     }
@@ -229,9 +227,9 @@ configure(){
         config.addPipelineStep('authorize', AuthorizeStep); // Add a route filter to the authorize extensibility point.
 
         config.map([
-            { route: ['','welcome'],  moduleId: './welcome',      nav: true, title:'Welcome' },
-            { route: 'flickr',        moduleId: './flickr',       nav: true, title:'Flickr' },
-            { route: 'customer',      moduleId: './customer',     nav: true, title:'CRM', auth:true },
+            { route: ['','welcome'],  moduleId: './welcome',  nav: true, title: 'Welcome' },
+            { route: 'flickr',        moduleId: './flickr',   nav: true, title: 'Flickr' },
+            { route: 'customer',      moduleId: './customer', nav: true, title: 'CRM', auth: true },
 
             ...
 
@@ -242,16 +240,6 @@ configure(){
     }
 ```
 In the above example the customer route is only available for authenticated users.
-
-### Configuring the endpoint
-Aurelia-auth uses [aurelia-api](https://github.com/SpoonX/aurelia-api), which has support for [multiple endpoints](https://github.com/SpoonX/aurelia-api/blob/master/doc/getting-started.md#multiple-endpoints).
-By default, aurelia-orm uses the HttpClient from [aurelia-fetch-client](https://github.com/aurelia/fetch-client) when no specific endpoint has been configured, and if no [default endpoint](https://github.com/SpoonX/aurelia-api/blob/master/doc/getting-started.md#default-endpoint) was configured.
-So, if you want aurelia to use your **default** endpoint, you only have to configure aurelia-api.
-If you wish to use a **specific** endpoint to have aurelia-auth talk to, you have to set the `endpoint` config option to a string, being the endpoint name.
-
-#### Authorization header
-If you require more flexibility, and want to send the authorization header along to multiple endpoints, you can simply use the `configureEndpoints` config option.
-Set this to an array of endpoint names to configure, and aurelia-auth will do the rest, and make sure that all requests (when authenticated) get enriched with the authorization header.
 
 ## Full configuration options.
 

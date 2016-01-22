@@ -33,6 +33,7 @@ var BaseConfig = (function () {
     this._current = {
       endpoint: null,
       configureEndpoints: null,
+      client: null,
       httpInterceptor: true,
       loginOnSignup: true,
       baseUrl: null,

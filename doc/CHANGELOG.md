@@ -1,3 +1,12 @@
+<a name"0.13.2"></a>
+### 0.13.2 (2016-01-23)
+
+
+#### Bug Fixes
+
+* **index:** fetchConfig needs configured baseConfig ([e62c9eb9](git+https://github.com/spoonx/aurelia-auth.git/commit/e62c9eb9))
+
+
 <a name"0.13.1"></a>
 ### 0.13.1 (2016-01-21)
 

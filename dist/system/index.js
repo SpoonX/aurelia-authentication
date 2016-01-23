@@ -9,14 +9,15 @@ System.register(['./baseConfig', './app.fetch-httpClient.config', 'spoonx/aureli
     aurelia.globalResources('./authFilter');
 
     var baseConfig = aurelia.container.get(BaseConfig);
-    var fetchConfig = aurelia.container.get(FetchConfig);
-    var clientConfig = aurelia.container.get(Config);
 
     if (typeof config === 'function') {
       config(baseConfig);
     } else if (typeof config === 'object') {
       baseConfig.configure(config);
     }
+
+    var fetchConfig = aurelia.container.get(FetchConfig);
+    var clientConfig = aurelia.container.get(Config);
 
     if (Array.isArray(baseConfig.current.configureEndpoints)) {
       baseConfig.current.configureEndpoints.forEach(function (endpointToPatch) {

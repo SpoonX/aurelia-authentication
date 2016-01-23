@@ -16,14 +16,16 @@ export function configure(aurelia, config) {
   aurelia.globalResources('./authFilter');
 
   let baseConfig   = aurelia.container.get(BaseConfig);
-  let fetchConfig  = aurelia.container.get(FetchConfig);
-  let clientConfig = aurelia.container.get(Config);
 
   if (typeof config === 'function') {
     config(baseConfig);
   } else if (typeof config === 'object') {
     baseConfig.configure(config);
   }
+
+  // after baseConfig was configured
+  let fetchConfig  = aurelia.container.get(FetchConfig);
+  let clientConfig = aurelia.container.get(Config);
 
   // Array? Configure the provided endpoints.
   if (Array.isArray(baseConfig.current.configureEndpoints)) {

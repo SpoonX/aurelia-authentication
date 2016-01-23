@@ -28,14 +28,15 @@ define(['exports', './baseConfig', './app.fetch-httpClient.config', 'spoonx/aure
     aurelia.globalResources('./authFilter');
 
     var baseConfig = aurelia.container.get(_baseConfig.BaseConfig);
-    var fetchConfig = aurelia.container.get(_appFetchHttpClientConfig.FetchConfig);
-    var clientConfig = aurelia.container.get(_spoonxAureliaApi.Config);
 
     if (typeof config === 'function') {
       config(baseConfig);
     } else if (typeof config === 'object') {
       baseConfig.configure(config);
     }
+
+    var fetchConfig = aurelia.container.get(_appFetchHttpClientConfig.FetchConfig);
+    var clientConfig = aurelia.container.get(_spoonxAureliaApi.Config);
 
     if (Array.isArray(baseConfig.current.configureEndpoints)) {
       baseConfig.current.configureEndpoints.forEach(function (endpointToPatch) {

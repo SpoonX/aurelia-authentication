@@ -1,3 +1,12 @@
+<a name"0.13.3"></a>
+### 0.13.3 (2016-01-24)
+
+
+#### Features
+
+* **typescript:** Add proper build support ([9ebfd763](git+https://github.com/spoonx/aurelia-auth.git/commit/9ebfd763))
+
+
 <a name"0.13.2"></a>
 ### 0.13.2 (2016-01-23)
 

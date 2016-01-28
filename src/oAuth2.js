@@ -26,59 +26,57 @@ export class OAuth2 {
       defaultUrlParams: ['response_type', 'client_id', 'redirect_uri'],
       responseType: 'code'
     };
+    this.current = {};
   }
 
   open(options, userData) {
-    authUtils.extend(this.defaults, options);
-    let stateName = this.defaults.name + '_state';
+    this.current = authUtils.extend({}, this.defaults, options);
+    let stateName = this.current.name + '_state';
 
-    if (authUtils.isFunction(this.defaults.state)) {
-      this.storage.set(stateName, this.defaults.state());
-    } else if (authUtils.isString(this.defaults.state)) {
-      this.storage.set(stateName, this.defaults.state);
+    if (authUtils.isFunction(this.current.state)) {
+      this.storage.set(stateName, this.current.state());
+    } else if (authUtils.isString(this.current.state)) {
+      this.storage.set(stateName, this.current.state);
     }
 
-    let url = this.defaults.authorizationEndpoint + '?' + this.buildQueryString();
+    let url = this.current.authorizationEndpoint + '?' + this.buildQueryString();
 
     let openPopup;
     if (this.config.platform === 'mobile') {
-      openPopup = this.popup.open(url, this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri).eventListener(this.defaults.redirectUri);
+      openPopup = this.popup.open(url, this.current.name, this.current.popupOptions, this.current.redirectUri).eventListener(this.current.redirectUri);
     } else {
-      openPopup = this.popup.open(url, this.defaults.name, this.defaults.popupOptions, this.defaults.redirectUri).pollPopup();
+      openPopup = this.popup.open(url, this.current.name, this.current.popupOptions, this.current.redirectUri).pollPopup();
     }
 
-    let self = this;
     return openPopup
-      .then((oauthData) => {
-        if (self.defaults.responseType === 'token' ||
-          self.defaults.responseType === 'id_token%20token' ||
-          self.defaults.responseType === 'token%20id_token'
+      .then(oauthData => {
+        if (this.current.responseType === 'token' ||
+          this.current.responseType === 'id_token%20token' ||
+          this.current.responseType === 'token%20id_token'
         ) {
           return oauthData;
         }
-        if (oauthData.state && oauthData.state !== self.storage.get(stateName)) {
+        if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
           return Promise.reject('OAuth 2.0 state parameter mismatch.');
         }
-        return self.exchangeForToken(oauthData, userData);
+        return this.exchangeForToken(oauthData, userData);
       });
   }
 
   exchangeForToken(oauthData, userData) {
     let data = authUtils.extend({}, userData, {
       code: oauthData.code,
-      clientId: this.defaults.clientId,
-      redirectUri: this.defaults.redirectUri
+      clientId: this.current.clientId,
+      redirectUri: this.current.redirectUri
     });
 
     if (oauthData.state) {
       data.state = oauthData.state;
     }
 
-    authUtils.forEach(this.defaults.responseParams, function(param) {
-      data[param] = oauthData[param];
-    });
+    authUtils.forEach(this.current.responseParams, param => data[param] = oauthData[param]);
 
-    let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.defaults.url) : this.defaults.url;
+    let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.current.url) : this.current.url;
     let credentials         = this.config.withCredentials ? 'include' : 'same-origin';
 
     return this.client.post(exchangeForTokenUrl, data, {credentials: credentials});
@@ -88,21 +86,21 @@ export class OAuth2 {
     let keyValuePairs = [];
     let urlParams     = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
 
-    authUtils.forEach(urlParams, (params) => {
-      authUtils.forEach(this.defaults[params], (paramName) => {
+    authUtils.forEach(urlParams, params => {
+      authUtils.forEach(this.current[params], paramName => {
         let camelizedName = authUtils.camelCase(paramName);
-        let paramValue    = authUtils.isFunction(this.defaults[paramName]) ? this.defaults[paramName]() : this.defaults[camelizedName];
+        let paramValue    = authUtils.isFunction(this.current[paramName]) ? this.current[paramName]() : this.current[camelizedName];
 
         if (paramName === 'state') {
-          let stateName = this.defaults.name + '_state';
+          let stateName = this.current.name + '_state';
           paramValue    = encodeURIComponent(this.storage.get(stateName));
         }
 
         if (paramName === 'scope' && Array.isArray(paramValue)) {
-          paramValue = paramValue.join(this.defaults.scopeDelimiter);
+          paramValue = paramValue.join(this.current.scopeDelimiter);
 
-          if (this.defaults.scopePrefix) {
-            paramValue = [this.defaults.scopePrefix, paramValue].join(this.defaults.scopeDelimiter);
+          if (this.current.scopePrefix) {
+            paramValue = [this.current.scopePrefix, paramValue].join(this.current.scopeDelimiter);
           }
         }
 
@@ -110,9 +108,7 @@ export class OAuth2 {
       });
     });
 
-    return keyValuePairs.map(function(pair) {
-      return pair.join('=');
-    }).join('&');
+    return keyValuePairs.map(pair => pair.join('=')).join('&');
   }
 
 }

@@ -156,7 +156,7 @@ define(['exports', './authUtils', './baseConfig', 'aurelia-framework'], function
       value: function stringifyOptions(options) {
         var parts = [];
         _authUtils2['default'].forEach(options, function (value, key) {
-          parts.push(key + '=' + value);
+          return parts.push(key + '=' + value);
         });
         return parts.join(',');
       }

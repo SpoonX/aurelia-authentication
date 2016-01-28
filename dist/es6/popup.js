@@ -26,7 +26,7 @@ export class Popup {
 
   eventListener(redirectUri) {
     let promise = new Promise((resolve, reject) => {
-      this.popupWindow.addEventListener('loadstart', (event) => {
+      this.popupWindow.addEventListener('loadstart', event => {
         if (event.url.indexOf(redirectUri) !== 0) {
           return;
         }
@@ -133,9 +133,7 @@ export class Popup {
 
   stringifyOptions(options) {
     let parts = [];
-    authUtils.forEach(options, function(value, key) {
-      parts.push(key + '=' + value);
-    });
+    authUtils.forEach(options, (value, key) => parts.push(key + '=' + value));
     return parts.join(',');
   }
 }

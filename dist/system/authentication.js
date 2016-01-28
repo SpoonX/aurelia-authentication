@@ -24,7 +24,6 @@ System.register(['aurelia-framework', './baseConfig', './storage', './authUtils'
 
           this.storage = storage;
           this.config = config.current;
-          this.tokenName = this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
         }
 
         _createClass(Authentication, [{
@@ -156,6 +155,11 @@ System.register(['aurelia-framework', './baseConfig', './storage', './authUtils'
 
               resolve();
             });
+          }
+        }, {
+          key: 'tokenName',
+          get: function get() {
+            return this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
           }
         }]);
 

@@ -8,7 +8,10 @@ export class Authentication {
   constructor(storage, config) {
     this.storage   = storage;
     this.config    = config.current;
-    this.tokenName = this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
+  }
+
+  get tokenName() {
+    return this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
   }
 
   getLoginRoute() {

@@ -1,4 +1,4 @@
-import {Container} from 'aurelia-framework';
+import {Container} from 'aurelia-dependency-injection';
 import {FetchConfig} from '../src/index';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Config, Rest} from 'spoonx/aurelia-api';

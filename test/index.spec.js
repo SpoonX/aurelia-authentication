@@ -1,4 +1,4 @@
-import {Container} from 'aurelia-framework';
+import {Container} from 'aurelia-dependency-injection';
 import {configure} from '../src/index';
 import {FetchConfig} from '../src/index';
 import {BaseConfig} from '../src/baseConfig';

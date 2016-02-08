@@ -20,8 +20,7 @@
     }
   ],
   "scripts": {
-    "test": "./node_modules/.bin/gulp test",
-    "postinstall": "npm install jspm@0.16.15 && jspm install && npm uninstall jspm"
+    "test": "./node_modules/.bin/gulp test"
   },
   "license": "MIT",
   "bugs": {

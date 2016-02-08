@@ -1,6 +1,6 @@
 {
   "name": "aurelia-auth",
-  "version": "0.13.4",
+  "version": "0.13.5",
   "description": "Plugin for social media authentication and local authentication together with other authentication utilities.",
   "main": "dist/system/index.js",
   "repository": {
@@ -20,8 +20,7 @@
     }
   ],
   "scripts": {
-    "test": "snyk test && ./node_modules/.bin/gulp test",
-    "postinstall": "npm install jspm@0.16.15 && jspm install && npm uninstall jspm"
+    "test": "./node_modules/.bin/gulp test"
   },
   "license": "MIT",
   "bugs": {

@@ -1,3 +1,12 @@
+<a name"0.13.6"></a>
+### 0.13.6 (2016-02-08)
+
+
+#### Bug Fixes
+
+* **oauth:** use current provider settings ([9c860c23](git+https://github.com/spoonx/aurelia-auth.git/commit/9c860c23))
+
+
 <a name"0.13.4"></a>
 ### 0.13.4 (2016-01-28)
 

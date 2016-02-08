@@ -159,7 +159,7 @@ System.register(['./authUtils', './baseConfig', 'aurelia-framework'], function (
           value: function stringifyOptions(options) {
             var parts = [];
             authUtils.forEach(options, function (value, key) {
-              parts.push(key + '=' + value);
+              return parts.push(key + '=' + value);
             });
             return parts.join(',');
           }

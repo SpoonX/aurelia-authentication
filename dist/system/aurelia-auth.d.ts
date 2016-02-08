@@ -38,6 +38,7 @@ declare module 'aurelia-auth/storage' {
 declare module 'aurelia-auth/authentication' {
 	export class Authentication {
 	    constructor(storage: any, config: any);
+	    tokenName: any;
 	    getLoginRoute(): any;
 	    getLoginRedirect(): any;
 	    getLoginUrl(): any;

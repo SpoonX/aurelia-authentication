@@ -19,7 +19,6 @@ define(['exports', 'aurelia-framework', './baseConfig', './storage', './authUtil
 
       this.storage = storage;
       this.config = config.current;
-      this.tokenName = this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
     }
 
     _createClass(Authentication, [{
@@ -151,6 +150,11 @@ define(['exports', 'aurelia-framework', './baseConfig', './storage', './authUtil
 
           resolve();
         });
+      }
+    }, {
+      key: 'tokenName',
+      get: function get() {
+        return this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
       }
     }]);
 

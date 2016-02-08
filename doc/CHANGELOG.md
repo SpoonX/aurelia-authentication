@@ -1,3 +1,12 @@
+<a name"0.13.4"></a>
+### 0.13.4 (2016-01-28)
+
+
+#### Bug Fixes
+
+* **oAuth:** reset defaults properly ([968abfcf](git+https://github.com/spoonx/aurelia-auth.git/commit/968abfcf))
+
+
 <a name"0.13.3"></a>
 ### 0.13.3 (2016-01-24)
 
@@ -5,6 +14,7 @@
 #### Features
 
 * **typescript:** Add proper build support ([9ebfd763](git+https://github.com/spoonx/aurelia-auth.git/commit/9ebfd763))
+* **authentication:** use current tokenName ([bd58f00b](git+https://github.com/spoonx/aurelia-auth.git/commit/bd58f00b))
 
 
 <a name"0.13.2"></a>

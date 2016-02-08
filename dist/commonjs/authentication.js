@@ -26,7 +26,6 @@ var Authentication = (function () {
 
     this.storage = storage;
     this.config = config.current;
-    this.tokenName = this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
   }
 
   _createClass(Authentication, [{
@@ -158,6 +157,11 @@ var Authentication = (function () {
 
         resolve();
       });
+    }
+  }, {
+    key: 'tokenName',
+    get: function get() {
+      return this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
     }
   }]);
 

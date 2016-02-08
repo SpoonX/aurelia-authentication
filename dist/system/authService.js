@@ -1,4 +1,4 @@
-System.register(['aurelia-framework', './authentication', './baseConfig', './oAuth1', './oAuth2', './authUtils'], function (_export) {
+System.register(['aurelia-dependency-injection', './authentication', './baseConfig', './oAuth1', './oAuth2', './authUtils'], function (_export) {
   'use strict';
 
   var inject, Authentication, BaseConfig, OAuth1, OAuth2, authUtils, AuthService;
@@ -8,8 +8,8 @@ System.register(['aurelia-framework', './authentication', './baseConfig', './oAu
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
   return {
-    setters: [function (_aureliaFramework) {
-      inject = _aureliaFramework.inject;
+    setters: [function (_aureliaDependencyInjection) {
+      inject = _aureliaDependencyInjection.inject;
     }, function (_authentication) {
       Authentication = _authentication.Authentication;
     }, function (_baseConfig) {

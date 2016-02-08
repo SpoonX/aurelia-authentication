@@ -1,4 +1,4 @@
-import {inject} from 'aurelia-framework';
+import {inject} from 'aurelia-dependency-injection';
 import authUtils from './authUtils';
 import {Storage} from './storage';
 import {Popup} from './popup';
@@ -18,16 +18,15 @@ export class OAuth1 {
       redirectUri: null,
       authorizationEndpoint: null
     };
-    this.current = {};
   }
 
   open(options, userData) {
-    this.current = authUtils.extend({}, this.defaults, options);
+    let current = authUtils.extend({}, this.defaults, options);
 
-    let serverUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.current.url) : this.current.url;
+    let serverUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, current.url) : current.url;
 
     if (this.config.platform !== 'mobile') {
-      this.popup = this.popup.open('', this.current.name, this.current.popupOptions, this.current.redirectUri);
+      this.popup = this.popup.open('', current.name, current.popupOptions, current.redirectUri);
     }
 
     return this.client.post(serverUrl)
@@ -35,28 +34,28 @@ export class OAuth1 {
         if (this.config.platform === 'mobile') {
           this.popup = this.popup.open(
             [
-              this.defaults.authorizationEndpoint,
+              current.authorizationEndpoint,
               this.buildQueryString(response)
             ].join('?'),
-            this.defaults.name,
-            this.defaults.popupOptions,
-            this.defaults.redirectUri);
+            current.name,
+            current.popupOptions,
+            current.redirectUri);
         } else {
           this.popup.popupWindow.location = [
-            this.defaults.authorizationEndpoint,
+            current.authorizationEndpoint,
             this.buildQueryString(response)
           ].join('?');
         }
 
-        let popupListener = this.config.platform === 'mobile' ? this.popup.eventListener(this.defaults.redirectUri) : this.popup.pollPopup();
+        let popupListener = this.config.platform === 'mobile' ? this.popup.eventListener(current.redirectUri) : this.popup.pollPopup();
 
-        return popupListener.then(result => this.exchangeForToken(result, userData));
+        return popupListener.then(result => this.exchangeForToken(result, userData, current));
       });
   }
 
-  exchangeForToken(oauthData, userData) {
+  exchangeForToken(oauthData, userData, current) {
     let data                = authUtils.extend({}, userData, oauthData);
-    let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.current.url) : this.current.url;
+    let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, current.url) : current.url;
     let credentials         = this.config.withCredentials ? 'include' : 'same-origin';
 
     return this.client.post(exchangeForTokenUrl, data, {credentials: credentials});

@@ -221,23 +221,24 @@ Menu items visibility can also be linked with the authFilter to the isAuthentica
 In the router config function, you can specifify an auth property in the routing map indicating wether or not the user needs to be authenticated in order to access the route:
 
 ```js
-configure(){
-    var appRouterConfig = function(config){
+import {AuthorizeStep} from 'spoonx/aurelia-auth';
+
+export class App {
+    configureRouter(config, router) {
         config.title = 'Aurelia';
+
         config.addPipelineStep('authorize', AuthorizeStep); // Add a route filter to the authorize extensibility point.
 
         config.map([
             { route: ['','welcome'],  moduleId: './welcome',  nav: true, title: 'Welcome' },
             { route: 'flickr',        moduleId: './flickr',   nav: true, title: 'Flickr' },
             { route: 'customer',      moduleId: './customer', nav: true, title: 'CRM', auth: true },
-
             ...
+        ]);
 
-            ]);
-        };
-
-        this.router.configure(appRouterConfig);
-    }
+        ...
+    };
+}
 ```
 In the above example the customer route is only available for authenticated users.
 

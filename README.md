@@ -34,7 +34,7 @@ jspm install github:spoonx/aurelia-auth
 
 ## How to use aurelia-auth?
 aurelia-auth does not contain any UI widgets. It's conceived as a simple service with following interface:
-```
+```javascript
 login(email, password)
 logout(redirectUri)
 authenticate(provider, redirect, userData)
@@ -92,10 +92,10 @@ var configForProduction = {
 
 var config;
 if (window.location.hostname === 'localhost') {
-    config = Object.assign({}, baseConfig, configForDevelopment};
+    config = Object.assign({}, baseConfig, configForDevelopment);
 }
 else {
-    config = Object.assign({}, baseConfig, configForProduction};
+    config = Object.assign({}, baseConfig, configForProduction);
 }
 
 export default config;
@@ -118,14 +118,14 @@ export function configure(aurelia) {
     .standardConfiguration()
     .developmentLogging()    
     /* setup the api endpoints first (if desired) */
-    .plugin('spoonx/aurelia-api', configure=>{
+    .plugin('spoonx/aurelia-api', configure => {
       configure
         .registerEndpoint('auth', 'https://myapi.org/auth')
         .registerEndpoint('protected-api', 'https://myapi.org/protected-api')
         .registerEndpoint('public-api', 'http://myapi.org/public-api');
     })
     /* configure spoonx/aurelia-auth */
-    .plugin('spoonx/aurelia-auth', baseConfig=>{
+    .plugin('spoonx/aurelia-auth', baseConfig => {
         baseConfig.configure(authConfig);
     });
 
@@ -141,7 +141,7 @@ See aurelia-auth-samples for more details.
 Button actions are passed to the corresponding view model via a simple click.delegate:
 ```html
 <button class="btn btn-block btn-google-plus" click.delegate="authenticate('google')">
-          <span class="ion-social-googleplus"></span>Sign in with Google
+    <span class="ion-social-googleplus"></span>Sign in with Google
 </button>
 ```
 
@@ -162,17 +162,17 @@ export class Login {
     password = '';
     login() {
         return this.auth.login(this.email, this.password)
-        .then(response=>{
+        .then(response => {
             console.log("success logged " + response);
         })
-        .catch(err=>{
+        .catch(err => {
             console.log("login failure");
         });
     };
 
     authenticate(name) {
         return this.auth.authenticate(name, false, null)
-        .then(response=>{
+        .then(response => {
             console.log("auth response " + response);
         });
     }
@@ -221,23 +221,24 @@ Menu items visibility can also be linked with the authFilter to the isAuthentica
 In the router config function, you can specifify an auth property in the routing map indicating wether or not the user needs to be authenticated in order to access the route:
 
 ```js
-configure(){
-    var appRouterConfig = function(config){
+import {AuthorizeStep} from 'spoonx/aurelia-auth';
+
+export class App {
+    configureRouter(config, router) {
         config.title = 'Aurelia';
+
         config.addPipelineStep('authorize', AuthorizeStep); // Add a route filter to the authorize extensibility point.
 
         config.map([
             { route: ['','welcome'],  moduleId: './welcome',  nav: true, title: 'Welcome' },
             { route: 'flickr',        moduleId: './flickr',   nav: true, title: 'Flickr' },
             { route: 'customer',      moduleId: './customer', nav: true, title: 'CRM', auth: true },
-
             ...
+        ]);
 
-            ]);
-        };
-
-        this.router.configure(appRouterConfig);
-    }
+        ...
+    };
+}
 ```
 In the above example the customer route is only available for authenticated users.
 

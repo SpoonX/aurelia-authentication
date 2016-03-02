@@ -9,7 +9,7 @@ module.exports = function (config) {
     frameworks         : ['jspm', 'jasmine'],
     jspm               : {
       // Edit this to your needs
-      loadFiles: ['src/**/*.js', 'test/setup.js', 'test/**/*.js'],
+      loadFiles: ['test/setup.js', 'src/**/*.js', 'test/**/*.js'],
       paths    : {
         '*': '*.js'
       }
@@ -32,8 +32,6 @@ module.exports = function (config) {
 
     // list of files to exclude
     exclude: [],
-
-    browserNoActivityTimeout: 30000,
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor

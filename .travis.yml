@@ -5,6 +5,7 @@ before_install:
 - npm install -g jspm
 - jspm config registries.github.auth U3Bvb25YOjY2NWIxYWQ2ZTM4ZjUxZGNjMzcwNDBkYzMxYjgxZGVkZjE1M2RjYjg=
 before_script:
+- jspm -v
 - jspm i
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start

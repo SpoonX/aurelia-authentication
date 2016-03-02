@@ -52,6 +52,7 @@
     "require-dir": "^0.1.0",
     "run-sequence": "^1.0.2",
     "snyk": "^1.8.4",
+    "typescript": "^1.7.3",
     "vinyl-paths": "^2.1.0",
     "yargs": "^2.1.1"
   },

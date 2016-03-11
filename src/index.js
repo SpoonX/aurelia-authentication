@@ -5,6 +5,7 @@ import {FetchConfig} from './app.fetch-httpClient.config';
 export {FetchConfig} from './app.fetch-httpClient.config';
 import {Config, Rest} from 'spoonx/aurelia-api';
 import {HttpClient} from 'aurelia-fetch-client';
+import './authFilter';
 
 /**
  * Configure the plugin.

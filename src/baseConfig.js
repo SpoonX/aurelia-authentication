@@ -24,7 +24,6 @@ export class BaseConfig {
       signupUrl: '/auth/signup',
       profileUrl: '/auth/me',
       loginRoute: '/login',
-      signupRoute: '/signup',
       tokenRoot: false,
       tokenName: 'token',
       tokenPrefix: 'aurelia',

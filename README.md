@@ -259,7 +259,6 @@ Via the above mentioned configuration virtually all aspects of the authenticatio
   signupUrl: '/auth/signup',
   profileUrl: '/auth/me',
   loginRoute: '/login',
-  signupRoute: '/signup',
   tokenRoot: false,
   tokenName: 'token',
   tokenPrefix: 'aurelia',

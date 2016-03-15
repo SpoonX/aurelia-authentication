@@ -11,31 +11,87 @@ export class BaseConfig {
 
   constructor() {
     this._current = {
-      endpoint: null, // Endpoint to use for auth requests (local only). Null uses HttpClient.
-      configureEndpoints: null, // Null to skip, or array of endpoints to patch.
-      client: null, // Used internally. The used Rest instance; set during configuration (see index.js)
-      httpInterceptor: true,
-      loginOnSignup: true,
-      baseUrl: null,
-      loginRedirect: '/#customer',
-      logoutRedirect: '/',
-      signupRedirect: '/login',
-      loginUrl: '/auth/login',
-      signupUrl: '/auth/signup',
-      profileUrl: '/auth/me',
+      // Used internally. The used Rest instance; set during configuration (see index.js)
+      client: null,
+
+      // If using aurelia-api:
+      // =====================
+
+      // This is the endpoint used for any requests made in relation to authentication (login, logout, etc.)
+      endpoint: null,
+      // When authenticated, these endpoints will have the token added to the header of any requests (for authorization)
+      configureEndpoints: null,
+
+
+      // SPA related options
+      // ===================
+
+      // The SPA url to which the user is redirected after a successful login
+      loginRedirect: '#/customer',
+      // The SPA url to which the user is redirected after a successful logout
+      logoutRedirect: '#/',
+      // The SPA route used when an unauthenticated user tries to access an SPA page that requires authentication
       loginRoute: '/login',
-      signupRoute: '/signup',
-      tokenRoot: false,
-      tokenName: 'token',
-      tokenPrefix: 'aurelia',
-      responseTokenProp: 'access_token',
+      // Whether or not an authentication token is provided in the response to a successful signup
+      loginOnSignup: true,
+      // If loginOnSignup == false: The SPA url to which the user is redirected after a successful signup (else loginRedirect is used)
+      signupRedirect: '#/login',
+
+
+      // API related options
+      // ===================
+
+      // The API endpoint to which login requests are sent
+      loginUrl: '/auth/login',
+      // The API endpoint to which signup requests are sent
+      signupUrl: '/auth/signup',
+      // The API endpoint used in profile requests (inc. `find/get` and `update`)
+      profileUrl: '/auth/me',
+      // The API endpoint used with oAuth to unlink authentication
       unlinkUrl: '/auth/unlink/',
+      // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
       unlinkMethod: 'get',
+
+
+      // Token Related options
+      // =====================
+
+      // The header property used to contain the authToken in the header of API requests that require authentication
       authHeader: 'Authorization',
+      // The token name used in the header of API requests that require authentication
       authToken: 'Bearer',
+      // The the property from which to get the authentication token after a successful login or signup
+      responseTokenProp: 'access_token',
+
+      // If the property defined by `responseTokenProp` is an object:
+      // ------------------------------------------------------------
+
+      //This is the property from which to get the token `{ "responseTokenProp": { "tokenName" : '...' } }`
+      tokenName: 'token',
+      // This allows the token to be a further object deeper `{ "responseTokenProp": { "tokenRoot" : { "tokenName" : '...' } } }`
+      tokenRoot: false,
+
+
+      // Miscellaneous Options
+      // =====================
+
+      // Whether to enable the fetch interceptor which automatically adds the authentication headers
+      // (or not... e.g. if using a session based API or you want to override the default behaviour)
+      httpInterceptor: true,
+      // The base url used for all authentication related requests (This appends to the httpClient/endpoint base url, it does not override it)
+      baseUrl: '/',
+      // For OAuth only: Tell the API whether or not to include token cookies in the response (for session based APIs)
       withCredentials: true,
+      // Controls how the popup is shown for different devices (Options: 'browser' or 'mobile')
       platform: 'browser',
+      // Determines the `window` property name upon which aurelia-auth data is stored (Default: `window.localStorage`)
       storage: 'localStorage',
+      // Prepended to the `tokenName` when kept in storage (nothing to do with)
+      tokenPrefix: 'aurelia',
+
+
+      //OAuth provider specific related configuration
+      // ============================================
       providers: {
         google: {
           name: 'google',

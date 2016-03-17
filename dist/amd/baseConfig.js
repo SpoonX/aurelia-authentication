@@ -30,31 +30,54 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
       _classCallCheck(this, BaseConfig);
 
       this._current = {
-        endpoint: null,
-        configureEndpoints: null,
         client: null,
-        httpInterceptor: true,
-        loginOnSignup: true,
-        baseUrl: null,
-        loginRedirect: '/#customer',
-        logoutRedirect: '/',
-        signupRedirect: '/login',
-        loginUrl: '/auth/login',
-        signupUrl: '/auth/signup',
-        profileUrl: '/auth/me',
+
+        endpoint: null,
+
+        configureEndpoints: null,
+
+        loginRedirect: '#/customer',
+
+        logoutRedirect: '#/',
+
         loginRoute: '/login',
-        signupRoute: '/signup',
-        tokenRoot: false,
-        tokenName: 'token',
-        tokenPrefix: 'aurelia',
-        responseTokenProp: 'access_token',
+
+        loginOnSignup: true,
+
+        signupRedirect: '#/login',
+
+        loginUrl: '/auth/login',
+
+        signupUrl: '/auth/signup',
+
+        profileUrl: '/auth/me',
+
         unlinkUrl: '/auth/unlink/',
+
         unlinkMethod: 'get',
+
         authHeader: 'Authorization',
+
         authToken: 'Bearer',
+
+        responseTokenProp: 'access_token',
+
+        tokenName: 'token',
+
+        tokenRoot: false,
+
+        httpInterceptor: true,
+
+        baseUrl: '/',
+
         withCredentials: true,
+
         platform: 'browser',
+
         storage: 'localStorage',
+
+        tokenPrefix: 'aurelia',
+
         providers: {
           google: {
             name: 'google',

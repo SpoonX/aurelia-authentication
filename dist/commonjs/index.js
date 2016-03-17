@@ -13,6 +13,8 @@ var _spoonxAureliaApi = require('spoonx/aurelia-api');
 
 var _aureliaFetchClient = require('aurelia-fetch-client');
 
+require('./authFilter');
+
 var _authService = require('./authService');
 
 Object.defineProperty(exports, 'AuthService', {

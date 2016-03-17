@@ -34,8 +34,8 @@ var AuthorizeStep = (function () {
           return next.cancel(new _aureliaRouter.Redirect(loginRoute));
         }
       } else if (isLoggedIn && routingContext.getAllInstructions().some(function (i) {
-        return i.fragment;
-      }) === loginRoute) {
+        return i.fragment === loginRoute;
+      })) {
         var loginRedirect = this.auth.getLoginRedirect();
         return next.cancel(new _aureliaRouter.Redirect(loginRedirect));
       }

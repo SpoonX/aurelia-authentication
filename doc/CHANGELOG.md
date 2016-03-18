@@ -1,3 +1,14 @@
+<a name"0.13.9"></a>
+### 0.13.9 (2016-03-17)
+
+
+#### Bug Fixes
+
+* **authorizeStep:** fix redirect if isLoggedIn and on login route ([65986f7c](git+https://github.com/spoonx/aurelia-auth.git/commit/65986f7c))
+* **baseConfig:** SPA redirects should be hashed ([a24ce935](git+https://github.com/spoonx/aurelia-auth.git/commit/a24ce935))
+* **project:** import authFilter for inclusion when bundling ([d70a5c6f](git+https://github.com/spoonx/aurelia-auth.git/commit/d70a5c6f), closes [#44](git+https://github.com/spoonx/aurelia-auth.git/issues/44))
+
+
 <a name"0.13.8"></a>
 ### 0.13.8 (2016-03-02)
 

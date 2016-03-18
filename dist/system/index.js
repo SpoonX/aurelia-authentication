@@ -1,4 +1,4 @@
-System.register(['./baseConfig', './app.fetch-httpClient.config', 'spoonx/aurelia-api', 'aurelia-fetch-client', './authService', './authorizeStep'], function (_export) {
+System.register(['./baseConfig', './app.fetch-httpClient.config', 'spoonx/aurelia-api', 'aurelia-fetch-client', './authFilter', './authService', './authorizeStep'], function (_export) {
   'use strict';
 
   var BaseConfig, FetchConfig, Config, Rest, HttpClient;
@@ -46,7 +46,7 @@ System.register(['./baseConfig', './app.fetch-httpClient.config', 'spoonx/aureli
       Rest = _spoonxAureliaApi.Rest;
     }, function (_aureliaFetchClient) {
       HttpClient = _aureliaFetchClient.HttpClient;
-    }, function (_authService) {
+    }, function (_authFilter) {}, function (_authService) {
       _export('AuthService', _authService.AuthService);
     }, function (_authorizeStep) {
       _export('AuthorizeStep', _authorizeStep.AuthorizeStep);

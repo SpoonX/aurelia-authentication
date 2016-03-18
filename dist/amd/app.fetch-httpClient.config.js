@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-fetch-client', './authentication', './baseConfig', 'aurelia-dependency-injection', './storage', 'spoonx/aurelia-api'], function (exports, _aureliaFetchClient, _authentication, _baseConfig, _aureliaDependencyInjection, _storage, _spoonxAureliaApi) {
+define(['exports', 'aurelia-fetch-client', './authentication', './baseConfig', 'aurelia-dependency-injection', 'spoonx/aurelia-api'], function (exports, _aureliaFetchClient, _authentication, _baseConfig, _aureliaDependencyInjection, _spoonxAureliaApi) {
   'use strict';
 
   Object.defineProperty(exports, '__esModule', {
@@ -10,13 +10,12 @@ define(['exports', 'aurelia-fetch-client', './authentication', './baseConfig', '
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
   var FetchConfig = (function () {
-    function FetchConfig(httpClient, clientConfig, authService, storage, config) {
+    function FetchConfig(httpClient, clientConfig, authentication, config) {
       _classCallCheck(this, _FetchConfig);
 
       this.httpClient = httpClient;
       this.clientConfig = clientConfig;
-      this.auth = authService;
-      this.storage = storage;
+      this.auth = authentication;
       this.config = config.current;
     }
 
@@ -59,7 +58,6 @@ define(['exports', 'aurelia-fetch-client', './authentication', './baseConfig', '
       get: function get() {
         var auth = this.auth;
         var config = this.config;
-        var storage = this.storage;
 
         return {
           request: function request(_request) {
@@ -67,8 +65,7 @@ define(['exports', 'aurelia-fetch-client', './authentication', './baseConfig', '
               return _request;
             }
 
-            var tokenName = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : config.tokenName;
-            var token = storage.get(tokenName);
+            var token = auth.getToken();
 
             if (config.authHeader && config.authToken) {
               token = config.authToken + ' ' + token;
@@ -83,7 +80,7 @@ define(['exports', 'aurelia-fetch-client', './authentication', './baseConfig', '
     }]);
 
     var _FetchConfig = FetchConfig;
-    FetchConfig = (0, _aureliaDependencyInjection.inject)(_aureliaFetchClient.HttpClient, _spoonxAureliaApi.Config, _authentication.Authentication, _storage.Storage, _baseConfig.BaseConfig)(FetchConfig) || FetchConfig;
+    FetchConfig = (0, _aureliaDependencyInjection.inject)(_aureliaFetchClient.HttpClient, _spoonxAureliaApi.Config, _authentication.Authentication, _baseConfig.BaseConfig)(FetchConfig) || FetchConfig;
     return FetchConfig;
   })();
 

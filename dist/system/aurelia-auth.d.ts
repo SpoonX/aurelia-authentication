@@ -61,10 +61,9 @@ declare module 'aurelia-auth/app.fetch-httpClient.config' {
 	     * @param {HttpClient} httpClient
 	     * @param {Config} clientConfig
 	     * @param {Authentication} authService
-	     * @param {Storage} storage
 	     * @param {BaseConfig} config
 	     */
-	    constructor(httpClient: any, clientConfig: any, authService: any, storage: any, config: any);
+	    constructor(httpClient: any, clientConfig: any, authentication: any, config: any);
 	    /**
 	     * Interceptor for HttpClient
 	     *
@@ -143,6 +142,7 @@ declare module 'aurelia-auth/index' {
 	export { AuthService } from 'aurelia-auth/authService';
 	export { AuthorizeStep } from 'aurelia-auth/authorizeStep';
 	export { FetchConfig } from 'aurelia-auth/app.fetch-httpClient.config';
+	import 'aurelia-auth/authFilter';
 	/**
 	 * Configure the plugin.
 	 *

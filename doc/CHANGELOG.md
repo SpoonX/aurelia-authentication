@@ -1,3 +1,14 @@
+<a name"1.0.0"></a>
+## 1.0.0 (2016-03-19)
+
+
+#### Breaking Changes
+
+* The project now must be imported with aurelia-authentication
+
+ ([ba66705d](git+https://github.com/spoonx/aurelia-authentication.git/commit/ba66705d))
+
+
 <a name"0.13.9"></a>
 ### 0.13.9 (2016-03-17)
 

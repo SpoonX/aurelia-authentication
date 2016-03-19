@@ -29,7 +29,7 @@ gulp.task('ts-build', function() {
 });
 
 gulp.task('ts-copy-dist', function() {
-  return gulp.src(paths.root + 'aurelia-auth.d.ts')
+  return gulp.src(paths.root + 'aurelia-authentication.d.ts')
     .pipe(rename(paths.packageName + '.d.ts'))
     .pipe(gulp.dest(paths.output + 'es6'))
     .pipe(gulp.dest(paths.output + 'commonjs'))

@@ -1,39 +1,39 @@
-# Aurelia-auth
+# aurelia-authentication
 
-[![Build Status](https://travis-ci.org/SpoonX/aurelia-auth.svg)](https://travis-ci.org/SpoonX/aurelia-auth)
+[![Build Status](https://travis-ci.org/SpoonX/aurelia-authentication.svg)](https://travis-ci.org/SpoonX/aurelia-authentication)
 [![Join the chat at https://gitter.im/SpoonX/Dev](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SpoonX/Dev?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 > Makes setting up authentication for your Aurelia app simple.
 
-## What is aurelia-auth?
-This is a largely refactored module based on [paul van bladel's aurelia-auth](https://github.com/paulvanbladel/aurelia-auth/).
+## What is aurelia-authentication?
+This is a largely refactored module based on [paul van bladel's aurelia-authentication](https://github.com/paulvanbladel/aurelia-auth/).
 
-aurelia-auth is a token-based authentication plugin for [Aurelia](http://aurelia.io/) with support for popular social authentication providers (Google, Twitter, Facebook, LinkedIn, Windows Live, FourSquare, Yahoo, Github, Instagram) and a local stragegy, i.e. simple username / email and password.
+aurelia-authentication is a token-based authentication plugin for [Aurelia](http://aurelia.io/) with support for popular social authentication providers (Google, Twitter, Facebook, LinkedIn, Windows Live, FourSquare, Yahoo, Github, Instagram) and a local stragegy, i.e. simple username / email and password.
 
-aurelia-auth is a port of the great [Satellizer](https://github.com/sahat/satellizer/) library to ES6 and packaged as an Aurelia plugin.
+aurelia-authentication is a port of the great [Satellizer](https://github.com/sahat/satellizer/) library to ES6 and packaged as an Aurelia plugin.
 
 Other OAuth1 and Oauth2 than the above mentioned providers can be simply added by editing the extensible configuration file.
 
-Basically, aurelia-auth does not use any cookies but relies on a JWT (json web token) stored in the local storage of the browser:
+Basically, aurelia-authentication does not use any cookies but relies on a JWT (json web token) stored in the local storage of the browser:
 
 ![JWT in local storage](./pictures/TokenViaDevelopmentTools.png)
 
-Both **local storage** as well as **session storage** can be used (via the aurelia-auth security configuration file).
+Both **local storage** as well as **session storage** can be used (via the aurelia-authentication security configuration file).
 
-Spoonx/aurelia-auth makes use of [aurelia-api](https://github.com/SpoonX/aurelia-api) for convenient use of the aurelia-fetch-client. Options are available to directly use aurelia-fetch-client instead. If configured, the aurelia token will be sent automatically to your protected API when the user is authenticated.
+Spoonx/aurelia-authentication makes use of [aurelia-api](https://github.com/SpoonX/aurelia-api) for convenient use of the aurelia-fetch-client. Options are available to directly use aurelia-fetch-client instead. If configured, the aurelia token will be sent automatically to your protected API when the user is authenticated.
 
 ![Authentication header](./pictures/authHeader.png)
 
 ## Installation
 We assume that you know about ([NodeJs](https://nodejs.org/), [Gulp](http://gulpjs.com/)) and [Aurelia](http://aurelia.io/).
-Since aurelia-auth is an [Aurelia plugin](https://github.com/aurelia/skeleton-plugin), we also assume that you have your [Aurelia](http://aurelia.io/) project up and running.
+Since aurelia-authentication is an [Aurelia plugin](https://github.com/aurelia/skeleton-plugin), we also assume that you have your [Aurelia](http://aurelia.io/) project up and running.
 
 ```
-jspm install github:spoonx/aurelia-auth
+jspm install github:spoonx/aurelia-authentication
 ```
 
-## How to use aurelia-auth?
-aurelia-auth does not contain any UI widgets. It's conceived as a simple service with following interface:
+## How to use aurelia-authentication?
+aurelia-authentication does not contain any UI widgets. It's conceived as a simple service with following interface:
 ```javascript
 login(email, password)
 logout(redirectUri)
@@ -47,11 +47,11 @@ unlink(provider)
 ```
 Login is used for the local authentication strategy (email + password). Authenticate is for social media authentication. Authenticate is also used for linking a social media account to an existing account.
 
-### Add an aurelia-auth security configuration file
-Add an javascript file to your project where you will store the aurelia-auth  security configuration data. Call it for example authConfig.js.
-Since this file is available via the browser, it should never contain sensitive data. Note that for OAuth the clientId is non sensitive. The client secret is sensitive data and should be only available server side. The aurelia-auth config file is compatible with the original Satellizer config file, easing the migration of AngularJs projects to Aurelia.
+### Add an aurelia-authentication security configuration file
+Add an javascript file to your project where you will store the aurelia-authentication  security configuration data. Call it for example authConfig.js.
+Since this file is available via the browser, it should never contain sensitive data. Note that for OAuth the clientId is non sensitive. The client secret is sensitive data and should be only available server side. The aurelia-authentication config file is compatible with the original Satellizer config file, easing the migration of AngularJs projects to Aurelia.
 
-Spoonx/aurelia-auth uses [aurelia-api](https://github.com/SpoonX/aurelia-api). Set here the aurelia-api endpoint for the authorization requests and specify all endpoints you want to have configured for authorized requests. The aurelia token will be added to requests to those endpoints.
+Spoonx/aurelia-authentication uses [aurelia-api](https://github.com/SpoonX/aurelia-api). Set here the aurelia-api endpoint for the authorization requests and specify all endpoints you want to have configured for authorized requests. The aurelia token will be added to requests to those endpoints.
 
 ```js
 var baseConfig = {
@@ -105,9 +105,9 @@ The above configuration file can cope with a development and production version 
 
 ### Update the aurelia configuration file
 
-In your aurelia configuration file, add the plugin and inject the aurelia-auth security configuration file.
+In your aurelia configuration file, add the plugin and inject the aurelia-authentication security configuration file.
 
-While not mandantory, spoonx/aureli-auth is easiest to use in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api). Aurelia-api allows to setup several endpoints for Rest services. This can be used to seperate public and protected routes. For that, we first need to register the endpoints with aurelia-api. Bellow we setup the endpoints 'auth' and 'protected-api'. These will be setup in the proceeding spoonx/aurelia-auth-plugin configuration for authorized access (specified in above authConfig.js example). The endpoint 'public-api' bellow could be used for public access only, since we didn't add it above to the 'configureEndpoints' array and thus the access token will not be added by aurelia-auth.
+While not mandantory, spoonx/aureli-auth is easiest to use in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api). Aurelia-api allows to setup several endpoints for Rest services. This can be used to seperate public and protected routes. For that, we first need to register the endpoints with aurelia-api. Bellow we setup the endpoints 'auth' and 'protected-api'. These will be setup in the proceeding spoonx/aurelia-authentication-plugin configuration for authorized access (specified in above authConfig.js example). The endpoint 'public-api' bellow could be used for public access only, since we didn't add it above to the 'configureEndpoints' array and thus the access token will not be added by aurelia-authentication.
 
 ```javascript
 import authConfig from './authConfig';
@@ -124,8 +124,8 @@ export function configure(aurelia) {
         .registerEndpoint('protected-api', 'https://myapi.org/protected-api')
         .registerEndpoint('public-api', 'http://myapi.org/public-api');
     })
-    /* configure spoonx/aurelia-auth */
-    .plugin('spoonx/aurelia-auth', baseConfig => {
+    /* configure spoonx/aurelia-authentication */
+    .plugin('spoonx/aurelia-authentication', baseConfig => {
         baseConfig.configure(authConfig);
     });
 
@@ -136,7 +136,7 @@ export function configure(aurelia) {
 
 ### Provide a UI for a login, signup and profile.
 
-See aurelia-auth-samples for more details.
+See aurelia-authentication-samples for more details.
 
 Button actions are passed to the corresponding view model via a simple click.delegate:
 ```html
@@ -145,9 +145,9 @@ Button actions are passed to the corresponding view model via a simple click.del
 </button>
 ```
 
-The login view model will speak directly with the aurelia-auth service, which is made available via constructor injection.
+The login view model will speak directly with the aurelia-authentication service, which is made available via constructor injection.
 ```js
-import {AuthService} from 'spoonx/aurelia-auth';
+import {AuthService} from 'spoonx/aurelia-authentication';
 import {inject} from 'aurelia-framework';
 @inject(AuthService)
 
@@ -221,7 +221,7 @@ Menu items visibility can also be linked with the authFilter to the isAuthentica
 In the router config function, you can specifify an auth property in the routing map indicating wether or not the user needs to be authenticated in order to access the route:
 
 ```js
-import {AuthorizeStep} from 'spoonx/aurelia-auth';
+import {AuthorizeStep} from 'spoonx/aurelia-authentication';
 
 export class App {
     configureRouter(config, router) {
@@ -317,7 +317,7 @@ baseUrl: null,
 withCredentials: true,
 // Controls how the popup is shown for different devices (Options: 'browser' or 'mobile')
 platform: 'browser',
-// Determines the `window` property name upon which aurelia-auth data is stored (Default: `window.localStorage`)
+// Determines the `window` property name upon which aurelia-authentication data is stored (Default: `window.localStorage`)
 storage: 'localStorage',
 // Prepended to the `tokenName` when kept in storage (nothing to do with)
 tokenPrefix: 'aurelia', 

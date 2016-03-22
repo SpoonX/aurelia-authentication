@@ -72,9 +72,7 @@ export class FetchConfig {
       client = this.httpClient;
     }
 
-    client.configure(httpConfig => {
-      httpConfig.withBaseUrl(client.baseUrl).withInterceptor(this.interceptor);
-    });
+    client.interceptors.push(this.interceptor);
 
     return client;
   }

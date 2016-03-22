@@ -142,6 +142,7 @@ declare module 'aurelia-authentication/index' {
 	export { AuthService } from 'aurelia-authentication/authService';
 	export { AuthorizeStep } from 'aurelia-authentication/authorizeStep';
 	export { FetchConfig } from 'aurelia-authentication/app.fetch-httpClient.config';
+	import 'aurelia-authentication/authFilter';
 	/**
 	 * Configure the plugin.
 	 *

@@ -1,3 +1,12 @@
+<a name"1.0.1"></a>
+### 1.0.1 (2016-03-22)
+
+
+#### Bug Fixes
+
+* **FetchConfig:** keep client settings when adding interceptor ([18c052c1](git+https://github.com/spoonx/aurelia-authentication.git/commit/18c052c1))
+
+
 <a name"1.0.0"></a>
 ## 1.0.0 (2016-03-19)
 

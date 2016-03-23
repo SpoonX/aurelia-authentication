@@ -59,9 +59,7 @@ System.register(['aurelia-fetch-client', './authentication', './baseConfig', 'au
               client = this.httpClient;
             }
 
-            client.configure(function (httpConfig) {
-              httpConfig.withBaseUrl(client.baseUrl).withInterceptor(_this.interceptor);
-            });
+            client.interceptors.push(this.interceptor);
 
             return client;
           }

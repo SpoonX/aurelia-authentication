@@ -41,14 +41,18 @@ export class BaseConfig {
       // API related options
       // ===================
 
+      // The base url used for all authentication related requests, including
+      // provider.url bellow. This appends to the httpClient/endpoint base url,
+      //  it does not override it.
+      baseUrl: '/auth',
       // The API endpoint to which login requests are sent
-      loginUrl: '/auth/login',
+      loginUrl: '/login',
       // The API endpoint to which signup requests are sent
-      signupUrl: '/auth/signup',
+      signupUrl: '/signup',
       // The API endpoint used in profile requests (inc. `find/get` and `update`)
-      profileUrl: '/auth/me',
+      profileUrl: '/me',
       // The API endpoint used with oAuth to unlink authentication
-      unlinkUrl: '/auth/unlink/',
+      unlinkUrl: '/unlink/',
       // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
       unlinkMethod: 'get',
 
@@ -78,8 +82,6 @@ export class BaseConfig {
       // Whether to enable the fetch interceptor which automatically adds the authentication headers
       // (or not... e.g. if using a session based API or you want to override the default behaviour)
       httpInterceptor: true,
-      // The base url used for all authentication related requests (This appends to the httpClient/endpoint base url, it does not override it)
-      baseUrl: '/',
       // For OAuth only: Tell the API whether or not to include token cookies in the response (for session based APIs)
       withCredentials: true,
       // Controls how the popup is shown for different devices (Options: 'browser' or 'mobile')
@@ -95,7 +97,7 @@ export class BaseConfig {
       providers: {
         google: {
           name: 'google',
-          url: '/auth/google',
+          url: '/google',
           authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           scope: ['profile', 'email'],
@@ -113,7 +115,7 @@ export class BaseConfig {
         },
         facebook: {
           name: 'facebook',
-          url: '/auth/facebook',
+          url: '/facebook',
           authorizationEndpoint: 'https://www.facebook.com/v2.3/dialog/oauth',
           redirectUri: window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/',
           scope: ['email'],
@@ -131,7 +133,7 @@ export class BaseConfig {
         },
         linkedin: {
           name: 'linkedin',
-          url: '/auth/linkedin',
+          url: '/linkedin',
           authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           requiredUrlParams: ['state'],
@@ -146,7 +148,7 @@ export class BaseConfig {
         },
         github: {
           name: 'github',
-          url: '/auth/github',
+          url: '/github',
           authorizationEndpoint: 'https://github.com/login/oauth/authorize',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           optionalUrlParams: ['scope'],
@@ -160,7 +162,7 @@ export class BaseConfig {
         },
         yahoo: {
           name: 'yahoo',
-          url: '/auth/yahoo',
+          url: '/yahoo',
           authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           scope: [],
@@ -173,7 +175,7 @@ export class BaseConfig {
         },
         twitter: {
           name: 'twitter',
-          url: '/auth/twitter',
+          url: '/twitter',
           authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
           type: '1.0',
           popupOptions: {
@@ -198,7 +200,7 @@ export class BaseConfig {
         },
         instagram: {
           name: 'instagram',
-          url: '/auth/instagram',
+          url: '/instagram',
           authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           requiredUrlParams: ['scope'],

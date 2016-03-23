@@ -274,14 +274,18 @@ signupRedirect: '#/login',
 // API related options
 // ===================
 
+// The base url used for all authentication related requests, including
+// provider.url  bellow. This appends to the httpClient/endpoint base url,
+//  it does not override it.
+baseUrl: '/auth',
 // The API endpoint to which login requests are sent
-loginUrl: '/auth/login',
+loginUrl: '/login',
 // The API endpoint to which signup requests are sent
-signupUrl: '/auth/signup',
+signupUrl: '/signup',
 // The API endpoint used in profile requests (inc. `find/get` and `update`)
-profileUrl: '/auth/me',
+profileUrl: '/me',
 // The API endpoint used with oAuth to unlink authentication
-unlinkUrl: '/auth/unlink/',
+unlinkUrl: '/unlink/',
 // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
 unlinkMethod: 'get',
 
@@ -328,7 +332,7 @@ tokenPrefix: 'aurelia',
 providers: {
   google: {
     name: 'google',
-    url: '/auth/google',
+    url: '/google',   // api endpoind
     authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
     redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
     scope: ['profile', 'email'],
@@ -343,7 +347,7 @@ providers: {
   },
   facebook: {
     name: 'facebook',
-    url: '/auth/facebook',
+    url: '/facebook',
     authorizationEndpoint: 'https://www.facebook.com/v2.3/dialog/oauth',
     redirectUri: window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/',
     scope: ['email'],
@@ -358,7 +362,7 @@ providers: {
   },
   linkedin: {
     name: 'linkedin',
-    url: '/auth/linkedin',
+    url: '/linkedin',
     authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
     redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
     requiredUrlParams: ['state'],
@@ -370,7 +374,7 @@ providers: {
   },
   github: {
     name: 'github',
-    url: '/auth/github',
+    url: '/github',
     authorizationEndpoint: 'https://github.com/login/oauth/authorize',
     redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
     optionalUrlParams: ['scope'],
@@ -381,7 +385,7 @@ providers: {
   },
   yahoo: {
     name: 'yahoo',
-    url: '/auth/yahoo',
+    url: '/yahoo',
     authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
     redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
     scope: [],
@@ -391,14 +395,14 @@ providers: {
   },
   twitter: {
     name: 'twitter',
-    url: '/auth/twitter',
+    url: '/twitter',
     authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
     type: '1.0',
     popupOptions: { width: 495, height: 645 }
   },
   live: {
     name: 'live',
-    url: '/auth/live',
+    url: '/live',
     authorizationEndpoint: 'https://login.live.com/oauth20_authorize.srf',
     redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
     scope: ['wl.emails'],

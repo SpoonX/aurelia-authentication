@@ -1,11 +1,13 @@
-System.register(['aurelia-dependency-injection', './baseConfig'], function (_export) {
-  'use strict';
+'use strict';
 
-  var inject, BaseConfig, Storage;
+System.register(['aurelia-dependency-injection', './baseConfig'], function (_export, _context) {
+  var inject, BaseConfig, _dec, _class, Storage;
 
-  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
 
   return {
     setters: [function (_aureliaDependencyInjection) {
@@ -14,46 +16,39 @@ System.register(['aurelia-dependency-injection', './baseConfig'], function (_exp
       BaseConfig = _baseConfig.BaseConfig;
     }],
     execute: function () {
-      Storage = (function () {
+      _export('Storage', Storage = (_dec = inject(BaseConfig), _dec(_class = function () {
         function Storage(config) {
-          _classCallCheck(this, _Storage);
+          _classCallCheck(this, Storage);
 
           this.config = config.current;
         }
 
-        _createClass(Storage, [{
-          key: 'get',
-          value: function get(key) {
-            var storageKey = this.config.storage;
+        Storage.prototype.get = function get(key) {
+          var storageKey = this.config.storage;
 
-            if (window[storageKey]) {
-              return window[storageKey].getItem(key);
-            }
+          if (window[storageKey]) {
+            return window[storageKey].getItem(key);
           }
-        }, {
-          key: 'set',
-          value: function set(key, value) {
-            var storageKey = this.config.storage;
+        };
 
-            if (window[storageKey]) {
-              return window[storageKey].setItem(key, value);
-            }
+        Storage.prototype.set = function set(key, value) {
+          var storageKey = this.config.storage;
+
+          if (window[storageKey]) {
+            return window[storageKey].setItem(key, value);
           }
-        }, {
-          key: 'remove',
-          value: function remove(key) {
-            var storageKey = this.config.storage;
+        };
 
-            if (window[storageKey]) {
-              return window[storageKey].removeItem(key);
-            }
+        Storage.prototype.remove = function remove(key) {
+          var storageKey = this.config.storage;
+
+          if (window[storageKey]) {
+            return window[storageKey].removeItem(key);
           }
-        }]);
+        };
 
-        var _Storage = Storage;
-        Storage = inject(BaseConfig)(Storage) || Storage;
         return Storage;
-      })();
+      }()) || _class));
 
       _export('Storage', Storage);
     }

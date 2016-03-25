@@ -1,18 +1,19 @@
-import authUtils from './authUtils';
-import {BaseConfig}  from './baseConfig';
-import {inject} from 'aurelia-dependency-injection';
+var _dec, _class;
 
-@inject(BaseConfig)
-export class Popup {
+import { authUtils } from './authUtils';
+import { BaseConfig } from './baseConfig';
+import { inject } from 'aurelia-dependency-injection';
+
+export let Popup = (_dec = inject(BaseConfig), _dec(_class = class Popup {
   constructor(config) {
-    this.config      = config.current;
+    this.config = config.current;
     this.popupWindow = null;
-    this.polling     = null;
-    this.url         = '';
+    this.polling = null;
+    this.url = '';
   }
 
   open(url, windowName, options, redirectUri) {
-    this.url          = url;
+    this.url = url;
     let optionsString = this.stringifyOptions(this.prepareOptions(options || {}));
 
     this.popupWindow = window.open(url, windowName, optionsString);
@@ -31,14 +32,14 @@ export class Popup {
           return;
         }
 
-        let parser  = document.createElement('a');
+        let parser = document.createElement('a');
         parser.href = event.url;
 
         if (parser.search || parser.hash) {
           let queryParams = parser.search.substring(1).replace(/\/$/, '');
-          let hashParams  = parser.hash.substring(1).replace(/\/$/, '');
-          let hash        = authUtils.parseQueryString(hashParams);
-          let qs          = authUtils.parseQueryString(queryParams);
+          let hashParams = parser.hash.substring(1).replace(/\/$/, '');
+          let hash = authUtils.parseQueryString(hashParams);
+          let qs = authUtils.parseQueryString(queryParams);
 
           authUtils.extend(qs, hash);
 
@@ -76,14 +77,14 @@ export class Popup {
         let errorData;
 
         try {
-          let documentOrigin    = document.location.host;
+          let documentOrigin = document.location.host;
           let popupWindowOrigin = this.popupWindow.location.host;
 
           if (popupWindowOrigin === documentOrigin && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
             let queryParams = this.popupWindow.location.search.substring(1).replace(/\/$/, '');
-            let hashParams  = this.popupWindow.location.hash.substring(1).replace(/[\/$]/, '');
-            let hash        = authUtils.parseQueryString(hashParams);
-            let qs          = authUtils.parseQueryString(queryParams);
+            let hashParams = this.popupWindow.location.hash.substring(1).replace(/[\/$]/, '');
+            let hash = authUtils.parseQueryString(hashParams);
+            let qs = authUtils.parseQueryString(queryParams);
 
             authUtils.extend(qs, hash);
 
@@ -120,14 +121,14 @@ export class Popup {
   }
 
   prepareOptions(options) {
-    let width  = options.width || 500;
+    let width = options.width || 500;
     let height = options.height || 500;
 
     return authUtils.extend({
       width: width,
       height: height,
-      left: window.screenX + ((window.outerWidth - width) / 2),
-      top: window.screenY + ((window.outerHeight - height) / 2.5)
+      left: window.screenX + (window.outerWidth - width) / 2,
+      top: window.screenY + (window.outerHeight - height) / 2.5
     }, options);
   }
 
@@ -136,4 +137,4 @@ export class Popup {
     authUtils.forEach(options, (value, key) => parts.push(key + '=' + value));
     return parts.join(',');
   }
-}
+}) || _class);

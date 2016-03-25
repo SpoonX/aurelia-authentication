@@ -1,13 +1,14 @@
-import {inject} from 'aurelia-dependency-injection';
-import {BaseConfig}  from './baseConfig';
-import {Storage} from './storage';
-import authUtils from './authUtils';
+var _dec, _class;
 
-@inject(Storage, BaseConfig)
-export class Authentication {
+import { inject } from 'aurelia-dependency-injection';
+import { BaseConfig } from './baseConfig';
+import { Storage } from './storage';
+import { authUtils } from './authUtils';
+
+export let Authentication = (_dec = inject(Storage, BaseConfig), _dec(_class = class Authentication {
   constructor(storage, config) {
-    this.storage   = storage;
-    this.config    = config.current;
+    this.storage = storage;
+    this.config = config.current;
   }
 
   get tokenName() {
@@ -43,7 +44,7 @@ export class Authentication {
 
     if (token && token.split('.').length === 3) {
       let base64Url = token.split('.')[1];
-      let base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
 
       try {
         return JSON.parse(decodeURIComponent(escape(window.atob(base64))));
@@ -54,7 +55,7 @@ export class Authentication {
   }
 
   setTokenFromResponse(response, redirect) {
-    let tokenName   = this.tokenName;
+    let tokenName = this.tokenName;
     let accessToken = response && response[this.config.responseTokenProp];
     let token;
 
@@ -92,18 +93,16 @@ export class Authentication {
   isAuthenticated() {
     let token = this.storage.get(this.tokenName);
 
-    // There's no token, so user is not authenticated.
     if (!token) {
       return false;
     }
 
-    // There is a token, but in a different format. Return true.
     if (token.split('.').length !== 3) {
       return true;
     }
 
     let base64Url = token.split('.')[1];
-    let base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     let exp;
 
     try {
@@ -132,4 +131,4 @@ export class Authentication {
       resolve();
     });
   }
-}
+}) || _class);

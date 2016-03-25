@@ -1,17 +1,18 @@
-import {inject} from 'aurelia-dependency-injection';
-import authUtils from './authUtils';
-import {Storage} from './storage';
-import {Popup} from './popup';
-import {BaseConfig} from './baseConfig';
+var _dec, _class;
 
-@inject(Storage, Popup, BaseConfig)
-export class OAuth2 {
+import { inject } from 'aurelia-dependency-injection';
+import { authUtils } from './authUtils';
+import { Storage } from './storage';
+import { Popup } from './popup';
+import { BaseConfig } from './baseConfig';
+
+export let OAuth2 = (_dec = inject(Storage, Popup, BaseConfig), _dec(_class = class OAuth2 {
   constructor(storage, popup, config) {
-    this.storage      = storage;
-    this.config       = config.current;
-    this.client       = this.config.client;
-    this.popup        = popup;
-    this.defaults     = {
+    this.storage = storage;
+    this.config = config.current;
+    this.client = this.config.client;
+    this.popup = popup;
+    this.defaults = {
       url: null,
       name: null,
       state: null,
@@ -47,19 +48,15 @@ export class OAuth2 {
       openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
     }
 
-    return openPopup
-      .then(oauthData => {
-        if (current.responseType === 'token' ||
-          current.responseType === 'id_token%20token' ||
-          current.responseType === 'token%20id_token'
-        ) {
-          return oauthData;
-        }
-        if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
-          return Promise.reject('OAuth 2.0 state parameter mismatch.');
-        }
-        return this.exchangeForToken(oauthData, userData, current);
-      });
+    return openPopup.then(oauthData => {
+      if (current.responseType === 'token' || current.responseType === 'id_token%20token' || current.responseType === 'token%20id_token') {
+        return oauthData;
+      }
+      if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
+        return Promise.reject('OAuth 2.0 state parameter mismatch.');
+      }
+      return this.exchangeForToken(oauthData, userData, current);
+    });
   }
 
   exchangeForToken(oauthData, userData, current) {
@@ -76,23 +73,23 @@ export class OAuth2 {
     authUtils.forEach(current.responseParams, param => data[param] = oauthData[param]);
 
     let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, current.url) : current.url;
-    let credentials         = this.config.withCredentials ? 'include' : 'same-origin';
+    let credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
-    return this.client.post(exchangeForTokenUrl, data, {credentials: credentials});
+    return this.client.post(exchangeForTokenUrl, data, { credentials: credentials });
   }
 
   buildQueryString(current) {
     let keyValuePairs = [];
-    let urlParams     = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
+    let urlParams = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
 
     authUtils.forEach(urlParams, params => {
       authUtils.forEach(current[params], paramName => {
         let camelizedName = authUtils.camelCase(paramName);
-        let paramValue    = authUtils.isFunction(current[paramName]) ? current[paramName]() : current[camelizedName];
+        let paramValue = authUtils.isFunction(current[paramName]) ? current[paramName]() : current[camelizedName];
 
         if (paramName === 'state') {
           let stateName = current.name + '_state';
-          paramValue    = encodeURIComponent(this.storage.get(stateName));
+          paramValue = encodeURIComponent(this.storage.get(stateName));
         }
 
         if (paramName === 'scope' && Array.isArray(paramValue)) {
@@ -110,4 +107,4 @@ export class OAuth2 {
     return keyValuePairs.map(pair => pair.join('=')).join('&');
   }
 
-}
+}) || _class);

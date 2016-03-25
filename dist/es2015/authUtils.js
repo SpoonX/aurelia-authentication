@@ -37,79 +37,75 @@ function baseExtend(dst, objs, deep) {
 }
 
 let authUtils = {
-  isDefined: function(value) {
+  isDefined: function (value) {
     return typeof value !== 'undefined';
   },
 
-  camelCase: function(name) {
-    return name.replace(/([\:\-\_]+(.))/g, function(_, separator, letter, offset) {
+  camelCase: function (name) {
+    return name.replace(/([\:\-\_]+(.))/g, function (_, separator, letter, offset) {
       return offset ? letter.toUpperCase() : letter;
     });
   },
 
-  parseQueryString: function(keyValue) {
+  parseQueryString: function (keyValue) {
     let obj = {};
     let key;
     let value;
 
-    authUtils.forEach((keyValue || '').split('&'), function(keyValuePair) {
+    authUtils.forEach((keyValue || '').split('&'), function (keyValuePair) {
       if (keyValuePair) {
-        value    = keyValuePair.split('=');
-        key      = decodeURIComponent(value[0]);
+        value = keyValuePair.split('=');
+        key = decodeURIComponent(value[0]);
         obj[key] = authUtils.isDefined(value[1]) ? decodeURIComponent(value[1]) : true;
       }
     });
     return obj;
   },
 
-  isString: function(value) {
+  isString: function (value) {
     return typeof value === 'string';
   },
 
-  isObject: function(value) {
+  isObject: function (value) {
     return value !== null && typeof value === 'object';
   },
   isArray: Array.isArray,
 
-  isFunction: function(value) {
+  isFunction: function (value) {
     return typeof value === 'function';
   },
 
-  joinUrl: function(baseUrl, url) {
+  joinUrl: function (baseUrl, url) {
     if (/^(?:[a-z]+:)?\/\//i.test(url)) {
       return url;
     }
 
     let joined = [baseUrl, url].join('/');
 
-    let normalize = function(str) {
-      return str
-        .replace(/[\/]+/g, '/')
-        .replace(/\/\?/g, '?')
-        .replace(/\/\#/g, '#')
-        .replace(/\:\//g, '://');
+    let normalize = function (str) {
+      return str.replace(/[\/]+/g, '/').replace(/\/\?/g, '?').replace(/\/\#/g, '#').replace(/\:\//g, '://');
     };
 
     return normalize(joined);
   },
-  isBlankObject: function(value) {
+  isBlankObject: function (value) {
     return value !== null && typeof value === 'object' && !Object.getPrototypeOf(value);
   },
-  isArrayLike: function(obj) {
+  isArrayLike: function (obj) {
     if (obj === null || authUtils.isWindow(obj)) {
       return false;
     }
   },
-  isWindow: function(obj) {
+  isWindow: function (obj) {
     return obj && obj.window === obj;
   },
-  extend: function(dst) {
+  extend: function (dst) {
     return baseExtend(dst, slice.call(arguments, 1), false);
   },
   merge: function merge(dst) {
     return baseExtend(dst, slice.call(arguments, 1), true);
   },
-  forEach: function(obj, iterator, context) {
+  forEach: function (obj, iterator, context) {
     let key;
     let length;
 
@@ -119,8 +115,6 @@ let authUtils = {
 
     if (authUtils.isFunction(obj)) {
       for (key in obj) {
-        // Need to check if hasOwnProperty exists,
-        // as on IE8 the result of querySelectorAll is an object without a hasOwnProperty function
         if (key !== 'prototype' && key !== 'length' && key !== 'name' && (!obj.hasOwnProperty || obj.hasOwnProperty(key))) {
           iterator.call(context, obj[key], key, obj);
         }
@@ -135,19 +129,16 @@ let authUtils = {
     } else if (obj.forEach && obj.forEach !== forEach) {
       obj.forEach(iterator, context, obj);
     } else if (authUtils.isBlankObject(obj)) {
-      // createMap() fast path --- Safe to avoid hasOwnProperty check because prototype chain is empty
       for (key in obj) {
         iterator.call(context, obj[key], key, obj);
       }
     } else if (typeof obj.hasOwnProperty === 'function') {
-      // Slow path for objects inheriting Object.prototype, hasOwnProperty check needed
       for (key in obj) {
         if (obj.hasOwnProperty(key)) {
           iterator.call(context, obj[key], key, obj);
         }
       }
     } else {
-      // Slow path for objects which do not have a method `hasOwnProperty`
       for (key in obj) {
         if (hasOwnProperty.call(obj, key)) {
           iterator.call(context, obj[key], key, obj);
@@ -158,4 +149,4 @@ let authUtils = {
 
 };
 
-export default authUtils;
+export { authUtils };

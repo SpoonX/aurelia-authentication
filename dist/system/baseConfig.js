@@ -1,24 +1,43 @@
-System.register(['./authUtils'], function (_export) {
-  'use strict';
+'use strict';
 
-  var authUtils, BaseConfig;
+System.register(['./authUtils'], function (_export, _context) {
+  var authUtils, _createClass, BaseConfig;
 
-  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
 
   return {
     setters: [function (_authUtils) {
-      authUtils = _authUtils['default'];
+      authUtils = _authUtils.authUtils;
     }],
     execute: function () {
-      BaseConfig = (function () {
-        _createClass(BaseConfig, [{
-          key: 'configure',
-          value: function configure(incomingConfig) {
-            authUtils.merge(this._current, incomingConfig);
+      _createClass = function () {
+        function defineProperties(target, props) {
+          for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];
+            descriptor.enumerable = descriptor.enumerable || false;
+            descriptor.configurable = true;
+            if ("value" in descriptor) descriptor.writable = true;
+            Object.defineProperty(target, descriptor.key, descriptor);
           }
-        }, {
+        }
+
+        return function (Constructor, protoProps, staticProps) {
+          if (protoProps) defineProperties(Constructor.prototype, protoProps);
+          if (staticProps) defineProperties(Constructor, staticProps);
+          return Constructor;
+        };
+      }();
+
+      _export('BaseConfig', BaseConfig = function () {
+        BaseConfig.prototype.configure = function configure(incomingConfig) {
+          authUtils.merge(this._current, incomingConfig);
+        };
+
+        _createClass(BaseConfig, [{
           key: 'current',
           get: function get() {
             return this._current;
@@ -45,13 +64,15 @@ System.register(['./authUtils'], function (_export) {
 
             signupRedirect: '#/login',
 
-            loginUrl: '/auth/login',
+            baseUrl: '/auth',
 
-            signupUrl: '/auth/signup',
+            loginUrl: '/login',
 
-            profileUrl: '/auth/me',
+            signupUrl: '/signup',
 
-            unlinkUrl: '/auth/unlink/',
+            profileUrl: '/me',
+
+            unlinkUrl: '/unlink/',
 
             unlinkMethod: 'get',
 
@@ -67,8 +88,6 @@ System.register(['./authUtils'], function (_export) {
 
             httpInterceptor: true,
 
-            baseUrl: '/',
-
             withCredentials: true,
 
             platform: 'browser',
@@ -80,7 +99,7 @@ System.register(['./authUtils'], function (_export) {
             providers: {
               google: {
                 name: 'google',
-                url: '/auth/google',
+                url: '/google',
                 authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 scope: ['profile', 'email'],
@@ -98,7 +117,7 @@ System.register(['./authUtils'], function (_export) {
               },
               facebook: {
                 name: 'facebook',
-                url: '/auth/facebook',
+                url: '/facebook',
                 authorizationEndpoint: 'https://www.facebook.com/v2.3/dialog/oauth',
                 redirectUri: window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/',
                 scope: ['email'],
@@ -116,7 +135,7 @@ System.register(['./authUtils'], function (_export) {
               },
               linkedin: {
                 name: 'linkedin',
-                url: '/auth/linkedin',
+                url: '/linkedin',
                 authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 requiredUrlParams: ['state'],
@@ -131,7 +150,7 @@ System.register(['./authUtils'], function (_export) {
               },
               github: {
                 name: 'github',
-                url: '/auth/github',
+                url: '/github',
                 authorizationEndpoint: 'https://github.com/login/oauth/authorize',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 optionalUrlParams: ['scope'],
@@ -145,7 +164,7 @@ System.register(['./authUtils'], function (_export) {
               },
               yahoo: {
                 name: 'yahoo',
-                url: '/auth/yahoo',
+                url: '/yahoo',
                 authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 scope: [],
@@ -158,7 +177,7 @@ System.register(['./authUtils'], function (_export) {
               },
               twitter: {
                 name: 'twitter',
-                url: '/auth/twitter',
+                url: '/twitter',
                 authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
                 type: '1.0',
                 popupOptions: {
@@ -183,7 +202,7 @@ System.register(['./authUtils'], function (_export) {
               },
               instagram: {
                 name: 'instagram',
-                url: '/auth/instagram',
+                url: '/instagram',
                 authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 requiredUrlParams: ['scope'],
@@ -201,7 +220,7 @@ System.register(['./authUtils'], function (_export) {
         }
 
         return BaseConfig;
-      })();
+      }());
 
       _export('BaseConfig', BaseConfig);
     }

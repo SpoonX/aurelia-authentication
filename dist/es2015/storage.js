@@ -1,8 +1,9 @@
-import {inject} from 'aurelia-dependency-injection';
-import {BaseConfig} from './baseConfig';
+var _dec, _class;
 
-@inject(BaseConfig)
-export class Storage {
+import { inject } from 'aurelia-dependency-injection';
+import { BaseConfig } from './baseConfig';
+
+export let Storage = (_dec = inject(BaseConfig), _dec(_class = class Storage {
   constructor(config) {
     this.config = config.current;
   }
@@ -30,4 +31,4 @@ export class Storage {
       return window[storageKey].removeItem(key);
     }
   }
-}
+}) || _class);

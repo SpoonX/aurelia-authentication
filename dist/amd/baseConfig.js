@@ -1,25 +1,41 @@
 define(['exports', './authUtils'], function (exports, _authUtils) {
   'use strict';
 
-  Object.defineProperty(exports, '__esModule', {
+  Object.defineProperty(exports, "__esModule", {
     value: true
   });
+  exports.BaseConfig = undefined;
 
-  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
 
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-  var _authUtils2 = _interopRequireDefault(_authUtils);
-
-  var BaseConfig = (function () {
-    _createClass(BaseConfig, [{
-      key: 'configure',
-      value: function configure(incomingConfig) {
-        _authUtils2['default'].merge(this._current, incomingConfig);
+  var _createClass = function () {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ("value" in descriptor) descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
       }
-    }, {
+    }
+
+    return function (Constructor, protoProps, staticProps) {
+      if (protoProps) defineProperties(Constructor.prototype, protoProps);
+      if (staticProps) defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  }();
+
+  var BaseConfig = exports.BaseConfig = function () {
+    BaseConfig.prototype.configure = function configure(incomingConfig) {
+      _authUtils.authUtils.merge(this._current, incomingConfig);
+    };
+
+    _createClass(BaseConfig, [{
       key: 'current',
       get: function get() {
         return this._current;
@@ -46,13 +62,15 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
 
         signupRedirect: '#/login',
 
-        loginUrl: '/auth/login',
+        baseUrl: '/auth',
 
-        signupUrl: '/auth/signup',
+        loginUrl: '/login',
 
-        profileUrl: '/auth/me',
+        signupUrl: '/signup',
 
-        unlinkUrl: '/auth/unlink/',
+        profileUrl: '/me',
+
+        unlinkUrl: '/unlink/',
 
         unlinkMethod: 'get',
 
@@ -68,8 +86,6 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
 
         httpInterceptor: true,
 
-        baseUrl: '/',
-
         withCredentials: true,
 
         platform: 'browser',
@@ -81,7 +97,7 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
         providers: {
           google: {
             name: 'google',
-            url: '/auth/google',
+            url: '/google',
             authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
             redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
             scope: ['profile', 'email'],
@@ -99,7 +115,7 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
           },
           facebook: {
             name: 'facebook',
-            url: '/auth/facebook',
+            url: '/facebook',
             authorizationEndpoint: 'https://www.facebook.com/v2.3/dialog/oauth',
             redirectUri: window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/',
             scope: ['email'],
@@ -117,7 +133,7 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
           },
           linkedin: {
             name: 'linkedin',
-            url: '/auth/linkedin',
+            url: '/linkedin',
             authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
             redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
             requiredUrlParams: ['state'],
@@ -132,7 +148,7 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
           },
           github: {
             name: 'github',
-            url: '/auth/github',
+            url: '/github',
             authorizationEndpoint: 'https://github.com/login/oauth/authorize',
             redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
             optionalUrlParams: ['scope'],
@@ -146,7 +162,7 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
           },
           yahoo: {
             name: 'yahoo',
-            url: '/auth/yahoo',
+            url: '/yahoo',
             authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
             redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
             scope: [],
@@ -159,7 +175,7 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
           },
           twitter: {
             name: 'twitter',
-            url: '/auth/twitter',
+            url: '/twitter',
             authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
             type: '1.0',
             popupOptions: {
@@ -184,7 +200,7 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
           },
           instagram: {
             name: 'instagram',
-            url: '/auth/instagram',
+            url: '/instagram',
             authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
             redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
             requiredUrlParams: ['scope'],
@@ -202,7 +218,5 @@ define(['exports', './authUtils'], function (exports, _authUtils) {
     }
 
     return BaseConfig;
-  })();
-
-  exports.BaseConfig = BaseConfig;
+  }();
 });

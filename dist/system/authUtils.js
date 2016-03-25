@@ -1,7 +1,7 @@
-System.register([], function (_export) {
-  'use strict';
+'use strict';
 
-  var slice, authUtils;
+System.register([], function (_export, _context) {
+  var _typeof, slice, authUtils;
 
   function setHashKey(obj, h) {
     if (h) {
@@ -42,8 +42,14 @@ System.register([], function (_export) {
   return {
     setters: [],
     execute: function () {
+      _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+        return typeof obj;
+      } : function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+      };
       slice = [].slice;
-      authUtils = {
+
+      _export('authUtils', authUtils = {
         isDefined: function isDefined(value) {
           return typeof value !== 'undefined';
         },
@@ -56,8 +62,8 @@ System.register([], function (_export) {
 
         parseQueryString: function parseQueryString(keyValue) {
           var obj = {};
-          var key = undefined;
-          var value = undefined;
+          var key = void 0;
+          var value = void 0;
 
           authUtils.forEach((keyValue || '').split('&'), function (keyValuePair) {
             if (keyValuePair) {
@@ -74,7 +80,7 @@ System.register([], function (_export) {
         },
 
         isObject: function isObject(value) {
-          return value !== null && typeof value === 'object';
+          return value !== null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object';
         },
         isArray: Array.isArray,
 
@@ -96,7 +102,7 @@ System.register([], function (_export) {
           return normalize(joined);
         },
         isBlankObject: function isBlankObject(value) {
-          return value !== null && typeof value === 'object' && !Object.getPrototypeOf(value);
+          return value !== null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !Object.getPrototypeOf(value);
         },
         isArrayLike: function isArrayLike(obj) {
           if (obj === null || authUtils.isWindow(obj)) {
@@ -112,7 +118,7 @@ System.register([], function (_export) {
         merge: function merge(dst) {
           return baseExtend(dst, slice.call(arguments, 1), true);
         },
-        forEach: (function (_forEach) {
+        forEach: function (_forEach) {
           function forEach(_x, _x2, _x3) {
             return _forEach.apply(this, arguments);
           }
@@ -122,9 +128,9 @@ System.register([], function (_export) {
           };
 
           return forEach;
-        })(function (obj, iterator, context) {
-          var key = undefined;
-          var length = undefined;
+        }(function (obj, iterator, context) {
+          var key = void 0;
+          var length = void 0;
 
           if (!obj) {
             return obj;
@@ -137,7 +143,7 @@ System.register([], function (_export) {
               }
             }
           } else if (authUtils.isArray(obj) || authUtils.isArrayLike(obj)) {
-            var isPrimitive = typeof obj !== 'object';
+            var isPrimitive = (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object';
             for (key = 0, length = obj.length; key < length; key++) {
               if (isPrimitive || key in obj) {
                 iterator.call(context, obj[key], key, obj);
@@ -164,9 +170,9 @@ System.register([], function (_export) {
           }
         })
 
-      };
+      });
 
-      _export('default', authUtils);
+      _export('authUtils', authUtils);
     }
   };
 });

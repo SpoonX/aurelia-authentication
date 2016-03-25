@@ -1,16 +1,23 @@
 var path = require('path');
-var appRoot = 'src/';
 var fs = require('fs');
-var pkg = JSON.parse(fs.readFileSync(__dirname + '/../package.json', 'utf-8'));
+
+var appRoot = 'src/';
+var pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
+// your main file which exports only configure and other modules.
+// usually packageName or 'index.js'
+var entryFileName = pkg.name + '.js';
 
 module.exports = {
   root: appRoot,
-  tmp: path.resolve(__dirname + '/../.tmp'),
   source: appRoot + '**/*.js',
+  tsSource: [
+    appRoot + '**/*.js',          // list files to parse for d.ts
+   '!' + appRoot + entryFileName  // exclude entry file
+  ],
   html: appRoot + '**/*.html',
   style: 'styles/**/*.css',
   output: 'dist/',
-  doc:'./doc',
+  doc: './doc',
   e2eSpecsSrc: 'test/e2e/src/*.js',
   e2eSpecsDist: 'test/e2e/dist/',
   packageName: pkg.name

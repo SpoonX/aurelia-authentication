@@ -15,16 +15,16 @@ System.config({
   },
 
   map: {
-    "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.1.5",
-    "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.1.1",
-    "aurelia-pal-browser": "npm:aurelia-pal-browser@1.0.0-beta.1.1.4",
-    "aurelia-polyfills": "npm:aurelia-polyfills@1.0.0-beta.1.0.0",
-    "aurelia-router": "npm:aurelia-router@1.0.0-beta.1.1.3",
-    "babel": "npm:babel-core@5.8.35",
-    "babel-runtime": "npm:babel-runtime@5.8.35",
+    "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0",
+    "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.2.0",
+    "aurelia-pal-browser": "npm:aurelia-pal-browser@1.0.0-beta.1.2.0",
+    "aurelia-polyfills": "npm:aurelia-polyfills@1.0.0-beta.1.1.0",
+    "aurelia-router": "npm:aurelia-router@1.0.0-beta.1.2.0",
+    "babel": "npm:babel-core@5.8.38",
+    "babel-runtime": "npm:babel-runtime@5.8.38",
     "core-js": "npm:core-js@1.2.6",
     "fetch": "github:github/fetch@0.11.0",
-    "spoonx/aurelia-api": "github:spoonx/aurelia-api@2.0.8",
+    "spoonx/aurelia-api": "github:spoonx/aurelia-api@2.1.2",
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.3.0"
     },
@@ -37,44 +37,44 @@ System.config({
     "github:jspm/nodelibs-util@0.1.0": {
       "util": "npm:util@0.10.3"
     },
-    "github:spoonx/aurelia-api@2.0.8": {
-      "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.1.5",
-      "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.1.1",
+    "github:spoonx/aurelia-api@2.1.2": {
+      "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0",
+      "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.2.0",
       "extend": "npm:extend@3.0.0",
       "qs": "npm:qs@6.1.0"
     },
     "npm:assert@1.3.0": {
       "util": "npm:util@0.10.3"
     },
-    "npm:aurelia-dependency-injection@1.0.0-beta.1.1.5": {
-      "aurelia-logging": "npm:aurelia-logging@1.0.0-beta.1.1.2",
-      "aurelia-metadata": "npm:aurelia-metadata@1.0.0-beta.1.1.6",
-      "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.1.1"
+    "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0": {
+      "aurelia-logging": "npm:aurelia-logging@1.0.0-beta.1.2.0",
+      "aurelia-metadata": "npm:aurelia-metadata@1.0.0-beta.1.2.0",
+      "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.2.0"
     },
-    "npm:aurelia-event-aggregator@1.0.0-beta.1.1.1": {
-      "aurelia-logging": "npm:aurelia-logging@1.0.0-beta.1.1.2"
+    "npm:aurelia-event-aggregator@1.0.0-beta.1.2.0": {
+      "aurelia-logging": "npm:aurelia-logging@1.0.0-beta.1.2.0"
     },
-    "npm:aurelia-metadata@1.0.0-beta.1.1.6": {
-      "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.1.1"
+    "npm:aurelia-metadata@1.0.0-beta.1.2.0": {
+      "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.2.0"
     },
-    "npm:aurelia-pal-browser@1.0.0-beta.1.1.4": {
-      "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.1.1"
+    "npm:aurelia-pal-browser@1.0.0-beta.1.2.0": {
+      "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.2.0"
     },
-    "npm:aurelia-polyfills@1.0.0-beta.1.0.0": {
-      "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.1.1"
+    "npm:aurelia-polyfills@1.0.0-beta.1.1.0": {
+      "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.2.0"
     },
-    "npm:aurelia-route-recognizer@1.0.0-beta.1.1.3": {
-      "aurelia-path": "npm:aurelia-path@1.0.0-beta.1.1.1"
+    "npm:aurelia-route-recognizer@1.0.0-beta.1.2.0": {
+      "aurelia-path": "npm:aurelia-path@1.0.0-beta.1.2.0"
     },
-    "npm:aurelia-router@1.0.0-beta.1.1.3": {
-      "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.1.5",
-      "aurelia-event-aggregator": "npm:aurelia-event-aggregator@1.0.0-beta.1.1.1",
-      "aurelia-history": "npm:aurelia-history@1.0.0-beta.1.1.1",
-      "aurelia-logging": "npm:aurelia-logging@1.0.0-beta.1.1.2",
-      "aurelia-path": "npm:aurelia-path@1.0.0-beta.1.1.1",
-      "aurelia-route-recognizer": "npm:aurelia-route-recognizer@1.0.0-beta.1.1.3"
+    "npm:aurelia-router@1.0.0-beta.1.2.0": {
+      "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0",
+      "aurelia-event-aggregator": "npm:aurelia-event-aggregator@1.0.0-beta.1.2.0",
+      "aurelia-history": "npm:aurelia-history@1.0.0-beta.1.2.0",
+      "aurelia-logging": "npm:aurelia-logging@1.0.0-beta.1.2.0",
+      "aurelia-path": "npm:aurelia-path@1.0.0-beta.1.2.0",
+      "aurelia-route-recognizer": "npm:aurelia-route-recognizer@1.0.0-beta.1.2.0"
     },
-    "npm:babel-runtime@5.8.35": {
+    "npm:babel-runtime@5.8.38": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:core-js@1.2.6": {

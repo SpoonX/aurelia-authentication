@@ -1,14 +1,15 @@
-import {inject} from 'aurelia-dependency-injection';
-import {Authentication} from './authentication';
-import {BaseConfig} from './baseConfig';
-import {OAuth1} from './oAuth1';
-import {OAuth2} from './oAuth2';
-import authUtils from './authUtils';
+var _dec, _class;
 
-@inject(Authentication, OAuth1, OAuth2, BaseConfig)
-export class AuthService {
+import { inject } from 'aurelia-dependency-injection';
+import { Authentication } from './authentication';
+import { BaseConfig } from './baseConfig';
+import { OAuth1 } from './oAuth1';
+import { OAuth2 } from './oAuth2';
+import { authUtils } from './authUtils';
+
+export let AuthService = (_dec = inject(Authentication, OAuth1, OAuth2, BaseConfig), _dec(_class = class AuthService {
   constructor(auth, oAuth1, oAuth2, config) {
-    this.auth   = auth;
+    this.auth = auth;
     this.oAuth1 = oAuth1;
     this.oAuth2 = oAuth2;
     this.config = config.current;
@@ -17,14 +18,14 @@ export class AuthService {
 
   getMe(criteria) {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
-      criteria = {id: criteria};
+      criteria = { id: criteria };
     }
     return this.client.find(this.auth.getProfileUrl(), criteria);
   }
 
   updateMe(body, criteria) {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
-      criteria = {id: criteria};
+      criteria = { id: criteria };
     }
     return this.client.update(this.auth.getProfileUrl(), criteria, body);
   }
@@ -49,16 +50,15 @@ export class AuthService {
         'password': password
       };
     }
-    return this.client.post(signupUrl, content)
-      .then(response => {
-        if (this.config.loginOnSignup) {
-          this.auth.setTokenFromResponse(response);
-        } else if (this.config.signupRedirect) {
-          window.location.href = this.config.signupRedirect;
-        }
+    return this.client.post(signupUrl, content).then(response => {
+      if (this.config.loginOnSignup) {
+        this.auth.setTokenFromResponse(response);
+      } else if (this.config.signupRedirect) {
+        window.location.href = this.config.signupRedirect;
+      }
 
-        return response;
-      });
+      return response;
+    });
   }
 
   login(email, password) {
@@ -73,12 +73,11 @@ export class AuthService {
       };
     }
 
-    return this.client.post(loginUrl, content)
-      .then(response => {
-        this.auth.setTokenFromResponse(response);
+    return this.client.post(loginUrl, content).then(response => {
+      this.auth.setTokenFromResponse(response);
 
-        return response;
-      });
+      return response;
+    });
   }
 
   logout(redirectUri) {
@@ -91,11 +90,10 @@ export class AuthService {
       provider = this.oAuth1;
     }
 
-    return provider.open(this.config.providers[name], userData || {})
-      .then(response => {
-        this.auth.setTokenFromResponse(response, redirect);
-        return response;
-      });
+    return provider.open(this.config.providers[name], userData || {}).then(response => {
+      this.auth.setTokenFromResponse(response, redirect);
+      return response;
+    });
   }
 
   unlink(provider) {
@@ -107,4 +105,4 @@ export class AuthService {
       return this.client.post(unlinkUrl, provider);
     }
   }
-}
+}) || _class);

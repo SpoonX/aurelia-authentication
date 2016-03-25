@@ -1,8 +1,11 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var slice = [].slice;
 
 function setHashKey(obj, h) {
@@ -54,8 +57,8 @@ var authUtils = {
 
   parseQueryString: function parseQueryString(keyValue) {
     var obj = {};
-    var key = undefined;
-    var value = undefined;
+    var key = void 0;
+    var value = void 0;
 
     authUtils.forEach((keyValue || '').split('&'), function (keyValuePair) {
       if (keyValuePair) {
@@ -72,7 +75,7 @@ var authUtils = {
   },
 
   isObject: function isObject(value) {
-    return value !== null && typeof value === 'object';
+    return value !== null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object';
   },
   isArray: Array.isArray,
 
@@ -94,7 +97,7 @@ var authUtils = {
     return normalize(joined);
   },
   isBlankObject: function isBlankObject(value) {
-    return value !== null && typeof value === 'object' && !Object.getPrototypeOf(value);
+    return value !== null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !Object.getPrototypeOf(value);
   },
   isArrayLike: function isArrayLike(obj) {
     if (obj === null || authUtils.isWindow(obj)) {
@@ -110,7 +113,7 @@ var authUtils = {
   merge: function merge(dst) {
     return baseExtend(dst, slice.call(arguments, 1), true);
   },
-  forEach: (function (_forEach) {
+  forEach: function (_forEach) {
     function forEach(_x, _x2, _x3) {
       return _forEach.apply(this, arguments);
     }
@@ -120,9 +123,9 @@ var authUtils = {
     };
 
     return forEach;
-  })(function (obj, iterator, context) {
-    var key = undefined;
-    var length = undefined;
+  }(function (obj, iterator, context) {
+    var key = void 0;
+    var length = void 0;
 
     if (!obj) {
       return obj;
@@ -135,7 +138,7 @@ var authUtils = {
         }
       }
     } else if (authUtils.isArray(obj) || authUtils.isArrayLike(obj)) {
-      var isPrimitive = typeof obj !== 'object';
+      var isPrimitive = (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object';
       for (key = 0, length = obj.length; key < length; key++) {
         if (isPrimitive || key in obj) {
           iterator.call(context, obj[key], key, obj);
@@ -164,5 +167,4 @@ var authUtils = {
 
 };
 
-exports['default'] = authUtils;
-module.exports = exports['default'];
+exports.authUtils = authUtils;

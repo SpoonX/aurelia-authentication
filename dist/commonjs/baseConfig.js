@@ -1,26 +1,22 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.BaseConfig = undefined;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _authUtils = require('./authUtils');
 
-var _authUtils2 = _interopRequireDefault(_authUtils);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var BaseConfig = (function () {
+var BaseConfig = exports.BaseConfig = function () {
+  BaseConfig.prototype.configure = function configure(incomingConfig) {
+    _authUtils.authUtils.merge(this._current, incomingConfig);
+  };
+
   _createClass(BaseConfig, [{
-    key: 'configure',
-    value: function configure(incomingConfig) {
-      _authUtils2['default'].merge(this._current, incomingConfig);
-    }
-  }, {
     key: 'current',
     get: function get() {
       return this._current;
@@ -47,13 +43,15 @@ var BaseConfig = (function () {
 
       signupRedirect: '#/login',
 
-      loginUrl: '/auth/login',
+      baseUrl: '/auth',
 
-      signupUrl: '/auth/signup',
+      loginUrl: '/login',
 
-      profileUrl: '/auth/me',
+      signupUrl: '/signup',
 
-      unlinkUrl: '/auth/unlink/',
+      profileUrl: '/me',
+
+      unlinkUrl: '/unlink/',
 
       unlinkMethod: 'get',
 
@@ -69,8 +67,6 @@ var BaseConfig = (function () {
 
       httpInterceptor: true,
 
-      baseUrl: '/',
-
       withCredentials: true,
 
       platform: 'browser',
@@ -82,7 +78,7 @@ var BaseConfig = (function () {
       providers: {
         google: {
           name: 'google',
-          url: '/auth/google',
+          url: '/google',
           authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           scope: ['profile', 'email'],
@@ -100,7 +96,7 @@ var BaseConfig = (function () {
         },
         facebook: {
           name: 'facebook',
-          url: '/auth/facebook',
+          url: '/facebook',
           authorizationEndpoint: 'https://www.facebook.com/v2.3/dialog/oauth',
           redirectUri: window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/',
           scope: ['email'],
@@ -118,7 +114,7 @@ var BaseConfig = (function () {
         },
         linkedin: {
           name: 'linkedin',
-          url: '/auth/linkedin',
+          url: '/linkedin',
           authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           requiredUrlParams: ['state'],
@@ -133,7 +129,7 @@ var BaseConfig = (function () {
         },
         github: {
           name: 'github',
-          url: '/auth/github',
+          url: '/github',
           authorizationEndpoint: 'https://github.com/login/oauth/authorize',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           optionalUrlParams: ['scope'],
@@ -147,7 +143,7 @@ var BaseConfig = (function () {
         },
         yahoo: {
           name: 'yahoo',
-          url: '/auth/yahoo',
+          url: '/yahoo',
           authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           scope: [],
@@ -160,7 +156,7 @@ var BaseConfig = (function () {
         },
         twitter: {
           name: 'twitter',
-          url: '/auth/twitter',
+          url: '/twitter',
           authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
           type: '1.0',
           popupOptions: {
@@ -185,7 +181,7 @@ var BaseConfig = (function () {
         },
         instagram: {
           name: 'instagram',
-          url: '/auth/instagram',
+          url: '/instagram',
           authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           requiredUrlParams: ['scope'],
@@ -203,6 +199,4 @@ var BaseConfig = (function () {
   }
 
   return BaseConfig;
-})();
-
-exports.BaseConfig = BaseConfig;
+}();

@@ -1,34 +1,22 @@
-import {HttpClient} from 'aurelia-fetch-client';
-import {Authentication} from './authentication';
-import {BaseConfig} from './baseConfig';
-import {inject} from 'aurelia-dependency-injection';
-import {Config, Rest} from 'spoonx/aurelia-api';
+var _dec, _class;
 
-@inject(HttpClient, Config, Authentication, BaseConfig)
-export class FetchConfig {
-  /**
-   * Construct the FetchConfig
-   *
-   * @param {HttpClient} httpClient
-   * @param {Config} clientConfig
-   * @param {Authentication} authService
-   * @param {BaseConfig} config
-   */
+import { HttpClient } from 'aurelia-fetch-client';
+import { Authentication } from './authentication';
+import { BaseConfig } from './baseConfig';
+import { inject } from 'aurelia-dependency-injection';
+import { Config, Rest } from 'spoonx/aurelia-api';
+
+export let FetchConfig = (_dec = inject(HttpClient, Config, Authentication, BaseConfig), _dec(_class = class FetchConfig {
   constructor(httpClient, clientConfig, authentication, config) {
-    this.httpClient   = httpClient;
+    this.httpClient = httpClient;
     this.clientConfig = clientConfig;
-    this.auth         = authentication;
-    this.config       = config.current;
+    this.auth = authentication;
+    this.config = config.current;
   }
 
-  /**
-   * Interceptor for HttpClient
-   *
-   * @return {{request: Function}}
-   */
   get interceptor() {
-    let auth    = this.auth;
-    let config  = this.config;
+    let auth = this.auth;
+    let config = this.config;
 
     return {
       request(request) {
@@ -39,7 +27,7 @@ export class FetchConfig {
         let token = auth.getToken();
 
         if (config.authHeader && config.authToken) {
-          token = `${config.authToken} ${token}`;
+          token = `${ config.authToken } ${ token }`;
         }
 
         request.headers.append(config.authHeader, token);
@@ -49,11 +37,6 @@ export class FetchConfig {
     };
   }
 
-  /**
-   * @param {HttpClient|Rest[]} client
-   *
-   * @return {HttpClient[]}
-   */
   configure(client) {
     if (Array.isArray(client)) {
       let configuredClients = [];
@@ -76,4 +59,4 @@ export class FetchConfig {
 
     return client;
   }
-}
+}) || _class);

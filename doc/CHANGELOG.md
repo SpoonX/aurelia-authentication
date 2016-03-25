@@ -1,3 +1,12 @@
+<a name"1.1.0"></a>
+### 1.1.0 (2016-03-25)
+
+
+#### Features
+
+* **authUtils:** make authUtils a named export, export  authUtils from index -- breaking change!  ([7de0aa23](https://github.com/spoonx/aurelia-authentication/commit/7de0aa23))
+
+
 <a name"1.0.1"></a>
 ### 1.0.1 (2016-03-22)
 
@@ -162,6 +171,3 @@
 
 * **fetch-client:** Recover baseUrl from singleton ([8281d906](git+https://github.com/spoonx/aurelia-authentication.git/commit/8281d9062e7a695402992f0db068c020efbeb3e1))
 * **lint:** Added linting ([5cf127b2](git+https://github.com/spoonx/aurelia-authentication.git/commit/5cf127b20b673c63d3b78d8b5c00e69b296312bf))
-
-
-

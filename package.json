@@ -1,6 +1,6 @@
 {
   "name": "aurelia-authentication",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Plugin for social media authentication and local authentication together with other authentication utilities.",
   "keywords": [
     "aurelia",
@@ -28,7 +28,6 @@
     "test": "./node_modules/.bin/gulp test"
   },
   "jspm": {
-    "registry": "npm",
     "jspmPackage": true,
     "main": "aurelia-authentication",
     "format": "amd",
@@ -36,24 +35,24 @@
       "dist": "dist/amd"
     },
     "dependencies": {
-      "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
-      "aurelia-fetch-client": "^1.0.0-beta.1.2.0",
-      "aurelia-router": "^1.0.0-beta.1.2.0",
+      "aurelia-dependency-injection": "npm:aurelia-dependency-injection@^1.0.0-beta.1.2.0",
+      "aurelia-fetch-client": "npm:aurelia-dependency-injection@^1.0.0-beta.1.2.0",
+      "aurelia-router": "npm:aurelia-dependency-injection@^1.0.0-beta.1.2.0",
       "fetch": "github:github/fetch@^0.11.0",
       "spoonx/aurelia-api": "github:spoonx/aurelia-api@^2.1.2"
     },
     "peerDependencies": {
-      "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
-      "aurelia-fetch-client": "^1.0.0-beta.1.2.0",
-      "aurelia-router": "^1.0.0-beta.1.2.0",
+      "aurelia-dependency-injection": "npm:aurelia-dependency-injection@^1.0.0-beta.1.2.0",
+      "aurelia-fetch-client": "npm:aurelia-dependency-injection@^1.0.0-beta.1.2.0",
+      "aurelia-router": "npm:aurelia-dependency-injection@^1.0.0-beta.1.2.0",
       "fetch": "github:github/fetch@^0.11.0",
       "spoonx/aurelia-api": "github:spoonx/aurelia-api@^2.1.2"
     },
     "devDependencies": {
-      "aurelia-polyfills": "^1.0.0-beta.1.1.0",
-      "babel": "babel-core@^5.8.38",
-      "babel-runtime": "^5.8.38",
-      "core-js": "^1.1.4",
+      "aurelia-polyfills": "npm:aurelia-dependency-injection@^1.0.0-beta.1.1.0",
+      "babel": "npm:babel-core@^5.8.38",
+      "babel-runtime": "npm:aurelia-dependency-injection@^5.8.38",
+      "core-js": "npm:aurelia-dependency-injection@^1.1.4",
       "fetch": "github:github/fetch@^0.11.0"
     }
   },

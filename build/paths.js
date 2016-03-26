@@ -12,13 +12,12 @@ module.exports = {
   source: appRoot + '**/*.js',
   tsSource: [
     appRoot + '**/*.js',          // list files to parse for d.ts
-   '!' + appRoot + entryFileName  // exclude entry file
+    '!' + appRoot + entryFileName  // exclude entry file
   ],
   html: appRoot + '**/*.html',
   style: 'styles/**/*.css',
   output: 'dist/',
   doc: './doc',
-  e2eSpecsSrc: 'test/e2e/src/*.js',
-  e2eSpecsDist: 'test/e2e/dist/',
+  test: './test/**/*.js',
   packageName: pkg.name
 };

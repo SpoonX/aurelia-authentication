@@ -8,11 +8,22 @@ var remarkValidateLinks = require('remark-validate-links');
 var remarkToc = require('remark-toc');
 
 
-gulp.task('lint', function() {
+gulp.task('lint', ['lint-test'], function() {
   return gulp.src(paths.source)
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failOnError());
+});
+
+gulp.task('lint-test', function() {
+  return gulp.src(paths.test)
+    .pipe(eslint({
+      rules: {
+        'dot-notation': 1,
+        'key-spacing': 1
+      }
+    }))
+    .pipe(eslint.format());
 });
 
 gulp.task('lint-md', function() {

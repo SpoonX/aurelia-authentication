@@ -1,3 +1,10 @@
+<a name"1.1.2"></a>
+### 1.1.2 (2016-03-26)
+#### Bug Fixes
+
+* **project:** fix wrong dependency introduced in 1.1.1 ([1b288214](https://github.com/spoonx/aurelia-authentication/commit/1b288214))
+
+
 <a name"1.1.1"></a>
 ### 1.1.1 (2016-03-25)
 

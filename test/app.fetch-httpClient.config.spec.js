@@ -15,10 +15,13 @@ function getContainer() {
   return container;
 }
 
-function getInterceptorStubs(isAuthenticated, httpInterceptor) {
+function getInterceptorStubs(isAuthenticated, httpInterceptor, refreshTokenExists) {
   let authenticationStub = {
     isAuthenticated: () => { return isAuthenticated; },
-    getToken: () => { return 'someToken'; }
+    getCurrentToken: () => { return 'someToken'; },
+    updateToken: () => {
+      return refreshTokenExists ? Promise.resolve() : Promise.reject();
+    }
   };
 
   let configStub = {

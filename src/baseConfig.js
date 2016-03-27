@@ -56,6 +56,21 @@ export class BaseConfig {
       // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
       unlinkMethod: 'get',
 
+      // Refresh Token Options
+      // =====================
+
+      // Option to turn refresh tokens On/Off
+      useRefreshToken: false,
+      // The option to enable/disable the automatic refresh of Auth tokens using Refresh Tokens
+      autoUpdateToken: true,
+      // This allows the refresh token to be a further object deeper `{ "responseTokenProp": { "refreshTokenRoot" : { "tokenName" : '...' } } }`
+      refreshTokenRoot: false,
+      // This is the property from which to get the token `{ "responseTokenProp": { "refreshTokenName" : '...' } }`
+      refreshTokenName: 'refresh_token',
+      // Prepended to the `refreshTokenName` when kept in storage (nothing to do with)
+      refreshTokenPrefix: 'aurelia',
+      // Oauth Client Id
+      clientId: false,
 
       // Token Related options
       // =====================

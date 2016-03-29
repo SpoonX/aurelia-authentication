@@ -36,18 +36,18 @@ function baseExtend(dst, objs, deep) {
   return dst;
 }
 
-let authUtils = {
-  isDefined: function(value) {
+export class authUtils {
+  static isDefined(value) {
     return typeof value !== 'undefined';
-  },
+  }
 
-  camelCase: function(name) {
+  static camelCase(name) {
     return name.replace(/([\:\-\_]+(.))/g, function(_, separator, letter, offset) {
       return offset ? letter.toUpperCase() : letter;
     });
-  },
+  }
 
-  parseQueryString: function(keyValue) {
+  static parseQueryString(keyValue) {
     let obj = {};
     let key;
     let value;
@@ -60,22 +60,23 @@ let authUtils = {
       }
     });
     return obj;
-  },
+  }
 
-  isString: function(value) {
+  static isString(value) {
     return typeof value === 'string';
-  },
+  }
 
-  isObject: function(value) {
+  static isObject(value) {
     return value !== null && typeof value === 'object';
-  },
-  isArray: Array.isArray,
+  }
 
-  isFunction: function(value) {
+  static isArray = Array.isArray
+
+  static isFunction(value) {
     return typeof value === 'function';
-  },
+  }
 
-  joinUrl: function(baseUrl, url) {
+  static joinUrl(baseUrl, url) {
     if (/^(?:[a-z]+:)?\/\//i.test(url)) {
       return url;
     }
@@ -91,25 +92,31 @@ let authUtils = {
     };
 
     return normalize(joined);
-  },
-  isBlankObject: function(value) {
+  }
+
+  static isBlankObject(value) {
     return value !== null && typeof value === 'object' && !Object.getPrototypeOf(value);
-  },
-  isArrayLike: function(obj) {
+  }
+
+  static isArrayLike(obj) {
     if (obj === null || authUtils.isWindow(obj)) {
       return false;
     }
-  },
-  isWindow: function(obj) {
+  }
+
+  static isWindow(obj) {
     return obj && obj.window === obj;
-  },
-  extend: function(dst) {
+  }
+
+  static extend(dst) {
     return baseExtend(dst, slice.call(arguments, 1), false);
-  },
-  merge: function merge(dst) {
+  }
+
+  static merge(dst) {
     return baseExtend(dst, slice.call(arguments, 1), true);
-  },
-  forEach: function(obj, iterator, context) {
+  }
+
+  static forEach(obj, iterator, context) {
     let key;
     let length;
 
@@ -155,7 +162,4 @@ let authUtils = {
       }
     }
   }
-
-};
-
-export {authUtils};
+}

@@ -13,12 +13,6 @@
   },
   "license": "MIT",
   "author": "RWOverdijk <wesley@spoonx.nl> (http://spoonx.nl/)",
-  "contributors": [
-    {
-      "name": "paul van bladel",
-      "url": "https://github.com/paulvanbladel"
-    }
-  ],
   "main": "dist/commonjs/aurelia-authentication.js",
   "repository": {
     "type": "git",

@@ -1,5 +1,11 @@
 import {Container} from 'aurelia-dependency-injection';
-import {configure, FetchConfig} from '../src/aurelia-authentication';
+import {
+  configure,
+  FetchConfig,
+  AuthService,
+  AuthorizeStep,
+  authUtils
+} from '../src/aurelia-authentication';
 import {BaseConfig} from '../src/baseConfig';
 import {Config, Rest} from 'spoonx/aurelia-api';
 import {HttpClient} from 'aurelia-fetch-client';
@@ -19,7 +25,29 @@ function getContainer() {
   return container;
 }
 
-describe('Index', function() {
+describe('aurelia-authentication', function() {
+  describe('export', function() {
+    it('Should export configure', function() {
+      expect(configure).toBeDefined();
+    });
+
+    it('Should export FetchConfig', function() {
+      expect(FetchConfig).toBeDefined();
+    });
+
+    it('Should export AuthService', function() {
+      expect(AuthService).toBeDefined();
+    });
+
+    it('Should export AuthorizeStep', function() {
+      expect(AuthorizeStep).toBeDefined();
+    });
+
+    it('Should export authUtils', function() {
+      expect(authUtils).toBeDefined();
+    });
+  });
+
   describe('configure()', function() {
     it('Should call globalResources configuration to be passed as a function.', function() {
       let container = new Container();

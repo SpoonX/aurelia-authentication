@@ -8,10 +8,10 @@ gulp.task('test', ['lint'], function(done) {
   var karmaServer = new KarmaServer({
     configFile: __dirname + '/../../karma.conf.js',
     singleRun: true
-  }, function() {
+  }, function(exitCode) {
     done();
 
-    process.exit();
+    process.exit(exitCode);
   });
 
   karmaServer.start();

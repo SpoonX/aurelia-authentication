@@ -71,9 +71,17 @@ describe('aurelia-authentication', function() {
       let container  = new Container();
       let baseConfig = container.get(BaseConfig);
 
-      configure({container: container, globalResources: noop}, {endpoint: 'something'});
+      configure({container: container, globalResources: noop}, {baseUrl: 'something'});
 
-      expect(baseConfig.current.endpoint).toEqual('something');
+      expect(baseConfig.current.baseUrl).toEqual('something');
+    });
+
+    it('Should not allow configuration with unregistered endpoint', function() {
+      let container  = new Container();
+
+      let configureWithTypo = () => configure({container: container, globalResources: noop}, {endpoint: 'something'});
+
+      expect(configureWithTypo).toThrow();
     });
 
     it('Should configure configured endpoints.', function() {
@@ -89,6 +97,19 @@ describe('aurelia-authentication', function() {
 
       expect(clientOneInterceptor).toEqual(configInterceptor);
       expect(clientTwoInterceptor).toEqual(configInterceptor);
+    });
+
+    it('Should configure default endpoint.', function() {
+      let container    = getContainer();
+      let fetchConfig  = container.get(FetchConfig);
+      let clientConfig = container.get(Config);
+
+      configure({container: container, globalResources: noop}, {configureEndpoints: ['']});
+
+      let clientOneInterceptor = clientConfig.getEndpoint().client.interceptors[0].toString();
+      let configInterceptor    = fetchConfig.interceptor.toString();
+
+      expect(clientOneInterceptor).toEqual(configInterceptor);
     });
 
     it('Should set the configured endpoint as a client.', function() {

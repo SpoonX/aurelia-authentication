@@ -40,7 +40,7 @@ logout(redirectUri)
 authenticate(provider, redirect, userData)
 signup(displayName, email, password)
 getMe([criteria])
-updateMe(data[,criteria]) 
+updateMe(data[,criteria])
 isAuthenticated()
 getTokenPayload()
 unlink(provider)
@@ -250,9 +250,9 @@ Via the above mentioned configuration virtually all aspects of the authenticatio
 // If using aurelia-api:
 // =====================
 
-// This is the endpoint used for any requests made in relation to authentication (login, logout, etc.)
+// This is the name of the endpoint used for any requests made in relation to authentication (login, logout, etc.). An empty string selects the default endpoint of aurelia-api.
 endpoint: null,
-// When authenticated, these endpoints will have the token added to the header of any requests (for authorization)
+// When authenticated, these endpoints will have the token added to the header of any requests (for authorization). Accepts an array of endpoint names. An empty string selects the default endpoint of aurelia-api.
 configureEndpoints: null,
 
 
@@ -321,7 +321,7 @@ platform: 'browser',
 // Determines the `window` property name upon which aurelia-authentication data is stored (Default: `window.localStorage`)
 storage: 'localStorage',
 // Prepended to the `tokenName` when kept in storage (nothing to do with)
-tokenPrefix: 'aurelia', 
+tokenPrefix: 'aurelia',
 
 
 //OAuth provider specific related configuration

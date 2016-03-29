@@ -113,6 +113,16 @@ describe('FetchConfig', function() {
       expect(client.client.baseUrl).toEqual('http://localhost:1927/');
     });
 
+    it('Should not configure  given client being an unknown string.', function() {
+      let container         = getContainer();
+      let client            = 'unknown';
+      let fetchConfig       = container.get(FetchConfig);
+
+      let configureWithTypo = () =>  fetchConfig.configure(client);
+
+      expect(configureWithTypo).toThrow();
+    });
+
     it('Should configure given client being a string.', function() {
       let container         = getContainer();
       let client            = 'sx/default';

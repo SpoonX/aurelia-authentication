@@ -27,15 +27,15 @@ export let BaseConfig = class BaseConfig {
 
       signupRedirect: '#/login',
 
-      baseUrl: '/auth',
+      baseUrl: '',
 
-      loginUrl: '/login',
+      loginUrl: '/auth/login',
 
-      signupUrl: '/signup',
+      signupUrl: '/auth/signup',
 
-      profileUrl: '/me',
+      profileUrl: '/auth/me',
 
-      unlinkUrl: '/unlink/',
+      unlinkUrl: '/auth/unlink/',
 
       unlinkMethod: 'get',
 
@@ -62,7 +62,7 @@ export let BaseConfig = class BaseConfig {
       providers: {
         google: {
           name: 'google',
-          url: '/google',
+          url: '/auth/google',
           authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           scope: ['profile', 'email'],
@@ -80,7 +80,7 @@ export let BaseConfig = class BaseConfig {
         },
         facebook: {
           name: 'facebook',
-          url: '/facebook',
+          url: '/auth/facebook',
           authorizationEndpoint: 'https://www.facebook.com/v2.3/dialog/oauth',
           redirectUri: window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/',
           scope: ['email'],
@@ -98,7 +98,7 @@ export let BaseConfig = class BaseConfig {
         },
         linkedin: {
           name: 'linkedin',
-          url: '/linkedin',
+          url: '/auth/linkedin',
           authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           requiredUrlParams: ['state'],
@@ -113,7 +113,7 @@ export let BaseConfig = class BaseConfig {
         },
         github: {
           name: 'github',
-          url: '/github',
+          url: '/auth/github',
           authorizationEndpoint: 'https://github.com/login/oauth/authorize',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           optionalUrlParams: ['scope'],
@@ -127,7 +127,7 @@ export let BaseConfig = class BaseConfig {
         },
         yahoo: {
           name: 'yahoo',
-          url: '/yahoo',
+          url: '/auth/yahoo',
           authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           scope: [],
@@ -140,7 +140,7 @@ export let BaseConfig = class BaseConfig {
         },
         twitter: {
           name: 'twitter',
-          url: '/twitter',
+          url: '/auth/twitter',
           authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
           type: '1.0',
           popupOptions: {
@@ -165,7 +165,7 @@ export let BaseConfig = class BaseConfig {
         },
         instagram: {
           name: 'instagram',
-          url: '/instagram',
+          url: '/auth/instagram',
           authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           requiredUrlParams: ['scope'],

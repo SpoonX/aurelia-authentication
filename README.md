@@ -274,6 +274,9 @@ signupRedirect: '#/login',
 // API related options
 // ===================
 
+// The base url used for all authentication related requests, including provider.url below.
+// This appends to the httpClient/endpoint base url, it does not override it.
+baseUrl: '',
 // The API endpoint to which login requests are sent
 loginUrl: '/auth/login',
 // The API endpoint to which signup requests are sent

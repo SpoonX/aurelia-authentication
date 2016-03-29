@@ -7,7 +7,7 @@ var KarmaServer = require('karma').Server;
 gulp.task('test', ['lint'], function(done) {
   var karmaServer = new KarmaServer({
     configFile: __dirname + '/../../karma.conf.js',
-    singleRun : true
+    singleRun: true
   }, function() {
     done();
 

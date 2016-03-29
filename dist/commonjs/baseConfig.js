@@ -43,15 +43,15 @@ var BaseConfig = exports.BaseConfig = function () {
 
       signupRedirect: '#/login',
 
-      baseUrl: '/auth',
+      baseUrl: '',
 
-      loginUrl: '/login',
+      loginUrl: '/auth/login',
 
-      signupUrl: '/signup',
+      signupUrl: '/auth/signup',
 
-      profileUrl: '/me',
+      profileUrl: '/auth/me',
 
-      unlinkUrl: '/unlink/',
+      unlinkUrl: '/auth/unlink/',
 
       unlinkMethod: 'get',
 
@@ -78,7 +78,7 @@ var BaseConfig = exports.BaseConfig = function () {
       providers: {
         google: {
           name: 'google',
-          url: '/google',
+          url: '/auth/google',
           authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           scope: ['profile', 'email'],
@@ -96,7 +96,7 @@ var BaseConfig = exports.BaseConfig = function () {
         },
         facebook: {
           name: 'facebook',
-          url: '/facebook',
+          url: '/auth/facebook',
           authorizationEndpoint: 'https://www.facebook.com/v2.3/dialog/oauth',
           redirectUri: window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/',
           scope: ['email'],
@@ -114,7 +114,7 @@ var BaseConfig = exports.BaseConfig = function () {
         },
         linkedin: {
           name: 'linkedin',
-          url: '/linkedin',
+          url: '/auth/linkedin',
           authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           requiredUrlParams: ['state'],
@@ -129,7 +129,7 @@ var BaseConfig = exports.BaseConfig = function () {
         },
         github: {
           name: 'github',
-          url: '/github',
+          url: '/auth/github',
           authorizationEndpoint: 'https://github.com/login/oauth/authorize',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           optionalUrlParams: ['scope'],
@@ -143,7 +143,7 @@ var BaseConfig = exports.BaseConfig = function () {
         },
         yahoo: {
           name: 'yahoo',
-          url: '/yahoo',
+          url: '/auth/yahoo',
           authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           scope: [],
@@ -156,7 +156,7 @@ var BaseConfig = exports.BaseConfig = function () {
         },
         twitter: {
           name: 'twitter',
-          url: '/twitter',
+          url: '/auth/twitter',
           authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
           type: '1.0',
           popupOptions: {
@@ -181,7 +181,7 @@ var BaseConfig = exports.BaseConfig = function () {
         },
         instagram: {
           name: 'instagram',
-          url: '/instagram',
+          url: '/auth/instagram',
           authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
           requiredUrlParams: ['scope'],

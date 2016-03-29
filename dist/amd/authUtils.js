@@ -11,6 +11,14 @@ define(['exports'], function (exports) {
     return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
   };
 
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
   var slice = [].slice;
 
   function setHashKey(obj, h) {
@@ -49,18 +57,22 @@ define(['exports'], function (exports) {
     return dst;
   }
 
-  var authUtils = {
-    isDefined: function isDefined(value) {
-      return typeof value !== 'undefined';
-    },
+  var authUtils = exports.authUtils = (_temp = _class = function () {
+    function authUtils() {
+      _classCallCheck(this, authUtils);
+    }
 
-    camelCase: function camelCase(name) {
+    authUtils.isDefined = function isDefined(value) {
+      return typeof value !== 'undefined';
+    };
+
+    authUtils.camelCase = function camelCase(name) {
       return name.replace(/([\:\-\_]+(.))/g, function (_, separator, letter, offset) {
         return offset ? letter.toUpperCase() : letter;
       });
-    },
+    };
 
-    parseQueryString: function parseQueryString(keyValue) {
+    authUtils.parseQueryString = function parseQueryString(keyValue) {
       var obj = {};
       var key = void 0;
       var value = void 0;
@@ -73,22 +85,21 @@ define(['exports'], function (exports) {
         }
       });
       return obj;
-    },
+    };
 
-    isString: function isString(value) {
+    authUtils.isString = function isString(value) {
       return typeof value === 'string';
-    },
+    };
 
-    isObject: function isObject(value) {
+    authUtils.isObject = function isObject(value) {
       return value !== null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object';
-    },
-    isArray: Array.isArray,
+    };
 
-    isFunction: function isFunction(value) {
+    authUtils.isFunction = function isFunction(value) {
       return typeof value === 'function';
-    },
+    };
 
-    joinUrl: function joinUrl(baseUrl, url) {
+    authUtils.joinUrl = function joinUrl(baseUrl, url) {
       if (/^(?:[a-z]+:)?\/\//i.test(url)) {
         return url;
       }
@@ -100,25 +111,31 @@ define(['exports'], function (exports) {
       };
 
       return normalize(joined);
-    },
-    isBlankObject: function isBlankObject(value) {
+    };
+
+    authUtils.isBlankObject = function isBlankObject(value) {
       return value !== null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !Object.getPrototypeOf(value);
-    },
-    isArrayLike: function isArrayLike(obj) {
+    };
+
+    authUtils.isArrayLike = function isArrayLike(obj) {
       if (obj === null || authUtils.isWindow(obj)) {
         return false;
       }
-    },
-    isWindow: function isWindow(obj) {
+    };
+
+    authUtils.isWindow = function isWindow(obj) {
       return obj && obj.window === obj;
-    },
-    extend: function extend(dst) {
+    };
+
+    authUtils.extend = function extend(dst) {
       return baseExtend(dst, slice.call(arguments, 1), false);
-    },
-    merge: function merge(dst) {
+    };
+
+    authUtils.merge = function merge(dst) {
       return baseExtend(dst, slice.call(arguments, 1), true);
-    },
-    forEach: function (_forEach) {
+    };
+
+    authUtils.forEach = function (_forEach) {
       function forEach(_x, _x2, _x3) {
         return _forEach.apply(this, arguments);
       }
@@ -168,9 +185,8 @@ define(['exports'], function (exports) {
           }
         }
       }
-    })
+    });
 
-  };
-
-  exports.authUtils = authUtils;
+    return authUtils;
+  }(), _class.isArray = Array.isArray, _temp);
 });

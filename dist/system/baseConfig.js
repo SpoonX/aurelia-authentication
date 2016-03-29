@@ -64,15 +64,15 @@ System.register(['./authUtils'], function (_export, _context) {
 
             signupRedirect: '#/login',
 
-            baseUrl: '/auth',
+            baseUrl: '',
 
-            loginUrl: '/login',
+            loginUrl: '/auth/login',
 
-            signupUrl: '/signup',
+            signupUrl: '/auth/signup',
 
-            profileUrl: '/me',
+            profileUrl: '/auth/me',
 
-            unlinkUrl: '/unlink/',
+            unlinkUrl: '/auth/unlink/',
 
             unlinkMethod: 'get',
 
@@ -99,7 +99,7 @@ System.register(['./authUtils'], function (_export, _context) {
             providers: {
               google: {
                 name: 'google',
-                url: '/google',
+                url: '/auth/google',
                 authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 scope: ['profile', 'email'],
@@ -117,7 +117,7 @@ System.register(['./authUtils'], function (_export, _context) {
               },
               facebook: {
                 name: 'facebook',
-                url: '/facebook',
+                url: '/auth/facebook',
                 authorizationEndpoint: 'https://www.facebook.com/v2.3/dialog/oauth',
                 redirectUri: window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/',
                 scope: ['email'],
@@ -135,7 +135,7 @@ System.register(['./authUtils'], function (_export, _context) {
               },
               linkedin: {
                 name: 'linkedin',
-                url: '/linkedin',
+                url: '/auth/linkedin',
                 authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 requiredUrlParams: ['state'],
@@ -150,7 +150,7 @@ System.register(['./authUtils'], function (_export, _context) {
               },
               github: {
                 name: 'github',
-                url: '/github',
+                url: '/auth/github',
                 authorizationEndpoint: 'https://github.com/login/oauth/authorize',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 optionalUrlParams: ['scope'],
@@ -164,7 +164,7 @@ System.register(['./authUtils'], function (_export, _context) {
               },
               yahoo: {
                 name: 'yahoo',
-                url: '/yahoo',
+                url: '/auth/yahoo',
                 authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 scope: [],
@@ -177,7 +177,7 @@ System.register(['./authUtils'], function (_export, _context) {
               },
               twitter: {
                 name: 'twitter',
-                url: '/twitter',
+                url: '/auth/twitter',
                 authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
                 type: '1.0',
                 popupOptions: {
@@ -202,7 +202,7 @@ System.register(['./authUtils'], function (_export, _context) {
               },
               instagram: {
                 name: 'instagram',
-                url: '/instagram',
+                url: '/auth/instagram',
                 authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
                 redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
                 requiredUrlParams: ['scope'],

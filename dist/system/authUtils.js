@@ -1,7 +1,13 @@
 'use strict';
 
 System.register([], function (_export, _context) {
-  var _typeof, slice, authUtils;
+  var _typeof, _class, _temp, slice, authUtils;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
 
   function setHashKey(obj, h) {
     if (h) {
@@ -49,18 +55,22 @@ System.register([], function (_export, _context) {
       };
       slice = [].slice;
 
-      _export('authUtils', authUtils = {
-        isDefined: function isDefined(value) {
-          return typeof value !== 'undefined';
-        },
+      _export('authUtils', authUtils = (_temp = _class = function () {
+        function authUtils() {
+          _classCallCheck(this, authUtils);
+        }
 
-        camelCase: function camelCase(name) {
+        authUtils.isDefined = function isDefined(value) {
+          return typeof value !== 'undefined';
+        };
+
+        authUtils.camelCase = function camelCase(name) {
           return name.replace(/([\:\-\_]+(.))/g, function (_, separator, letter, offset) {
             return offset ? letter.toUpperCase() : letter;
           });
-        },
+        };
 
-        parseQueryString: function parseQueryString(keyValue) {
+        authUtils.parseQueryString = function parseQueryString(keyValue) {
           var obj = {};
           var key = void 0;
           var value = void 0;
@@ -73,22 +83,21 @@ System.register([], function (_export, _context) {
             }
           });
           return obj;
-        },
+        };
 
-        isString: function isString(value) {
+        authUtils.isString = function isString(value) {
           return typeof value === 'string';
-        },
+        };
 
-        isObject: function isObject(value) {
+        authUtils.isObject = function isObject(value) {
           return value !== null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object';
-        },
-        isArray: Array.isArray,
+        };
 
-        isFunction: function isFunction(value) {
+        authUtils.isFunction = function isFunction(value) {
           return typeof value === 'function';
-        },
+        };
 
-        joinUrl: function joinUrl(baseUrl, url) {
+        authUtils.joinUrl = function joinUrl(baseUrl, url) {
           if (/^(?:[a-z]+:)?\/\//i.test(url)) {
             return url;
           }
@@ -100,25 +109,31 @@ System.register([], function (_export, _context) {
           };
 
           return normalize(joined);
-        },
-        isBlankObject: function isBlankObject(value) {
+        };
+
+        authUtils.isBlankObject = function isBlankObject(value) {
           return value !== null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !Object.getPrototypeOf(value);
-        },
-        isArrayLike: function isArrayLike(obj) {
+        };
+
+        authUtils.isArrayLike = function isArrayLike(obj) {
           if (obj === null || authUtils.isWindow(obj)) {
             return false;
           }
-        },
-        isWindow: function isWindow(obj) {
+        };
+
+        authUtils.isWindow = function isWindow(obj) {
           return obj && obj.window === obj;
-        },
-        extend: function extend(dst) {
+        };
+
+        authUtils.extend = function extend(dst) {
           return baseExtend(dst, slice.call(arguments, 1), false);
-        },
-        merge: function merge(dst) {
+        };
+
+        authUtils.merge = function merge(dst) {
           return baseExtend(dst, slice.call(arguments, 1), true);
-        },
-        forEach: function (_forEach) {
+        };
+
+        authUtils.forEach = function (_forEach) {
           function forEach(_x, _x2, _x3) {
             return _forEach.apply(this, arguments);
           }
@@ -168,9 +183,10 @@ System.register([], function (_export, _context) {
               }
             }
           }
-        })
+        });
 
-      });
+        return authUtils;
+      }(), _class.isArray = Array.isArray, _temp));
 
       _export('authUtils', authUtils);
     }

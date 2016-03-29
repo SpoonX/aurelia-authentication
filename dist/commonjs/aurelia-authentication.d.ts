@@ -12,12 +12,25 @@ declare module 'aurelia-authentication' {
   import {
     Redirect
   } from 'aurelia-router';
+  export class authUtils {
+    static isDefined(value: any): any;
+    static camelCase(name: any): any;
+    static parseQueryString(keyValue: any): any;
+    static isString(value: any): any;
+    static isObject(value: any): any;
+    static isArray: any;
+    static isFunction(value: any): any;
+    static joinUrl(baseUrl: any, url: any): any;
+    static isBlankObject(value: any): any;
+    static isArrayLike(obj: any): any;
+    static isWindow(obj: any): any;
+    static extend(dst: any): any;
+    static merge(dst: any): any;
+    static forEach(obj: any, iterator: any, context: any): any;
+  }
   export class AuthFilterValueConverter {
     toView(routes: any, isAuthenticated: any): any;
   }
-  export {
-    authUtils
-  };
   export class BaseConfig {
     configure(incomingConfig: any): any;
     current: any;

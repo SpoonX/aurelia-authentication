@@ -1,6 +1,6 @@
 {
   "name": "aurelia-authentication",
-  "version": "1.1.2",
+  "version": "2.0.0",
   "description": "Plugin for social media authentication and local authentication together with other authentication utilities.",
   "keywords": [
     "aurelia",
@@ -13,12 +13,6 @@
   },
   "license": "MIT",
   "author": "RWOverdijk <wesley@spoonx.nl> (http://spoonx.nl/)",
-  "contributors": [
-    {
-      "name": "paul van bladel",
-      "url": "https://github.com/paulvanbladel"
-    }
-  ],
   "main": "dist/commonjs/aurelia-authentication.js",
   "repository": {
     "type": "git",

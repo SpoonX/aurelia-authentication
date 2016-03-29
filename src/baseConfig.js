@@ -43,7 +43,7 @@ export class BaseConfig {
 
       // The base url used for all authentication related requests, including provider.url below.
       // This appends to the httpClient/endpoint base url, it does not override it.
-      baseUrl: '/auth',
+      baseUrl: '',
       // The API endpoint to which login requests are sent
       loginUrl: '/auth/login',
       // The API endpoint to which signup requests are sent
@@ -82,7 +82,7 @@ export class BaseConfig {
       // (or not... e.g. if using a session based API or you want to override the default behaviour)
       httpInterceptor: true,
       // The base url used for all authentication related requests (This appends to the httpClient/endpoint base url, it does not override it)
-      baseUrl: '/',
+      baseUrl: '',
       // For OAuth only: Tell the API whether or not to include token cookies in the response (for session based APIs)
       withCredentials: true,
       // Controls how the popup is shown for different devices (Options: 'browser' or 'mobile')

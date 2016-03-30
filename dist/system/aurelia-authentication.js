@@ -1,6 +1,6 @@
 'use strict';
 
-System.register(['aurelia-fetch-client', 'spoonx/aurelia-api', './authService', './authorizeStep', './baseConfig', './app.fetch-httpClient.config', './authUtils'], function (_export, _context) {
+System.register(['aurelia-fetch-client', 'spoonx/aurelia-api', './authService', './authorizeStep', './baseConfig', './app.fetch-httpClient.config', './authUtils', './authFilter'], function (_export, _context) {
   var HttpClient, Config, Rest, AuthService, AuthorizeStep, BaseConfig, FetchConfig, authUtils, _typeof;
 
   function configure(aurelia, config) {
@@ -48,7 +48,7 @@ System.register(['aurelia-fetch-client', 'spoonx/aurelia-api', './authService', 
       FetchConfig = _appFetchHttpClientConfig.FetchConfig;
     }, function (_authUtils) {
       authUtils = _authUtils.authUtils;
-    }],
+    }, function (_authFilter) {}],
     execute: function () {
       _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
         return typeof obj;

@@ -6,6 +6,7 @@ import {AuthorizeStep} from './authorizeStep';
 import {BaseConfig} from './baseConfig';
 import {FetchConfig} from './app.fetch-httpClient.config';
 import {authUtils} from './authUtils';
+import './authFilter';
 
 /**
  * Configure the plugin.

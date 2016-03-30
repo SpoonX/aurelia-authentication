@@ -1,3 +1,12 @@
+<a name"2.0.2"></a>
+### 2.0.2 (2016-03-30)
+
+
+#### Bug Fixes
+
+* **authFilter:** Import authfilter for bundling ([d5461fd6](https://github.com/spoonx/aurelia-authentication/commit/d5461fd6))
+
+
 <a name"2.0.1"></a>
 ### 2.0.1 (2016-03-29)
 

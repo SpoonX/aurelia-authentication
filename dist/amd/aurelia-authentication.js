@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-fetch-client', 'spoonx/aurelia-api', './authService', './authorizeStep', './baseConfig', './app.fetch-httpClient.config', './authUtils'], function (exports, _aureliaFetchClient, _aureliaApi, _authService, _authorizeStep, _baseConfig, _appFetchHttpClient, _authUtils) {
+define(['exports', 'aurelia-fetch-client', 'spoonx/aurelia-api', './authService', './authorizeStep', './baseConfig', './app.fetch-httpClient.config', './authUtils', './authFilter'], function (exports, _aureliaFetchClient, _aureliaApi, _authService, _authorizeStep, _baseConfig, _appFetchHttpClient, _authUtils) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {

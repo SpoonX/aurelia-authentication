@@ -21,6 +21,8 @@ var _appFetchHttpClient = require('./app.fetch-httpClient.config');
 
 var _authUtils = require('./authUtils');
 
+require('./authFilter');
+
 function configure(aurelia, config) {
   aurelia.globalResources('./authFilter');
 

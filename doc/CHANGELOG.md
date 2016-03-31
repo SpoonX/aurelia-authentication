@@ -1,3 +1,18 @@
+<a name"2.1.0"></a>
+## 2.1.0 (2016-03-31)
+
+
+#### Bug Fixes
+
+* **configure:** fail if specified endpoints are not registered ([4a444253](https://github.com/spoonx/aurelia-authentication/commit/4a444253))
+* **interceptor:** set authorization header instead of appending ([4e53457d](https://github.com/spoonx/aurelia-authentication/commit/4e53457d))
+
+
+#### Features
+
+* **project:** add refresh token ([77bdbe49](https://github.com/spoonx/aurelia-authentication/commit/77bdbe49))
+
+
 <a name"2.0.2"></a>
 ### 2.0.2 (2016-03-30)
 

@@ -32,7 +32,14 @@ define(['exports', 'aurelia-fetch-client', 'spoonx/aurelia-api', './authService'
       });
     }
 
-    var client = clientConfig.getEndpoint(baseConfig.current.endpoint);
+    var client = void 0;
+
+    if (baseConfig.current.endpoint !== null) {
+      client = clientConfig.getEndpoint(baseConfig.current.endpoint);
+      if (!client) {
+        throw new Error('There is no \'' + (baseConfig.current.endpoint || 'default') + '\' endpoint registered.');
+      }
+    }
 
     if (!(client instanceof _aureliaApi.Rest)) {
       client = new _aureliaApi.Rest(aurelia.container.get(_aureliaFetchClient.HttpClient));

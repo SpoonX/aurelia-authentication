@@ -3,15 +3,15 @@ declare module 'aurelia-authentication' {
     inject
   } from 'aurelia-dependency-injection';
   import {
+    Redirect
+  } from 'aurelia-router';
+  import {
     HttpClient
   } from 'aurelia-fetch-client';
   import {
     Config,
     Rest
   } from 'spoonx/aurelia-api';
-  import {
-    Redirect
-  } from 'aurelia-router';
   export class authUtils {
     static isDefined(value: any): any;
     static camelCase(name: any): any;
@@ -52,6 +52,7 @@ declare module 'aurelia-authentication' {
   }
   export class Authentication {
     constructor(storage: any, config: any);
+    refreshTokenName: any;
     tokenName: any;
     getLoginRoute(): any;
     getLoginRedirect(): any;
@@ -59,10 +60,14 @@ declare module 'aurelia-authentication' {
     getSignupUrl(): any;
     getProfileUrl(): any;
     getToken(): any;
+    getRefreshToken(): any;
     getPayload(): any;
     setTokenFromResponse(response: any, redirect: any): any;
+    setRefreshTokenFromResponse(response: any): any;
     removeToken(): any;
+    removeRefreshToken(): any;
     isAuthenticated(): any;
+    isTokenExpired(): any;
     logout(redirect: any): any;
   }
   export class OAuth1 {
@@ -77,6 +82,26 @@ declare module 'aurelia-authentication' {
     exchangeForToken(oauthData: any, userData: any, current: any): any;
     buildQueryString(current: any): any;
   }
+  export class AuthorizeStep {
+    constructor(auth: any);
+    run(routingContext: any, next: any): any;
+  }
+  export class AuthService {
+    constructor(auth: any, oAuth1: any, oAuth2: any, config: any);
+    getMe(criteria: any): any;
+    getCurrentToken(): any;
+    getRefreshToken(): any;
+    updateMe(body: any, criteria: any): any;
+    isAuthenticated(): any;
+    isTokenExpired(): any;
+    getTokenPayload(): any;
+    signup(displayName: any, email: any, password: any): any;
+    login(email: any, password: any): any;
+    logout(redirectUri: any): any;
+    updateToken(): any;
+    authenticate(name: any, redirect: any, userData: any): any;
+    unlink(provider: any): any;
+  }
   export class FetchConfig {
     
     /**
@@ -87,7 +112,7 @@ declare module 'aurelia-authentication' {
        * @param {Authentication} authService
        * @param {BaseConfig} config
        */
-    constructor(httpClient: any, clientConfig: any, authentication: any, config: any);
+    constructor(httpClient: any, clientConfig: any, authService: any, config: any);
     
     /**
        * Interceptor for HttpClient
@@ -102,21 +127,5 @@ declare module 'aurelia-authentication' {
        * @return {HttpClient[]}
        */
     configure(client: any): any;
-  }
-  export class AuthorizeStep {
-    constructor(auth: any);
-    run(routingContext: any, next: any): any;
-  }
-  export class AuthService {
-    constructor(auth: any, oAuth1: any, oAuth2: any, config: any);
-    getMe(criteria: any): any;
-    updateMe(body: any, criteria: any): any;
-    isAuthenticated(): any;
-    getTokenPayload(): any;
-    signup(displayName: any, email: any, password: any): any;
-    login(email: any, password: any): any;
-    logout(redirectUri: any): any;
-    authenticate(name: any, redirect: any, userData: any): any;
-    unlink(provider: any): any;
   }
 }

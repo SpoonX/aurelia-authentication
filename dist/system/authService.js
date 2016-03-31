@@ -39,6 +39,7 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
           this.oAuth2 = oAuth2;
           this.config = config.current;
           this.client = this.config.client;
+          this.isRefreshing = false;
         }
 
         AuthService.prototype.getMe = function getMe(criteria) {
@@ -46,6 +47,14 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
             criteria = { id: criteria };
           }
           return this.client.find(this.auth.getProfileUrl(), criteria);
+        };
+
+        AuthService.prototype.getCurrentToken = function getCurrentToken() {
+          return this.auth.getToken();
+        };
+
+        AuthService.prototype.getRefreshToken = function getRefreshToken() {
+          return this.auth.getRefreshToken();
         };
 
         AuthService.prototype.updateMe = function updateMe(body, criteria) {
@@ -56,7 +65,18 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
         };
 
         AuthService.prototype.isAuthenticated = function isAuthenticated() {
+          var isExpired = this.auth.isTokenExpired();
+          if (isExpired && this.config.autoUpdateToken) {
+            if (this.isRefreshing) {
+              return true;
+            }
+            this.updateToken();
+          }
           return this.auth.isAuthenticated();
+        };
+
+        AuthService.prototype.isTokenExpired = function isTokenExpired() {
+          return this.auth.isTokenExpired();
         };
 
         AuthService.prototype.getTokenPayload = function getTokenPayload() {
@@ -92,18 +112,23 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
           var _this2 = this;
 
           var loginUrl = this.auth.getLoginUrl();
-          var content = void 0;
+          var config = this.config;
+          var clientId = this.config.clientId;
+          var content = {};
           if (typeof arguments[1] !== 'string') {
             content = arguments[0];
           } else {
-            content = {
-              'email': email,
-              'password': password
-            };
+            content = { email: email, password: password };
+            if (clientId) {
+              content.client_id = clientId;
+            }
           }
 
           return this.client.post(loginUrl, content).then(function (response) {
             _this2.auth.setTokenFromResponse(response);
+            if (config.useRefreshToken) {
+              _this2.auth.setRefreshTokenFromResponse(response);
+            }
 
             return response;
           });
@@ -113,8 +138,38 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
           return this.auth.logout(redirectUri);
         };
 
-        AuthService.prototype.authenticate = function authenticate(name, redirect, userData) {
+        AuthService.prototype.updateToken = function updateToken() {
           var _this3 = this;
+
+          this.isRefreshing = true;
+          var loginUrl = this.auth.getLoginUrl();
+          var refreshToken = this.auth.getRefreshToken();
+          var clientId = this.config.clientId;
+          var content = {};
+          if (refreshToken) {
+            content = { grant_type: 'refresh_token', refresh_token: refreshToken };
+            if (clientId) {
+              content.client_id = clientId;
+            }
+
+            return this.client.post(loginUrl, content).then(function (response) {
+              _this3.auth.setRefreshToken(response);
+              _this3.auth.setToken(response);
+              _this3.isRefreshing = false;
+
+              return response;
+            }).catch(function (err) {
+              _this3.auth.removeToken();
+              _this3.auth.removeRefreshToken();
+              _this3.isRefreshing = false;
+
+              throw err;
+            });
+          }
+        };
+
+        AuthService.prototype.authenticate = function authenticate(name, redirect, userData) {
+          var _this4 = this;
 
           var provider = this.oAuth2;
           if (this.config.providers[name].type === '1.0') {
@@ -122,7 +177,7 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
           }
 
           return provider.open(this.config.providers[name], userData || {}).then(function (response) {
-            _this3.auth.setTokenFromResponse(response, redirect);
+            _this4.auth.setTokenFromResponse(response, redirect);
             return response;
           });
         };

@@ -13,7 +13,7 @@ var _dec, _class;
 
 var _aureliaFetchClient = require('aurelia-fetch-client');
 
-var _authentication = require('./authentication');
+var _authService = require('./authService');
 
 var _baseConfig = require('./baseConfig');
 
@@ -23,13 +23,13 @@ var _aureliaApi = require('spoonx/aurelia-api');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var FetchConfig = exports.FetchConfig = (_dec = (0, _aureliaDependencyInjection.inject)(_aureliaFetchClient.HttpClient, _aureliaApi.Config, _authentication.Authentication, _baseConfig.BaseConfig), _dec(_class = function () {
-  function FetchConfig(httpClient, clientConfig, authentication, config) {
+var FetchConfig = exports.FetchConfig = (_dec = (0, _aureliaDependencyInjection.inject)(_aureliaFetchClient.HttpClient, _aureliaApi.Config, _authService.AuthService, _baseConfig.BaseConfig), _dec(_class = function () {
+  function FetchConfig(httpClient, clientConfig, authService, config) {
     _classCallCheck(this, FetchConfig);
 
     this.httpClient = httpClient;
     this.clientConfig = clientConfig;
-    this.auth = authentication;
+    this.auth = authService;
     this.config = config.current;
   }
 
@@ -52,7 +52,11 @@ var FetchConfig = exports.FetchConfig = (_dec = (0, _aureliaDependencyInjection.
     }
 
     if (typeof client === 'string') {
-      client = this.clientConfig.getEndpoint(client).client;
+      var endpoint = this.clientConfig.getEndpoint(client);
+      if (!endpoint) {
+        throw new Error('There is no \'' + (client || 'default') + '\' endpoint registered.');
+      }
+      client = endpoint.client;
     } else if (client instanceof _aureliaApi.Rest) {
       client = client.client;
     } else if (!(client instanceof _aureliaFetchClient.HttpClient)) {
@@ -69,22 +73,46 @@ var FetchConfig = exports.FetchConfig = (_dec = (0, _aureliaDependencyInjection.
     get: function get() {
       var auth = this.auth;
       var config = this.config;
+      var client = this.httpClient;
 
       return {
         request: function request(_request) {
           if (!auth.isAuthenticated() || !config.httpInterceptor) {
             return _request;
           }
-
-          var token = auth.getToken();
+          var token = auth.getCurrentToken();
 
           if (config.authHeader && config.authToken) {
             token = config.authToken + ' ' + token;
           }
 
-          _request.headers.append(config.authHeader, token);
+          _request.headers.set(config.authHeader, token);
 
           return _request;
+        },
+        response: function response(_response, request) {
+          return new Promise(function (resolve, reject) {
+            if (_response.ok) {
+              return resolve(_response);
+            }
+            if (_response.status !== 401) {
+              return resolve(_response);
+            }
+            if (!auth.isTokenExpired() || !config.httpInterceptor) {
+              return resolve(_response);
+            }
+            if (!auth.getRefreshToken()) {
+              return resolve(_response);
+            }
+            auth.updateToken().then(function () {
+              var token = auth.getCurrentToken();
+              if (config.authHeader && config.authToken) {
+                token = config.authToken + ' ' + token;
+              }
+              request.headers.append('Authorization', token);
+              return client.fetch(request).then(resolve);
+            });
+          });
         }
       };
     }

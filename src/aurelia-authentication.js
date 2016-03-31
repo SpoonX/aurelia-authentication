@@ -36,8 +36,15 @@ function configure(aurelia, config) {
     });
   }
 
-  // Let's see if there's a configured client.
-  let client = clientConfig.getEndpoint(baseConfig.current.endpoint);
+  let client;
+
+  // Let's see if there's a configured named or default client.
+  if (baseConfig.current.endpoint !== null) {
+    client = clientConfig.getEndpoint(baseConfig.current.endpoint);
+    if (!client) {
+      throw new Error(`There is no '${baseConfig.current.endpoint || 'default'}' endpoint registered.`);
+    }
+  }
 
   // No? Fine. Default to HttpClient. BC all the way.
   if (!(client instanceof Rest)) {

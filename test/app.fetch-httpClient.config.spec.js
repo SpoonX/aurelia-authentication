@@ -31,7 +31,8 @@ function getInterceptorStubs(isAuthenticated, httpInterceptor) {
 
   let requestStub = {
     headers: {
-      append: (header, value) => {}
+      append: (header, value) => {},
+      set: (header, value) => {}
     }
   };
 
@@ -47,13 +48,13 @@ describe('FetchConfig', function() {
     it('Should intercept requests when authenticated.', function() {
       let { authenticationStub, configStub, requestStub } = getInterceptorStubs(true, true);
 
-      spyOn(requestStub.headers, 'append');
+      spyOn(requestStub.headers, 'set');
 
       let fetchConfig = new FetchConfig(null, null, authenticationStub, configStub);
       let chain = fetchConfig.interceptor.request(requestStub);
 
       expect(chain).toBe(requestStub);
-      expect(requestStub.headers.append).toHaveBeenCalledWith('AuthoriseHeader', 'AuthoriseToken someToken');
+      expect(requestStub.headers.set).toHaveBeenCalledWith('AuthoriseHeader', 'AuthoriseToken someToken');
     });
 
     it('Should not intercept requests when unauthenticated.', function() {
@@ -111,6 +112,16 @@ describe('FetchConfig', function() {
 
       expect(clientInterceptor.request.toString()).toEqual(configInterceptor.request.toString());
       expect(client.client.baseUrl).toEqual('http://localhost:1927/');
+    });
+
+    it('Should not configure  given client being an unknown string.', function() {
+      let container         = getContainer();
+      let client            = 'unknown';
+      let fetchConfig       = container.get(FetchConfig);
+
+      let configureWithTypo = () =>  fetchConfig.configure(client);
+
+      expect(configureWithTypo).toThrow();
     });
 
     it('Should configure given client being a string.', function() {

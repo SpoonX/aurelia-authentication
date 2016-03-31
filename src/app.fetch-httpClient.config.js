@@ -42,7 +42,7 @@ export class FetchConfig {
           token = `${config.authToken} ${token}`;
         }
 
-        request.headers.append(config.authHeader, token);
+        request.headers.set(config.authHeader, token);
 
         return request;
       }
@@ -65,7 +65,11 @@ export class FetchConfig {
     }
 
     if (typeof client === 'string') {
-      client = this.clientConfig.getEndpoint(client).client;
+      let endpoint = this.clientConfig.getEndpoint(client);
+      if (!endpoint) {
+        throw new Error(`There is no '${client || 'default'}' endpoint registered.`);
+      }
+      client = endpoint.client;
     } else if (client instanceof Rest) {
       client = client.client;
     } else if (!(client instanceof HttpClient)) {

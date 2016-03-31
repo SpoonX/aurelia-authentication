@@ -17,9 +17,9 @@ export class BaseConfig {
       // If using aurelia-api:
       // =====================
 
-      // This is the endpoint used for any requests made in relation to authentication (login, logout, etc.)
+      // This is the name of the endpoint used for any requests made in relation to authentication (login, logout, etc.). An empty string selects the default endpoint of aurelia-api.
       endpoint: null,
-      // When authenticated, these endpoints will have the token added to the header of any requests (for authorization)
+      // When authenticated, these endpoints will have the token added to the header of any requests (for authorization). Accepts an array of endpoint names. An empty string selects the default endpoint of aurelia-api.
       configureEndpoints: null,
 
 

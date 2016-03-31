@@ -39,6 +39,18 @@ export let BaseConfig = class BaseConfig {
 
       unlinkMethod: 'get',
 
+      useRefreshToken: false,
+
+      autoUpdateToken: true,
+
+      refreshTokenRoot: false,
+
+      refreshTokenName: 'refresh_token',
+
+      refreshTokenPrefix: 'aurelia',
+
+      clientId: false,
+
       authHeader: 'Authorization',
 
       authToken: 'Bearer',

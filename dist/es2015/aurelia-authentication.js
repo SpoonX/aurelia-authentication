@@ -28,7 +28,14 @@ function configure(aurelia, config) {
     });
   }
 
-  let client = clientConfig.getEndpoint(baseConfig.current.endpoint);
+  let client;
+
+  if (baseConfig.current.endpoint !== null) {
+    client = clientConfig.getEndpoint(baseConfig.current.endpoint);
+    if (!client) {
+      throw new Error(`There is no '${ baseConfig.current.endpoint || 'default' }' endpoint registered.`);
+    }
+  }
 
   if (!(client instanceof Rest)) {
     client = new Rest(aurelia.container.get(HttpClient));

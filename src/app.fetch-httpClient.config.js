@@ -1,10 +1,10 @@
 import {HttpClient} from 'aurelia-fetch-client';
-import {Authentication} from './authentication';
+import {AuthService} from './authService';
 import {BaseConfig} from './baseConfig';
 import {inject} from 'aurelia-dependency-injection';
 import {Config, Rest} from 'spoonx/aurelia-api';
 
-@inject(HttpClient, Config, Authentication, BaseConfig)
+@inject(HttpClient, Config, AuthService, BaseConfig)
 export class FetchConfig {
   /**
    * Construct the FetchConfig
@@ -14,10 +14,10 @@ export class FetchConfig {
    * @param {Authentication} authService
    * @param {BaseConfig} config
    */
-  constructor(httpClient, clientConfig, authentication, config) {
+  constructor(httpClient, clientConfig, authService, config) {
     this.httpClient   = httpClient;
     this.clientConfig = clientConfig;
-    this.auth         = authentication;
+    this.auth         = authService;
     this.config       = config.current;
   }
 
@@ -27,16 +27,16 @@ export class FetchConfig {
    * @return {{request: Function}}
    */
   get interceptor() {
-    let auth    = this.auth;
-    let config  = this.config;
+    let auth   = this.auth;
+    let config = this.config;
+    let client = this.httpClient;
 
     return {
       request(request) {
         if (!auth.isAuthenticated() || !config.httpInterceptor) {
           return request;
         }
-
-        let token = auth.getToken();
+        let token = auth.getCurrentToken();
 
         if (config.authHeader && config.authToken) {
           token = `${config.authToken} ${token}`;
@@ -45,6 +45,30 @@ export class FetchConfig {
         request.headers.set(config.authHeader, token);
 
         return request;
+      },
+      response(response, request) {
+        return new Promise((resolve, reject) => {
+          if (response.ok) {
+            return resolve(response);
+          }
+          if (response.status !== 401) {
+            return resolve(response);
+          }
+          if (!auth.isTokenExpired() || !config.httpInterceptor) {
+            return resolve(response);
+          }
+          if (!auth.getRefreshToken()) {
+            return resolve(response);
+          }
+          auth.updateToken().then(() => {
+            let token = auth.getCurrentToken();
+            if (config.authHeader && config.authToken) {
+              token = `${config.authToken} ${token}`;
+            }
+            request.headers.append('Authorization', token);
+            return client.fetch(request).then(resolve);
+          });
+        });
       }
     };
   }

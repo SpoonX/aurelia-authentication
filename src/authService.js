@@ -8,11 +8,12 @@ import {authUtils} from './authUtils';
 @inject(Authentication, OAuth1, OAuth2, BaseConfig)
 export class AuthService {
   constructor(auth, oAuth1, oAuth2, config) {
-    this.auth   = auth;
-    this.oAuth1 = oAuth1;
-    this.oAuth2 = oAuth2;
-    this.config = config.current;
-    this.client = this.config.client;
+    this.auth         = auth;
+    this.oAuth1       = oAuth1;
+    this.oAuth2       = oAuth2;
+    this.config       = config.current;
+    this.client       = this.config.client;
+    this.isRefreshing = false;
   }
 
   getMe(criteria) {
@@ -22,15 +23,34 @@ export class AuthService {
     return this.client.find(this.auth.getProfileUrl(), criteria);
   }
 
+  getCurrentToken() {
+    return this.auth.getToken();
+  }
+
+  getRefreshToken() {
+    return this.auth.getRefreshToken();
+  }
+
   updateMe(body, criteria) {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
-      criteria = {id: criteria};
+      criteria = { id: criteria };
     }
     return this.client.update(this.auth.getProfileUrl(), criteria, body);
   }
 
   isAuthenticated() {
+    let isExpired = this.auth.isTokenExpired();
+    if (isExpired && this.config.autoUpdateToken) {
+      if (this.isRefreshing) {
+        return true;
+      }
+      this.updateToken();
+    }
     return this.auth.isAuthenticated();
+  }
+
+  isTokenExpired() {
+    return this.auth.isTokenExpired();
   }
 
   getTokenPayload() {
@@ -63,26 +83,59 @@ export class AuthService {
 
   login(email, password) {
     let loginUrl = this.auth.getLoginUrl();
-    let content;
+    let config   = this.config;
+    let clientId = this.config.clientId;
+    let content  = {};
     if (typeof arguments[1] !== 'string') {
       content = arguments[0];
     } else {
-      content = {
-        'email': email,
-        'password': password
-      };
+      content = {email: email, password: password};
+      if (clientId) {
+        content.client_id = clientId;
+      }
     }
 
     return this.client.post(loginUrl, content)
       .then(response => {
         this.auth.setTokenFromResponse(response);
+        if (config.useRefreshToken) {
+          this.auth.setRefreshTokenFromResponse(response);
+        }
 
         return response;
       });
   }
-
   logout(redirectUri) {
     return this.auth.logout(redirectUri);
+  }
+
+  updateToken() {
+    this.isRefreshing = true;
+    let loginUrl      = this.auth.getLoginUrl();
+    let refreshToken  = this.auth.getRefreshToken();
+    let clientId      = this.config.clientId;
+    let content       = {};
+    if (refreshToken) {
+      content = {grant_type: 'refresh_token', refresh_token: refreshToken};
+      if (clientId) {
+        content.client_id = clientId;
+      }
+
+      return this.client.post(loginUrl, content)
+          .then(response => {
+            this.auth.setRefreshToken(response);
+            this.auth.setToken(response);
+            this.isRefreshing = false;
+
+            return response;
+          }).catch((err) => {
+            this.auth.removeToken();
+            this.auth.removeRefreshToken();
+            this.isRefreshing = false;
+
+            throw err;
+          });
+    }
   }
 
   authenticate(name, redirect, userData) {

@@ -339,7 +339,7 @@ storage: 'localStorage',
 tokenPrefix: 'aurelia',
 
 
-//OAuth provider specific related configuration
+// OAuth provider specific related configuration
 // ============================================
 providers: {
   google: {

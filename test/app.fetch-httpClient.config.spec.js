@@ -1,7 +1,7 @@
 import {Container} from 'aurelia-dependency-injection';
 import {FetchConfig} from '../src/aurelia-authentication';
 import {HttpClient} from 'aurelia-fetch-client';
-import {Config} from 'spoonx/aurelia-api';
+import {Config} from 'aurelia-api';
 
 function getContainer() {
   let container = new Container();

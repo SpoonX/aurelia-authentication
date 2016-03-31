@@ -22,6 +22,7 @@
     "test": "./node_modules/.bin/gulp test"
   },
   "jspm": {
+    "registry": "npm",
     "jspmPackage": true,
     "main": "aurelia-authentication",
     "format": "amd",
@@ -29,25 +30,28 @@
       "dist": "dist/amd"
     },
     "dependencies": {
-      "aurelia-dependency-injection": "npm:aurelia-dependency-injection@^1.0.0-beta.1.2.0",
-      "aurelia-fetch-client": "npm:aurelia-fetch-client@^1.0.0-beta.1.2.0",
-      "aurelia-router": "npm:aurelia-router@^1.0.0-beta.1.2.0",
-      "fetch": "github:github/fetch@^0.11.0",
-      "spoonx/aurelia-api": "github:spoonx/aurelia-api@^2.1.2"
+      "aurelia-api": "^2.1.2",
+      "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
+      "aurelia-fetch-client": "^1.0.0-beta.1.2.0",
+      "aurelia-router": "^1.0.0-beta.1.2.0"
     },
     "peerDependencies": {
-      "aurelia-dependency-injection": "npm:aurelia-dependency-injection@^1.0.0-beta.1.2.0",
-      "aurelia-fetch-client": "npm:aurelia-fetch-client@^1.0.0-beta.1.2.0",
-      "aurelia-router": "npm:aurelia-router@^1.0.0-beta.1.2.0",
-      "fetch": "github:github/fetch@^0.11.0",
-      "spoonx/aurelia-api": "github:spoonx/aurelia-api@^2.1.2"
+      "aurelia-api": "^2.1.2",
+      "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
+      "aurelia-fetch-client": "^1.0.0-beta.1.2.0",
+      "aurelia-router": "^1.0.0-beta.1.2.0"
     },
     "devDependencies": {
-      "aurelia-polyfills": "npm:aurelia-polyfills@^1.0.0-beta.1.1.0",
+      "aurelia-polyfills": "^1.0.0-beta.1.1.0",
       "fetch": "github:github/fetch@^0.11.0"
     }
   },
-  "dependencies": {},
+  "dependencies": {
+    "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
+    "aurelia-fetch-client": "^1.0.0-beta.1.2.0",
+    "aurelia-router": "^1.0.0-beta.1.2.0",
+    "aurelia-api": "^2.1.2"
+  },
   "devDependencies": {
     "aurelia-tools": "^0.1.20",
     "babel-dts-generator": "^0.4.7",

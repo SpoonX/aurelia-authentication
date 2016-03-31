@@ -1,5 +1,5 @@
 import {HttpClient} from 'aurelia-fetch-client';
-import {Config, Rest} from 'spoonx/aurelia-api';
+import {Config, Rest} from 'aurelia-api';
 
 import {AuthService} from './authService';
 import {AuthorizeStep} from './authorizeStep';

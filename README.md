@@ -24,6 +24,18 @@ Spoonx/aurelia-authentication makes use of [aurelia-api](https://github.com/Spoo
 
 ![Authentication header](./pictures/authHeader.png)
 
+## How this differs from 'paulvanbladel/aurelia-auth'
+
+This repository was originally a fork of paulvanbladel/aurealia-auth. It was forked when the original repository was in a period of inactivity, and later made into a repository of it's own. As such we often get asked how this repository differs from the original. So, at the time of writing the differences are as follows:
+
+- Provides the option to use endpoints, introduced by [spoonx/aurelia-api](https://github.com/SpoonX/aurelia-api), which simplifies API access. 
+ - By using aurelia-api the developer can specify which endpoints require the authentication patch.
+- TypeScript support added through the addition of d.ts (typescript definition) files
+- Lots of bug fixes
+- Refactored code to be more readable and performant
+
+**Aside:** Public SpoonX repositories are open to the community and actively maintained and used by the SpoonX company. They follow a strict deploy cycle with reviews and follow semantic versioning. This ensures code quality control and long term commitment.
+
 ## Installation
 We assume that you know about ([NodeJs](https://nodejs.org/), [Gulp](http://gulpjs.com/)) and [Aurelia](http://aurelia.io/).
 Since aurelia-authentication is an [Aurelia plugin](https://github.com/aurelia/skeleton-plugin), we also assume that you have your [Aurelia](http://aurelia.io/) project up and running.

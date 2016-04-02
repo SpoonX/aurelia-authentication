@@ -17,7 +17,7 @@ export class FetchConfig {
   constructor(httpClient, clientConfig, authService, config) {
     this.httpClient   = httpClient;
     this.clientConfig = clientConfig;
-    this.auth         = authService;
+    this.authService  = authService;
     this.config       = config.current;
   }
 
@@ -27,26 +27,22 @@ export class FetchConfig {
    * @return {{request: Function}}
    */
   get interceptor() {
-    let auth   = this.auth;
-    let config = this.config;
-    let client = this.httpClient;
-
     return {
-      request(request) {
-        if (!auth.isAuthenticated() || !config.httpInterceptor) {
+      request: (request) => {
+        if (!this.authService.isAuthenticated() || !this.config.httpInterceptor) {
           return request;
         }
-        let token = auth.getCurrentToken();
+        let token = this.authService.getCurrentToken();
 
-        if (config.authHeader && config.authToken) {
-          token = `${config.authToken} ${token}`;
+        if (this.config.authHeader && this.config.authToken) {
+          token = `${this.config.authToken} ${token}`;
         }
 
-        request.headers.set(config.authHeader, token);
+        request.headers.set(this.config.authHeader, token);
 
         return request;
       },
-      response(response, request) {
+      response: (response, request) => {
         return new Promise((resolve, reject) => {
           if (response.ok) {
             return resolve(response);
@@ -54,19 +50,19 @@ export class FetchConfig {
           if (response.status !== 401) {
             return resolve(response);
           }
-          if (!auth.isTokenExpired() || !config.httpInterceptor) {
+          if (!this.authService.isTokenExpired() || !this.config.httpInterceptor) {
             return resolve(response);
           }
-          if (!auth.getRefreshToken()) {
+          if (!this.authService.getRefreshToken()) {
             return resolve(response);
           }
-          auth.updateToken().then(() => {
-            let token = auth.getCurrentToken();
-            if (config.authHeader && config.authToken) {
-              token = `${config.authToken} ${token}`;
+          this.authService.updateToken().then(() => {
+            let token = this.authService.getCurrentToken();
+            if (this.config.authHeader && this.config.authToken) {
+              token = `${this.config.authToken} ${token}`;
             }
             request.headers.append('Authorization', token);
-            return client.fetch(request).then(resolve);
+            return this.client.fetch(request).then(resolve);
           });
         });
       }

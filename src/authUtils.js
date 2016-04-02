@@ -41,6 +41,34 @@ export class authUtils {
     return typeof value !== 'undefined';
   }
 
+  static isString(value) {
+    return typeof value === 'string';
+  }
+
+  static isObject(value) {
+    return value !== null && typeof value === 'object';
+  }
+
+  static isArray = Array.isArray
+
+  static isFunction(value) {
+    return typeof value === 'function';
+  }
+
+  static isBlankObject(value) {
+    return value !== null && typeof value === 'object' && !Object.getPrototypeOf(value);
+  }
+
+  static isArrayLike(obj) {
+    if (obj === null || authUtils.isWindow(obj)) {
+      return false;
+    }
+  }
+
+  static isWindow(obj) {
+    return obj && obj.window === obj;
+  }
+
   static camelCase(name) {
     return name.replace(/([\:\-\_]+(.))/g, function(_, separator, letter, offset) {
       return offset ? letter.toUpperCase() : letter;
@@ -62,21 +90,11 @@ export class authUtils {
     return obj;
   }
 
-  static isString(value) {
-    return typeof value === 'string';
+  static addTokenPrefix(prefix = '', tokenNme) {
+    return prefix ? prefix + _  + tokenNme : tokenNme;
   }
 
-  static isObject(value) {
-    return value !== null && typeof value === 'object';
-  }
-
-  static isArray = Array.isArray
-
-  static isFunction(value) {
-    return typeof value === 'function';
-  }
-
-  static joinUrl(baseUrl, url) {
+  static joinUrl(baseUrl = '', url = '') {
     if (/^(?:[a-z]+:)?\/\//i.test(url)) {
       return url;
     }
@@ -92,20 +110,6 @@ export class authUtils {
     };
 
     return normalize(joined);
-  }
-
-  static isBlankObject(value) {
-    return value !== null && typeof value === 'object' && !Object.getPrototypeOf(value);
-  }
-
-  static isArrayLike(obj) {
-    if (obj === null || authUtils.isWindow(obj)) {
-      return false;
-    }
-  }
-
-  static isWindow(obj) {
-    return obj && obj.window === obj;
   }
 
   static extend(dst) {

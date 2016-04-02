@@ -25,7 +25,7 @@ export class Popup {
   }
 
   eventListener(redirectUri) {
-    let promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.popupWindow.addEventListener('loadstart', event => {
         if (event.url.indexOf(redirectUri) !== 0) {
           return;
@@ -43,9 +43,7 @@ export class Popup {
           authUtils.extend(qs, hash);
 
           if (qs.error) {
-            reject({
-              error: qs.error
-            });
+            reject({error: qs.error});
           } else {
             resolve(qs);
           }
@@ -55,19 +53,13 @@ export class Popup {
       });
 
       this.popupWindow.addEventListener('exit', () => {
-        reject({
-          data: 'Provider Popup was closed'
-        });
+        reject({data: 'Provider Popup was closed'});
       });
 
       this.popupWindow.addEventListener('loaderror', () => {
-        deferred.reject({
-          data: 'Authorization Failed'
-        });
+        reject({data: 'Authorization Failed'});
       });
     });
-
-    return promise;
   }
 
   pollPopup() {
@@ -88,9 +80,7 @@ export class Popup {
             authUtils.extend(qs, hash);
 
             if (qs.error) {
-              reject({
-                error: qs.error
-              });
+              reject({error: qs.error});
             } else {
               resolve(qs);
             }

@@ -18,7 +18,7 @@ export class FetchConfig {
     this.httpClient   = httpClient;
     this.clientConfig = clientConfig;
     this.auth         = authService;
-    this.config       = config.current;
+    this.config       = config;
   }
 
   /**
@@ -28,7 +28,7 @@ export class FetchConfig {
    */
   get interceptor() {
     let auth   = this.auth;
-    let config = this.config;
+    let config = this.config.current;
     let client = this.httpClient;
 
     return {

@@ -7,7 +7,7 @@ import {
   authUtils
 } from '../src/aurelia-authentication';
 import {BaseConfig} from '../src/baseConfig';
-import {Config, Rest} from 'spoonx/aurelia-api';
+import {Config, Rest} from 'aurelia-api';
 import {HttpClient} from 'aurelia-fetch-client';
 
 let noop = () => {

@@ -2,7 +2,7 @@ import {HttpClient} from 'aurelia-fetch-client';
 import {AuthService} from './authService';
 import {BaseConfig} from './baseConfig';
 import {inject} from 'aurelia-dependency-injection';
-import {Config, Rest} from 'spoonx/aurelia-api';
+import {Config, Rest} from 'aurelia-api';
 
 @inject(HttpClient, Config, AuthService, BaseConfig)
 export class FetchConfig {

@@ -5,7 +5,12 @@
 
 > Makes setting up authentication for your Aurelia app simple.
 
+## Important note
+
+`jspm i aurelia-authentication` or (for webpack) `npm i aurelia-authentication`. Make sure you update all references to `spoonx/aurelia-authentication` and `spoonx/aurelia-api` and remove the `spoonx/` prefix (don't forget your config.js, package.json, imports and bundles).
+
 ## What is aurelia-authentication?
+
 This is a largely refactored module based on [paul van bladel's aurelia-authentication](https://github.com/paulvanbladel/aurelia-auth/).
 
 aurelia-authentication is a token-based authentication plugin for [Aurelia](http://aurelia.io/) with support for popular social authentication providers (Google, Twitter, Facebook, LinkedIn, Windows Live, FourSquare, Yahoo, Github, Instagram) and a local stragegy, i.e. simple username / email and password.
@@ -20,7 +25,7 @@ Basically, aurelia-authentication does not use any cookies but relies on a JWT (
 
 Both **local storage** as well as **session storage** can be used (via the aurelia-authentication security configuration file).
 
-Spoonx/aurelia-authentication makes use of [aurelia-api](https://github.com/SpoonX/aurelia-api) for convenient use of the aurelia-fetch-client. Options are available to directly use aurelia-fetch-client instead. If configured, the aurelia token will be sent automatically to your protected API when the user is authenticated.
+aurelia-authentication makes use of [aurelia-api](https://github.com/SpoonX/aurelia-api) for convenient use of the aurelia-fetch-client. Options are available to directly use aurelia-fetch-client instead. If configured, the aurelia token will be sent automatically to your protected API when the user is authenticated.
 
 ![Authentication header](./pictures/authHeader.png)
 
@@ -28,7 +33,7 @@ Spoonx/aurelia-authentication makes use of [aurelia-api](https://github.com/Spoo
 
 This repository was originally a fork of paulvanbladel/aurealia-auth. It was forked when the original repository was in a period of inactivity, and later made into a repository of it's own. As such we often get asked how this repository differs from the original. So, at the time of writing the differences are as follows:
 
-- Provides the option to use endpoints, introduced by [spoonx/aurelia-api](https://github.com/SpoonX/aurelia-api), which simplifies API access. 
+- Provides the option to use endpoints, introduced by [aurelia-api](https://github.com/SpoonX/aurelia-api), which simplifies API access.
  - By using aurelia-api the developer can specify which endpoints require the authentication patch.
 - TypeScript support added through the addition of d.ts (typescript definition) files
 - Lots of bug fixes
@@ -37,16 +42,19 @@ This repository was originally a fork of paulvanbladel/aurealia-auth. It was for
 **Aside:** Public SpoonX repositories are open to the community and actively maintained and used by the SpoonX company. They follow a strict deploy cycle with reviews and follow semantic versioning. This ensures code quality control and long term commitment.
 
 ## Installation
+
 We assume that you know about ([NodeJs](https://nodejs.org/), [Gulp](http://gulpjs.com/)) and [Aurelia](http://aurelia.io/).
 Since aurelia-authentication is an [Aurelia plugin](https://github.com/aurelia/skeleton-plugin), we also assume that you have your [Aurelia](http://aurelia.io/) project up and running.
 
-```
-jspm install github:spoonx/aurelia-authentication
+```sh
+jspm install aurelia-authentication
 ```
 
 ## How to use aurelia-authentication?
+
 aurelia-authentication does not contain any UI widgets. It's conceived as a simple service with following interface:
-```javascript
+
+```js
 login(email, password)
 logout(redirectUri)
 authenticate(provider, redirect, userData)
@@ -57,13 +65,15 @@ isAuthenticated()
 getTokenPayload()
 unlink(provider)
 ```
+
 Login is used for the local authentication strategy (email + password). Authenticate is for social media authentication. Authenticate is also used for linking a social media account to an existing account.
 
 ### Add an aurelia-authentication security configuration file
+
 Add an javascript file to your project where you will store the aurelia-authentication  security configuration data. Call it for example authConfig.js.
 Since this file is available via the browser, it should never contain sensitive data. Note that for OAuth the clientId is non sensitive. The client secret is sensitive data and should be only available server side. The aurelia-authentication config file is compatible with the original Satellizer config file, easing the migration of AngularJs projects to Aurelia.
 
-Spoonx/aurelia-authentication uses [aurelia-api](https://github.com/SpoonX/aurelia-api). Set here the aurelia-api endpoint for the authorization requests and specify all endpoints you want to have configured for authorized requests. The aurelia token will be added to requests to those endpoints.
+aurelia-authentication uses [aurelia-api](https://github.com/SpoonX/aurelia-api). Set here the aurelia-api endpoint for the authorization requests and specify all endpoints you want to have configured for authorized requests. The aurelia token will be added to requests to those endpoints.
 
 ```js
 var baseConfig = {
@@ -111,17 +121,17 @@ else {
 }
 
 export default config;
-
 ```
+
 The above configuration file can cope with a development and production version (not mandatory of course). The strategy is that when your run on localhost, the development configuration file is used, otherwise the production configuration file is taken.
 
 ### Update the aurelia configuration file
 
 In your aurelia configuration file, add the plugin and inject the aurelia-authentication security configuration file.
 
-While not mandantory, spoonx/aureli-auth is easiest to use in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api). Aurelia-api allows to setup several endpoints for Rest services. This can be used to seperate public and protected routes. For that, we first need to register the endpoints with aurelia-api. Bellow we setup the endpoints 'auth' and 'protected-api'. These will be setup in the proceeding spoonx/aurelia-authentication-plugin configuration for authorized access (specified in above authConfig.js example). The endpoint 'public-api' bellow could be used for public access only, since we didn't add it above to the 'configureEndpoints' array and thus the access token will not be added by aurelia-authentication.
+While not mandantory, aurelia-authentication is easiest to use in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api). Aurelia-api allows to setup several endpoints for Rest services. This can be used to seperate public and protected routes. For that, we first need to register the endpoints with aurelia-api. Bellow we setup the endpoints 'auth' and 'protected-api'. These will be setup in the proceeding aurelia-authentication-plugin configuration for authorized access (specified in above authConfig.js example). The endpoint 'public-api' bellow could be used for public access only, since we didn't add it above to the 'configureEndpoints' array and thus the access token will not be added by aurelia-authentication.
 
-```javascript
+```js
 import authConfig from './authConfig';
 
 export function configure(aurelia) {
@@ -130,27 +140,27 @@ export function configure(aurelia) {
     .standardConfiguration()
     .developmentLogging()    
     /* setup the api endpoints first (if desired) */
-    .plugin('spoonx/aurelia-api', configure => {
+    .plugin('aurelia-api', configure => {
       configure
         .registerEndpoint('auth', 'https://myapi.org/auth')
         .registerEndpoint('protected-api', 'https://myapi.org/protected-api')
         .registerEndpoint('public-api', 'http://myapi.org/public-api');
     })
-    /* configure spoonx/aurelia-authentication */
-    .plugin('spoonx/aurelia-authentication', baseConfig => {
+    /* configure aurelia-authentication */
+    .plugin('aurelia-authentication', baseConfig => {
         baseConfig.configure(authConfig);
     });
 
     aurelia.start().then(a => a.setRoot());
 }
-
 ```
 
-### Provide a UI for a login, signup and profile.
+### Provide a UI for a login, signup and profile
 
 See aurelia-authentication-samples for more details.
 
 Button actions are passed to the corresponding view model via a simple click.delegate:
+
 ```html
 <button class="btn btn-block btn-google-plus" click.delegate="authenticate('google')">
     <span class="ion-social-googleplus"></span>Sign in with Google
@@ -158,8 +168,9 @@ Button actions are passed to the corresponding view model via a simple click.del
 ```
 
 The login view model will speak directly with the aurelia-authentication service, which is made available via constructor injection.
+
 ```js
-import {AuthService} from 'spoonx/aurelia-authentication';
+import {AuthService} from 'aurelia-authentication';
 import {inject} from 'aurelia-framework';
 @inject(AuthService)
 
@@ -192,6 +203,7 @@ export class Login {
 ```
 
 On the profile page, social media accounts can be linked and unlinked. For a nice UI experience, use  if.bind for either showing the link or unlink button:
+
 ```html
 <button class="btn btn-sm btn-danger" if.bind="profile.facebook" click.delegate="unlink('facebook')">
     <i class="ion-social-facebook"></i> Unlink Facebook Account
@@ -200,6 +212,7 @@ On the profile page, social media accounts can be linked and unlinked. For a nic
     <i class="ion-social-facebook"></i> Link Facebook Account
 </button>
 ```
+
 ### Making the Aurelia Router authentication aware
 
 The logout and profile links are only shown when the user is authenticated, whereas the login link is only visible when the user is not authenticated.
@@ -228,12 +241,13 @@ The logout and profile links are only shown when the user is authenticated, wher
     </ul>
 </div>
 ```
+
 Menu items visibility can also be linked with the authFilter to the isAuthenticated value.
 
 In the router config function, you can specifify an auth property in the routing map indicating wether or not the user needs to be authenticated in order to access the route:
 
 ```js
-import {AuthorizeStep} from 'spoonx/aurelia-authentication';
+import {AuthorizeStep} from 'aurelia-authentication';
 
 export class App {
     configureRouter(config, router) {
@@ -252,9 +266,10 @@ export class App {
     };
 }
 ```
+
 In the above example the customer route is only available for authenticated users.
 
-## Full configuration options.
+## Full configuration options
 
 Via the above mentioned configuration virtually all aspects of the authentication process can be tweaked:
 

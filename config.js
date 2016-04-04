@@ -7,13 +7,13 @@ System.config({
   },
 
   map: {
+    "aurelia-api": "npm:aurelia-api@2.1.2",
     "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0",
     "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.2.0",
-    "aurelia-polyfills": "npm:aurelia-polyfills@1.0.0-beta.1.1.0",
+    "aurelia-polyfills": "npm:aurelia-polyfills@1.0.0-beta.1.1.1",
     "aurelia-router": "npm:aurelia-router@1.0.0-beta.1.2.0",
     "fetch": "github:github/fetch@0.11.0",
-    "spoonx/aurelia-api": "github:spoonx/aurelia-api@2.1.2",
-    "github:spoonx/aurelia-api@2.1.2": {
+    "npm:aurelia-api@2.1.2": {
       "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0",
       "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.2.0",
       "extend": "npm:extend@3.0.0",
@@ -30,7 +30,7 @@ System.config({
     "npm:aurelia-metadata@1.0.0-beta.1.2.0": {
       "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.2.0"
     },
-    "npm:aurelia-polyfills@1.0.0-beta.1.1.0": {
+    "npm:aurelia-polyfills@1.0.0-beta.1.1.1": {
       "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.2.0"
     },
     "npm:aurelia-route-recognizer@1.0.0-beta.1.2.0": {

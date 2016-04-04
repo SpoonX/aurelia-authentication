@@ -37,27 +37,27 @@ define(['exports', 'aurelia-dependency-injection', './baseConfig', './storage', 
       _classCallCheck(this, Authentication);
 
       this.storage = storage;
-      this.config = config.current;
+      this.config = config;
     }
 
     Authentication.prototype.getLoginRoute = function getLoginRoute() {
-      return this.config.loginRoute;
+      return this.config.current.loginRoute;
     };
 
     Authentication.prototype.getLoginRedirect = function getLoginRedirect() {
-      return this.config.loginRedirect;
+      return this.config.current.loginRedirect;
     };
 
     Authentication.prototype.getLoginUrl = function getLoginUrl() {
-      return this.config.baseUrl ? _authUtils.authUtils.joinUrl(this.config.baseUrl, this.config.loginUrl) : this.config.loginUrl;
+      return this.config.current.baseUrl ? _authUtils.authUtils.joinUrl(this.config.current.baseUrl, this.config.current.loginUrl) : this.config.current.loginUrl;
     };
 
     Authentication.prototype.getSignupUrl = function getSignupUrl() {
-      return this.config.baseUrl ? _authUtils.authUtils.joinUrl(this.config.baseUrl, this.config.signupUrl) : this.config.signupUrl;
+      return this.config.current.baseUrl ? _authUtils.authUtils.joinUrl(this.config.current.baseUrl, this.config.current.signupUrl) : this.config.current.signupUrl;
     };
 
     Authentication.prototype.getProfileUrl = function getProfileUrl() {
-      return this.config.baseUrl ? _authUtils.authUtils.joinUrl(this.config.baseUrl, this.config.profileUrl) : this.config.profileUrl;
+      return this.config.current.baseUrl ? _authUtils.authUtils.joinUrl(this.config.current.baseUrl, this.config.current.profileUrl) : this.config.current.profileUrl;
     };
 
     Authentication.prototype.getToken = function getToken() {
@@ -84,7 +84,7 @@ define(['exports', 'aurelia-dependency-injection', './baseConfig', './storage', 
 
     Authentication.prototype.setTokenFromResponse = function setTokenFromResponse(response, redirect) {
       var tokenName = this.tokenName;
-      var accessToken = response && response[this.config.responseTokenProp];
+      var accessToken = response && response[this.config.current.responseTokenProp];
       var token = void 0;
 
       if (accessToken) {
@@ -96,19 +96,19 @@ define(['exports', 'aurelia-dependency-injection', './baseConfig', './storage', 
       }
 
       if (!token && response) {
-        token = this.config.tokenRoot && response[this.config.tokenRoot] ? response[this.config.tokenRoot][this.config.tokenName] : response[this.config.tokenName];
+        token = this.config.current.tokenRoot && response[this.config.current.tokenRoot] ? response[this.config.current.tokenRoot][this.config.current.tokenName] : response[this.config.current.tokenName];
       }
 
       if (!token) {
-        var tokenPath = this.config.tokenRoot ? this.config.tokenRoot + '.' + this.config.tokenName : this.config.tokenName;
+        var tokenPath = this.config.current.tokenRoot ? this.config.current.tokenRoot + '.' + this.config.current.tokenName : this.config.current.tokenName;
 
         throw new Error('Expecting a token named "' + tokenPath + '" but instead got: ' + JSON.stringify(response));
       }
 
       this.storage.set(tokenName, token);
 
-      if (this.config.loginRedirect && !redirect) {
-        window.location.href = this.config.loginRedirect;
+      if (this.config.current.loginRedirect && !redirect) {
+        window.location.href = this.config.current.loginRedirect;
       } else if (redirect && _authUtils.authUtils.isString(redirect)) {
         window.location.href = window.encodeURI(redirect);
       }
@@ -129,10 +129,10 @@ define(['exports', 'aurelia-dependency-injection', './baseConfig', './storage', 
       }
 
       if (!token && response) {
-        token = this.config.refreshTokenRoot && response[this.config.refreshTokenRoot] ? response[this.config.refreshTokenRoot][this.config.refreshTokenName] : response[this.config.refreshTokenName];
+        token = this.config.current.refreshTokenRoot && response[this.config.current.refreshTokenRoot] ? response[this.config.current.refreshTokenRoot][this.config.current.refreshTokenName] : response[this.config.current.refreshTokenName];
       }
       if (!token) {
-        refreshTokenPath = this.config.refreshTokenRoot ? this.config.refreshTokenRoot + '.' + this.config.refreshTokenName : this.config.refreshTokenName;
+        refreshTokenPath = this.config.current.refreshTokenRoot ? this.config.current.refreshTokenRoot + '.' + this.config.current.refreshTokenName : this.config.current.refreshTokenName;
 
         throw new Error('Expecting a refresh token named "' + refreshTokenPath + '" but instead got: ' + JSON.stringify(response.content));
       }
@@ -193,8 +193,8 @@ define(['exports', 'aurelia-dependency-injection', './baseConfig', './storage', 
         _this.storage.remove(_this.tokenName);
         _this.storage.remove(_this.refreshTokenName);
 
-        if (_this.config.logoutRedirect && !redirect) {
-          window.location.href = _this.config.logoutRedirect;
+        if (_this.config.current.logoutRedirect && !redirect) {
+          window.location.href = _this.config.current.logoutRedirect;
         } else if (_authUtils.authUtils.isString(redirect)) {
           window.location.href = redirect;
         }
@@ -206,12 +206,12 @@ define(['exports', 'aurelia-dependency-injection', './baseConfig', './storage', 
     _createClass(Authentication, [{
       key: 'refreshTokenName',
       get: function get() {
-        return this.config.refreshTokenPrefix ? this.config.refreshTokenPrefix + '_' + this.config.refreshTokenName : this.config.refreshTokenName;
+        return this.config.current.refreshTokenPrefix ? this.config.current.refreshTokenPrefix + '_' + this.config.current.refreshTokenName : this.config.current.refreshTokenName;
       }
     }, {
       key: 'tokenName',
       get: function get() {
-        return this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
+        return this.config.current.tokenPrefix ? this.config.current.tokenPrefix + '_' + this.config.current.tokenName : this.config.current.tokenName;
       }
     }]);
 

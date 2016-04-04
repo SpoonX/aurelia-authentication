@@ -1,7 +1,7 @@
 'use strict';
 
-System.register(['./authUtils', './baseConfig', 'aurelia-dependency-injection'], function (_export, _context) {
-  var authUtils, BaseConfig, inject, _dec, _class, Popup;
+System.register(['./authUtils'], function (_export, _context) {
+  var authUtils, Popup;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -12,17 +12,12 @@ System.register(['./authUtils', './baseConfig', 'aurelia-dependency-injection'],
   return {
     setters: [function (_authUtils) {
       authUtils = _authUtils.authUtils;
-    }, function (_baseConfig) {
-      BaseConfig = _baseConfig.BaseConfig;
-    }, function (_aureliaDependencyInjection) {
-      inject = _aureliaDependencyInjection.inject;
     }],
     execute: function () {
-      _export('Popup', Popup = (_dec = inject(BaseConfig), _dec(_class = function () {
-        function Popup(config) {
+      _export('Popup', Popup = function () {
+        function Popup() {
           _classCallCheck(this, Popup);
 
-          this.config = config.current;
           this.popupWindow = null;
           this.polling = null;
           this.url = '';
@@ -161,7 +156,7 @@ System.register(['./authUtils', './baseConfig', 'aurelia-dependency-injection'],
         };
 
         return Popup;
-      }()) || _class));
+      }());
 
       _export('Popup', Popup);
     }

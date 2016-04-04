@@ -11,12 +11,12 @@ export let FetchConfig = (_dec = inject(HttpClient, Config, AuthService, BaseCon
     this.httpClient = httpClient;
     this.clientConfig = clientConfig;
     this.auth = authService;
-    this.config = config.current;
+    this.config = config;
   }
 
   get interceptor() {
     let auth = this.auth;
-    let config = this.config;
+    let config = this.config.current;
     let client = this.httpClient;
 
     return {

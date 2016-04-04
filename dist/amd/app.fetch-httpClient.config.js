@@ -45,7 +45,7 @@ define(['exports', 'aurelia-fetch-client', './authService', './baseConfig', 'aur
       this.httpClient = httpClient;
       this.clientConfig = clientConfig;
       this.auth = authService;
-      this.config = config.current;
+      this.config = config;
     }
 
     FetchConfig.prototype.configure = function configure(client) {
@@ -87,7 +87,7 @@ define(['exports', 'aurelia-fetch-client', './authService', './baseConfig', 'aur
       key: 'interceptor',
       get: function get() {
         var auth = this.auth;
-        var config = this.config;
+        var config = this.config.current;
         var client = this.httpClient;
 
         return {

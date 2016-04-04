@@ -20,11 +20,11 @@ System.register(['aurelia-dependency-injection', './baseConfig'], function (_exp
         function Storage(config) {
           _classCallCheck(this, Storage);
 
-          this.config = config.current;
+          this.config = config;
         }
 
         Storage.prototype.get = function get(key) {
-          var storageKey = this.config.storage;
+          var storageKey = this.config.current.storage;
 
           if (window[storageKey]) {
             return window[storageKey].getItem(key);
@@ -32,7 +32,7 @@ System.register(['aurelia-dependency-injection', './baseConfig'], function (_exp
         };
 
         Storage.prototype.set = function set(key, value) {
-          var storageKey = this.config.storage;
+          var storageKey = this.config.current.storage;
 
           if (window[storageKey]) {
             return window[storageKey].setItem(key, value);
@@ -40,7 +40,7 @@ System.register(['aurelia-dependency-injection', './baseConfig'], function (_exp
         };
 
         Storage.prototype.remove = function remove(key) {
-          var storageKey = this.config.storage;
+          var storageKey = this.config.current.storage;
 
           if (window[storageKey]) {
             return window[storageKey].removeItem(key);

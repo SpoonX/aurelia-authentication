@@ -9,8 +9,7 @@ import { BaseConfig } from './baseConfig';
 export let OAuth2 = (_dec = inject(Storage, Popup, BaseConfig), _dec(_class = class OAuth2 {
   constructor(storage, popup, config) {
     this.storage = storage;
-    this.config = config.current;
-    this.client = this.config.client;
+    this.config = config;
     this.popup = popup;
     this.defaults = {
       url: null,
@@ -42,7 +41,7 @@ export let OAuth2 = (_dec = inject(Storage, Popup, BaseConfig), _dec(_class = cl
     let url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
     let openPopup;
-    if (this.config.platform === 'mobile') {
+    if (this.config.current.platform === 'mobile') {
       openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
     } else {
       openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
@@ -72,10 +71,10 @@ export let OAuth2 = (_dec = inject(Storage, Popup, BaseConfig), _dec(_class = cl
 
     authUtils.forEach(current.responseParams, param => data[param] = oauthData[param]);
 
-    let exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, current.url) : current.url;
-    let credentials = this.config.withCredentials ? 'include' : 'same-origin';
+    let exchangeForTokenUrl = this.config.current.baseUrl ? authUtils.joinUrl(this.config.current.baseUrl, current.url) : current.url;
+    let credentials = this.config.current.withCredentials ? 'include' : 'same-origin';
 
-    return this.client.post(exchangeForTokenUrl, data, { credentials: credentials });
+    return this.config.current.client.post(exchangeForTokenUrl, data, { credentials: credentials });
   }
 
   buildQueryString(current) {

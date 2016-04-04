@@ -1,4 +1,4 @@
-define(['exports', './authUtils', './baseConfig', 'aurelia-dependency-injection'], function (exports, _authUtils, _baseConfig, _aureliaDependencyInjection) {
+define(['exports', './authUtils'], function (exports, _authUtils) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -12,13 +12,10 @@ define(['exports', './authUtils', './baseConfig', 'aurelia-dependency-injection'
     }
   }
 
-  var _dec, _class;
-
-  var Popup = exports.Popup = (_dec = (0, _aureliaDependencyInjection.inject)(_baseConfig.BaseConfig), _dec(_class = function () {
-    function Popup(config) {
+  var Popup = exports.Popup = function () {
+    function Popup() {
       _classCallCheck(this, Popup);
 
-      this.config = config.current;
       this.popupWindow = null;
       this.polling = null;
       this.url = '';
@@ -157,5 +154,5 @@ define(['exports', './authUtils', './baseConfig', 'aurelia-dependency-injection'
     };
 
     return Popup;
-  }()) || _class);
+  }();
 });

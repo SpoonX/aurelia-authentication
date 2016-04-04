@@ -1,7 +1,7 @@
 'use strict';
 
 System.register(['aurelia-dependency-injection', './authentication', './baseConfig', './oAuth1', './oAuth2', './authUtils'], function (_export, _context) {
-  var inject, Authentication, BaseConfig, OAuth1, OAuth2, authUtils, _typeof, _dec, _class, AuthService;
+  var inject, Authentication, BaseConfig, OAuth1, OAuth2, authUtils, _typeof, _createClass, _dec, _class, AuthService;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -30,6 +30,24 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
         return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
       };
 
+      _createClass = function () {
+        function defineProperties(target, props) {
+          for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];
+            descriptor.enumerable = descriptor.enumerable || false;
+            descriptor.configurable = true;
+            if ("value" in descriptor) descriptor.writable = true;
+            Object.defineProperty(target, descriptor.key, descriptor);
+          }
+        }
+
+        return function (Constructor, protoProps, staticProps) {
+          if (protoProps) defineProperties(Constructor.prototype, protoProps);
+          if (staticProps) defineProperties(Constructor, staticProps);
+          return Constructor;
+        };
+      }();
+
       _export('AuthService', AuthService = (_dec = inject(Authentication, OAuth1, OAuth2, BaseConfig), _dec(_class = function () {
         function AuthService(auth, oAuth1, oAuth2, config) {
           _classCallCheck(this, AuthService);
@@ -37,8 +55,7 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
           this.auth = auth;
           this.oAuth1 = oAuth1;
           this.oAuth2 = oAuth2;
-          this.config = config.current;
-          this.client = this.config.client;
+          this.config = config;
           this.isRefreshing = false;
         }
 
@@ -66,7 +83,7 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
 
         AuthService.prototype.isAuthenticated = function isAuthenticated() {
           var isExpired = this.auth.isTokenExpired();
-          if (isExpired && this.config.autoUpdateToken) {
+          if (isExpired && this.config.current.autoUpdateToken) {
             if (this.isRefreshing) {
               return true;
             }
@@ -98,10 +115,10 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
             };
           }
           return this.client.post(signupUrl, content).then(function (response) {
-            if (_this.config.loginOnSignup) {
+            if (_this.config.current.loginOnSignup) {
               _this.auth.setTokenFromResponse(response);
-            } else if (_this.config.signupRedirect) {
-              window.location.href = _this.config.signupRedirect;
+            } else if (_this.config.current.signupRedirect) {
+              window.location.href = _this.config.current.signupRedirect;
             }
 
             return response;
@@ -112,8 +129,8 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
           var _this2 = this;
 
           var loginUrl = this.auth.getLoginUrl();
-          var config = this.config;
-          var clientId = this.config.clientId;
+          var config = this.config.current;
+          var clientId = this.config.current.clientId;
           var content = {};
           if (typeof arguments[1] !== 'string') {
             content = arguments[0];
@@ -144,7 +161,7 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
           this.isRefreshing = true;
           var loginUrl = this.auth.getLoginUrl();
           var refreshToken = this.auth.getRefreshToken();
-          var clientId = this.config.clientId;
+          var clientId = this.config.current.clientId;
           var content = {};
           if (refreshToken) {
             content = { grant_type: 'refresh_token', refresh_token: refreshToken };
@@ -172,25 +189,32 @@ System.register(['aurelia-dependency-injection', './authentication', './baseConf
           var _this4 = this;
 
           var provider = this.oAuth2;
-          if (this.config.providers[name].type === '1.0') {
+          if (this.config.current.providers[name].type === '1.0') {
             provider = this.oAuth1;
           }
 
-          return provider.open(this.config.providers[name], userData || {}).then(function (response) {
+          return provider.open(this.config.current.providers[name], userData || {}).then(function (response) {
             _this4.auth.setTokenFromResponse(response, redirect);
             return response;
           });
         };
 
         AuthService.prototype.unlink = function unlink(provider) {
-          var unlinkUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.config.unlinkUrl) : this.config.unlinkUrl;
+          var unlinkUrl = this.config.current.baseUrl ? authUtils.joinUrl(this.config.current.baseUrl, this.config.current.unlinkUrl) : this.config.current.unlinkUrl;
 
-          if (this.config.unlinkMethod === 'get') {
+          if (this.config.current.unlinkMethod === 'get') {
             return this.client.find(unlinkUrl + provider);
-          } else if (this.config.unlinkMethod === 'post') {
+          } else if (this.config.current.unlinkMethod === 'post') {
             return this.client.post(unlinkUrl, provider);
           }
         };
+
+        _createClass(AuthService, [{
+          key: 'client',
+          get: function get() {
+            return this.config.current.client;
+          }
+        }]);
 
         return AuthService;
       }()) || _class));

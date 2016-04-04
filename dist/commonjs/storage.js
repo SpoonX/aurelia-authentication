@@ -17,11 +17,11 @@ var Storage = exports.Storage = (_dec = (0, _aureliaDependencyInjection.inject)(
   function Storage(config) {
     _classCallCheck(this, Storage);
 
-    this.config = config.current;
+    this.config = config;
   }
 
   Storage.prototype.get = function get(key) {
-    var storageKey = this.config.storage;
+    var storageKey = this.config.current.storage;
 
     if (window[storageKey]) {
       return window[storageKey].getItem(key);
@@ -29,7 +29,7 @@ var Storage = exports.Storage = (_dec = (0, _aureliaDependencyInjection.inject)(
   };
 
   Storage.prototype.set = function set(key, value) {
-    var storageKey = this.config.storage;
+    var storageKey = this.config.current.storage;
 
     if (window[storageKey]) {
       return window[storageKey].setItem(key, value);
@@ -37,7 +37,7 @@ var Storage = exports.Storage = (_dec = (0, _aureliaDependencyInjection.inject)(
   };
 
   Storage.prototype.remove = function remove(key) {
-    var storageKey = this.config.storage;
+    var storageKey = this.config.current.storage;
 
     if (window[storageKey]) {
       return window[storageKey].removeItem(key);

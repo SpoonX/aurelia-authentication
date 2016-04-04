@@ -1,12 +1,7 @@
-var _dec, _class;
-
 import { authUtils } from './authUtils';
-import { BaseConfig } from './baseConfig';
-import { inject } from 'aurelia-dependency-injection';
 
-export let Popup = (_dec = inject(BaseConfig), _dec(_class = class Popup {
-  constructor(config) {
-    this.config = config.current;
+export let Popup = class Popup {
+  constructor() {
     this.popupWindow = null;
     this.polling = null;
     this.url = '';
@@ -137,4 +132,4 @@ export let Popup = (_dec = inject(BaseConfig), _dec(_class = class Popup {
     authUtils.forEach(options, (value, key) => parts.push(key + '=' + value));
     return parts.join(',');
   }
-}) || _class);
+};

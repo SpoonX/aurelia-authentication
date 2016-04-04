@@ -5,21 +5,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Popup = undefined;
 
-var _dec, _class;
-
 var _authUtils = require('./authUtils');
-
-var _baseConfig = require('./baseConfig');
-
-var _aureliaDependencyInjection = require('aurelia-dependency-injection');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Popup = exports.Popup = (_dec = (0, _aureliaDependencyInjection.inject)(_baseConfig.BaseConfig), _dec(_class = function () {
-  function Popup(config) {
+var Popup = exports.Popup = function () {
+  function Popup() {
     _classCallCheck(this, Popup);
 
-    this.config = config.current;
     this.popupWindow = null;
     this.polling = null;
     this.url = '';
@@ -158,4 +151,4 @@ var Popup = exports.Popup = (_dec = (0, _aureliaDependencyInjection.inject)(_bas
   };
 
   return Popup;
-}()) || _class);
+}();

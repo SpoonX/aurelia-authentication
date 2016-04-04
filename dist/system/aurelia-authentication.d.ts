@@ -1,17 +1,7 @@
 declare module 'aurelia-authentication' {
-  import {
-    inject
-  } from 'aurelia-dependency-injection';
-  import {
-    Redirect
-  } from 'aurelia-router';
-  import {
-    HttpClient
-  } from 'aurelia-fetch-client';
-  import {
-    Config,
-    Rest
-  } from 'spoonx/aurelia-api';
+  export class AuthFilterValueConverter {
+    toView(routes: any, isAuthenticated: any): any;
+  }
   export class authUtils {
     static isDefined(value: any): any;
     static camelCase(name: any): any;
@@ -28,16 +18,13 @@ declare module 'aurelia-authentication' {
     static merge(dst: any): any;
     static forEach(obj: any, iterator: any, context: any): any;
   }
-  export class AuthFilterValueConverter {
-    toView(routes: any, isAuthenticated: any): any;
-  }
   export class BaseConfig {
     configure(incomingConfig: any): any;
     current: any;
     constructor();
   }
   export class Popup {
-    constructor(config: any);
+    constructor();
     open(url: any, windowName: any, options: any, redirectUri: any): any;
     eventListener(redirectUri: any): any;
     pollPopup(): any;
@@ -88,6 +75,7 @@ declare module 'aurelia-authentication' {
   }
   export class AuthService {
     constructor(auth: any, oAuth1: any, oAuth2: any, config: any);
+    client: any;
     getMe(criteria: any): any;
     getCurrentToken(): any;
     getRefreshToken(): any;

@@ -12,9 +12,12 @@ export let AuthService = (_dec = inject(Authentication, OAuth1, OAuth2, BaseConf
     this.auth = auth;
     this.oAuth1 = oAuth1;
     this.oAuth2 = oAuth2;
-    this.config = config.current;
-    this.client = this.config.client;
+    this.config = config;
     this.isRefreshing = false;
+  }
+
+  get client() {
+    return this.config.current.client;
   }
 
   getMe(criteria) {
@@ -41,7 +44,7 @@ export let AuthService = (_dec = inject(Authentication, OAuth1, OAuth2, BaseConf
 
   isAuthenticated() {
     let isExpired = this.auth.isTokenExpired();
-    if (isExpired && this.config.autoUpdateToken) {
+    if (isExpired && this.config.current.autoUpdateToken) {
       if (this.isRefreshing) {
         return true;
       }
@@ -71,10 +74,10 @@ export let AuthService = (_dec = inject(Authentication, OAuth1, OAuth2, BaseConf
       };
     }
     return this.client.post(signupUrl, content).then(response => {
-      if (this.config.loginOnSignup) {
+      if (this.config.current.loginOnSignup) {
         this.auth.setTokenFromResponse(response);
-      } else if (this.config.signupRedirect) {
-        window.location.href = this.config.signupRedirect;
+      } else if (this.config.current.signupRedirect) {
+        window.location.href = this.config.current.signupRedirect;
       }
 
       return response;
@@ -83,8 +86,8 @@ export let AuthService = (_dec = inject(Authentication, OAuth1, OAuth2, BaseConf
 
   login(email, password) {
     let loginUrl = this.auth.getLoginUrl();
-    let config = this.config;
-    let clientId = this.config.clientId;
+    let config = this.config.current;
+    let clientId = this.config.current.clientId;
     let content = {};
     if (typeof arguments[1] !== 'string') {
       content = arguments[0];
@@ -112,7 +115,7 @@ export let AuthService = (_dec = inject(Authentication, OAuth1, OAuth2, BaseConf
     this.isRefreshing = true;
     let loginUrl = this.auth.getLoginUrl();
     let refreshToken = this.auth.getRefreshToken();
-    let clientId = this.config.clientId;
+    let clientId = this.config.current.clientId;
     let content = {};
     if (refreshToken) {
       content = { grant_type: 'refresh_token', refresh_token: refreshToken };
@@ -138,22 +141,22 @@ export let AuthService = (_dec = inject(Authentication, OAuth1, OAuth2, BaseConf
 
   authenticate(name, redirect, userData) {
     let provider = this.oAuth2;
-    if (this.config.providers[name].type === '1.0') {
+    if (this.config.current.providers[name].type === '1.0') {
       provider = this.oAuth1;
     }
 
-    return provider.open(this.config.providers[name], userData || {}).then(response => {
+    return provider.open(this.config.current.providers[name], userData || {}).then(response => {
       this.auth.setTokenFromResponse(response, redirect);
       return response;
     });
   }
 
   unlink(provider) {
-    let unlinkUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.config.unlinkUrl) : this.config.unlinkUrl;
+    let unlinkUrl = this.config.current.baseUrl ? authUtils.joinUrl(this.config.current.baseUrl, this.config.current.unlinkUrl) : this.config.current.unlinkUrl;
 
-    if (this.config.unlinkMethod === 'get') {
+    if (this.config.current.unlinkMethod === 'get') {
       return this.client.find(unlinkUrl + provider);
-    } else if (this.config.unlinkMethod === 'post') {
+    } else if (this.config.current.unlinkMethod === 'post') {
       return this.client.post(unlinkUrl, provider);
     }
   }

@@ -27,9 +27,8 @@ System.register(['aurelia-dependency-injection', './authUtils', './storage', './
           _classCallCheck(this, OAuth1);
 
           this.storage = storage;
-          this.config = config.current;
+          this.config = config;
           this.popup = popup;
-          this.client = this.config.client;
           this.defaults = {
             url: null,
             name: null,
@@ -44,20 +43,20 @@ System.register(['aurelia-dependency-injection', './authUtils', './storage', './
 
           var current = authUtils.extend({}, this.defaults, options);
 
-          var serverUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, current.url) : current.url;
+          var serverUrl = this.config.current.baseUrl ? authUtils.joinUrl(this.config.current.baseUrl, current.url) : current.url;
 
-          if (this.config.platform !== 'mobile') {
+          if (this.config.current.platform !== 'mobile') {
             this.popup = this.popup.open('', current.name, current.popupOptions, current.redirectUri);
           }
 
-          return this.client.post(serverUrl).then(function (response) {
-            if (_this.config.platform === 'mobile') {
+          return this.config.current.client.post(serverUrl).then(function (response) {
+            if (_this.config.current.platform === 'mobile') {
               _this.popup = _this.popup.open([current.authorizationEndpoint, _this.buildQueryString(response)].join('?'), current.name, current.popupOptions, current.redirectUri);
             } else {
               _this.popup.popupWindow.location = [current.authorizationEndpoint, _this.buildQueryString(response)].join('?');
             }
 
-            var popupListener = _this.config.platform === 'mobile' ? _this.popup.eventListener(current.redirectUri) : _this.popup.pollPopup();
+            var popupListener = _this.config.current.platform === 'mobile' ? _this.popup.eventListener(current.redirectUri) : _this.popup.pollPopup();
 
             return popupListener.then(function (result) {
               return _this.exchangeForToken(result, userData, current);
@@ -67,10 +66,10 @@ System.register(['aurelia-dependency-injection', './authUtils', './storage', './
 
         OAuth1.prototype.exchangeForToken = function exchangeForToken(oauthData, userData, current) {
           var data = authUtils.extend({}, userData, oauthData);
-          var exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, current.url) : current.url;
-          var credentials = this.config.withCredentials ? 'include' : 'same-origin';
+          var exchangeForTokenUrl = this.config.current.baseUrl ? authUtils.joinUrl(this.config.current.baseUrl, current.url) : current.url;
+          var credentials = this.config.current.withCredentials ? 'include' : 'same-origin';
 
-          return this.client.post(exchangeForTokenUrl, data, { credentials: credentials });
+          return this.config.current.client.post(exchangeForTokenUrl, data, { credentials: credentials });
         };
 
         OAuth1.prototype.buildQueryString = function buildQueryString(obj) {

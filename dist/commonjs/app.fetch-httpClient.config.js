@@ -30,7 +30,7 @@ var FetchConfig = exports.FetchConfig = (_dec = (0, _aureliaDependencyInjection.
     this.httpClient = httpClient;
     this.clientConfig = clientConfig;
     this.auth = authService;
-    this.config = config.current;
+    this.config = config;
   }
 
   FetchConfig.prototype.configure = function configure(client) {
@@ -72,7 +72,7 @@ var FetchConfig = exports.FetchConfig = (_dec = (0, _aureliaDependencyInjection.
     key: 'interceptor',
     get: function get() {
       var auth = this.auth;
-      var config = this.config;
+      var config = this.config.current;
       var client = this.httpClient;
 
       return {

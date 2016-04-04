@@ -54,7 +54,7 @@ System.register(['aurelia-fetch-client', './authService', './baseConfig', 'aurel
           this.httpClient = httpClient;
           this.clientConfig = clientConfig;
           this.auth = authService;
-          this.config = config.current;
+          this.config = config;
         }
 
         FetchConfig.prototype.configure = function configure(client) {
@@ -96,7 +96,7 @@ System.register(['aurelia-fetch-client', './authService', './baseConfig', 'aurel
           key: 'interceptor',
           get: function get() {
             var auth = this.auth;
-            var config = this.config;
+            var config = this.config.current;
             var client = this.httpClient;
 
             return {

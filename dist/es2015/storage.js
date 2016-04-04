@@ -5,11 +5,11 @@ import { BaseConfig } from './baseConfig';
 
 export let Storage = (_dec = inject(BaseConfig), _dec(_class = class Storage {
   constructor(config) {
-    this.config = config.current;
+    this.config = config;
   }
 
   get(key) {
-    let storageKey = this.config.storage;
+    let storageKey = this.config.current.storage;
 
     if (window[storageKey]) {
       return window[storageKey].getItem(key);
@@ -17,7 +17,7 @@ export let Storage = (_dec = inject(BaseConfig), _dec(_class = class Storage {
   }
 
   set(key, value) {
-    let storageKey = this.config.storage;
+    let storageKey = this.config.current.storage;
 
     if (window[storageKey]) {
       return window[storageKey].setItem(key, value);
@@ -25,7 +25,7 @@ export let Storage = (_dec = inject(BaseConfig), _dec(_class = class Storage {
   }
 
   remove(key) {
-    let storageKey = this.config.storage;
+    let storageKey = this.config.current.storage;
 
     if (window[storageKey]) {
       return window[storageKey].removeItem(key);

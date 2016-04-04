@@ -27,8 +27,7 @@ System.register(['aurelia-dependency-injection', './authUtils', './storage', './
           _classCallCheck(this, OAuth2);
 
           this.storage = storage;
-          this.config = config.current;
-          this.client = this.config.client;
+          this.config = config;
           this.popup = popup;
           this.defaults = {
             url: null,
@@ -62,7 +61,7 @@ System.register(['aurelia-dependency-injection', './authUtils', './storage', './
           var url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
           var openPopup = void 0;
-          if (this.config.platform === 'mobile') {
+          if (this.config.current.platform === 'mobile') {
             openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
           } else {
             openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
@@ -94,10 +93,10 @@ System.register(['aurelia-dependency-injection', './authUtils', './storage', './
             return data[param] = oauthData[param];
           });
 
-          var exchangeForTokenUrl = this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, current.url) : current.url;
-          var credentials = this.config.withCredentials ? 'include' : 'same-origin';
+          var exchangeForTokenUrl = this.config.current.baseUrl ? authUtils.joinUrl(this.config.current.baseUrl, current.url) : current.url;
+          var credentials = this.config.current.withCredentials ? 'include' : 'same-origin';
 
-          return this.client.post(exchangeForTokenUrl, data, { credentials: credentials });
+          return this.config.current.client.post(exchangeForTokenUrl, data, { credentials: credentials });
         };
 
         OAuth2.prototype.buildQueryString = function buildQueryString(current) {

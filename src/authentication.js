@@ -11,11 +11,11 @@ export class Authentication {
   }
 
   get refreshTokenName() {
-    return this.config.refreshTokenPrefix ? this.config.refreshTokenPrefix + '_' + this.config.refreshTokenName : this.config.refreshTokenName;
+    return authUtils.addTokenPrefix(this.config.refreshTokenPrefix, this.config.refreshTokenName);
   }
 
   get tokenName() {
-    return this.config.tokenPrefix ? this.config.tokenPrefix + '_' + this.config.tokenName : this.config.tokenName;
+    return authUtils.addTokenPrefix(this.config.tokenPrefix, this.config.tokenName);
   }
 
   getLoginRoute() {
@@ -27,15 +27,15 @@ export class Authentication {
   }
 
   getLoginUrl() {
-    return this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.config.loginUrl) : this.config.loginUrl;
+    return authUtils.joinUrl(this.config.baseUrl, this.config.loginUrl);
   }
 
   getSignupUrl() {
-    return this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.config.signupUrl) : this.config.signupUrl;
+    return authUtils.joinUrl(this.config.baseUrl, this.config.signupUrl);
   }
 
   getProfileUrl() {
-    return this.config.baseUrl ? authUtils.joinUrl(this.config.baseUrl, this.config.profileUrl) : this.config.profileUrl;
+    return authUtils.joinUrl(this.config.baseUrl, this.config.profileUrl);
   }
 
   getToken() {

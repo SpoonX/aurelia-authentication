@@ -1,3 +1,13 @@
+<a name"2.1.1"></a>
+### 2.1.1 (2016-04-04)
+
+
+#### Bug Fixes
+
+* **d.ts:** include only necessary imports ([2c292ac4](https://github.com/spoonx/aurelia-authentication/commit/2c292ac4))
+* **project:** allways use config.current directly instead of a copy made in the constructor ([4cfe33b4](https://github.com/spoonx/aurelia-authentication/commit/4cfe33b4))
+
+
 <a name"2.1.0"></a>
 ## 2.1.0 (2016-03-31)
 

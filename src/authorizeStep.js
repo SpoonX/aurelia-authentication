@@ -9,16 +9,15 @@ export class AuthorizeStep {
   }
 
   run(routingContext, next) {
-    let isLoggedIn = this.authentication.isAuthenticated();
-    let loginRoute = this.authentication.getLoginRoute();
+    const isLoggedIn = this.authentication.isAuthenticated();
+    const loginRoute = this.authentication.config.loginRoute;
 
     if (routingContext.getAllInstructions().some(i => i.config.auth)) {
       if (!isLoggedIn) {
         return next.cancel(new Redirect(loginRoute));
       }
     } else if (isLoggedIn && routingContext.getAllInstructions().some(i => i.fragment === loginRoute)) {
-      let loginRedirect = this.authentication.getLoginRedirect();
-      return next.cancel(new Redirect(loginRedirect));
+      return next.cancel(new Redirect( this.authentication.config.loginRedirect ));
     }
 
     return next();

@@ -10,8 +10,10 @@ System.config({
     "aurelia-api": "npm:aurelia-api@2.2.0",
     "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0",
     "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.2.1",
+    "aurelia-path": "npm:aurelia-path@1.0.0-beta.1.2.0",
     "aurelia-polyfills": "npm:aurelia-polyfills@1.0.0-beta.1.1.1",
     "aurelia-router": "npm:aurelia-router@1.0.0-beta.1.2.0",
+    "extend": "npm:extend@3.0.0",
     "fetch": "github:github/fetch@0.11.0",
     "npm:aurelia-api@2.2.0": {
       "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0",

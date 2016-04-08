@@ -4,8 +4,7 @@ import {Config, Rest} from 'aurelia-api';
 import {AuthService} from './authService';
 import {AuthorizeStep} from './authorizeStep';
 import {BaseConfig} from './baseConfig';
-import {FetchConfig} from './app.fetch-httpClient.config';
-import {authUtils} from './authUtils';
+import {FetchConfig} from './fetchClientConfig';
 import './authFilter';
 
 /**
@@ -17,32 +16,36 @@ import './authFilter';
 function configure(aurelia, config) {
   aurelia.globalResources('./authFilter');
 
-  let baseConfig   = aurelia.container.get(BaseConfig);
+  const baseConfig = aurelia.container.get(BaseConfig);
 
   if (typeof config === 'function') {
     config(baseConfig);
   } else if (typeof config === 'object') {
     baseConfig.configure(config);
   }
-
   // after baseConfig was configured
-  let fetchConfig  = aurelia.container.get(FetchConfig);
-  let clientConfig = aurelia.container.get(Config);
+  const fetchConfig  = aurelia.container.get(FetchConfig);
+  const clientConfig = aurelia.container.get(Config);
 
   // Array? Configure the provided endpoints.
-  if (Array.isArray(baseConfig.current.configureEndpoints)) {
-    baseConfig.current.configureEndpoints.forEach(endpointToPatch => {
+  if (Array.isArray(baseConfig.configureEndpoints)) {
+    baseConfig.configureEndpoints.forEach(endpointToPatch => {
       fetchConfig.configure(endpointToPatch);
     });
   }
 
   let client;
 
-  // Let's see if there's a configured named or default client.
-  if (baseConfig.current.endpoint !== null) {
-    client = clientConfig.getEndpoint(baseConfig.current.endpoint);
-    if (!client) {
-      throw new Error(`There is no '${baseConfig.current.endpoint || 'default'}' endpoint registered.`);
+  // Let's see if there's a configured named or default endpoint or a HttpClient.
+  if (baseConfig.endpoint !== null) {
+    if (typeof baseConfig.endpoint === 'string') {
+      const endpoint = clientConfig.getEndpoint(baseConfig.endpoint);
+      if (!endpoint) {
+        throw new Error(`There is no '${baseConfig.endpoint || 'default'}' endpoint registered.`);
+      }
+      client = endpoint;
+    } else if (baseConfig.endpoint instanceof HttpClient) {
+      client = new Rest(baseConfig.endpoint);
     }
   }
 
@@ -52,13 +55,12 @@ function configure(aurelia, config) {
   }
 
   // Set the client on the config, for use throughout the plugin.
-  baseConfig.current.client = client;
+  baseConfig.client = client;
 }
 
 export {
   configure,
   FetchConfig,
   AuthService,
-  AuthorizeStep,
-  authUtils
+  AuthorizeStep
 };

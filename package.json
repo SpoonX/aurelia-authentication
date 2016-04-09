@@ -30,15 +30,15 @@
       "dist": "dist/amd"
     },
     "dependencies": {
-      "aurelia-api": "^2.1.2",
+      "aurelia-api": "^2.2.0",
       "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
-      "aurelia-fetch-client": "^1.0.0-beta.1.2.0",
+      "aurelia-fetch-client": "^1.0.0-beta.1.2.1",
       "aurelia-router": "^1.0.0-beta.1.2.0"
     },
     "peerDependencies": {
-      "aurelia-api": "^2.1.2",
+      "aurelia-api": "^2.2.0",
       "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
-      "aurelia-fetch-client": "^1.0.0-beta.1.2.0",
+      "aurelia-fetch-client": "^1.0.0-beta.1.2.1",
       "aurelia-router": "^1.0.0-beta.1.2.0"
     },
     "devDependencies": {
@@ -47,10 +47,10 @@
     }
   },
   "dependencies": {
+    "aurelia-api": "^2.2.0",
     "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
-    "aurelia-fetch-client": "^1.0.0-beta.1.2.0",
-    "aurelia-router": "^1.0.0-beta.1.2.0",
-    "aurelia-api": "^2.1.2"
+    "aurelia-fetch-client": "^1.0.0-beta.1.2.1",
+    "aurelia-router": "^1.0.0-beta.1.2.0"
   },
   "devDependencies": {
     "aurelia-tools": "^0.1.20",

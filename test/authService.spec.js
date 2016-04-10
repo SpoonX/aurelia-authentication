@@ -30,6 +30,30 @@ function getContainer() {
 
 
 describe('AuthService', () => {
+  describe('.isAuthenticated()', () => {
+    afterEach((done) => {
+      const container = getContainer();
+      const authService = container.get(AuthService);
+      authService.logout().then(done);
+    });
+
+    it('should return boolean', () => {
+      const container = getContainer();
+      const authService = container.get(AuthService);
+
+      expect(typeof authService.isAuthenticated()).toBe('boolean');
+    });
+
+    it('should return Promise', (done) => {
+      const container = getContainer();
+      const authService = container.get(AuthService);
+
+      const result = authService.isAuthenticated(true);
+      expect(result instanceof Promise).toBe(true);
+      result.then(done);
+    });
+  });
+
   describe('.signup()', () => {
     afterEach((done) => {
       const container = getContainer();

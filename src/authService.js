@@ -35,7 +35,7 @@ export class AuthService {
   /**
    * Get current user profile from server
    *
-   * @param {[{},Number,String]}  [criteria object or a Number|String converted to {id:criteria}]
+   * @param {[{}|number|string]}  [criteria object or a Number|String converted to {id:criteria}]
    *
    * @return {Promise<response>}
    *
@@ -51,7 +51,7 @@ export class AuthService {
    * Send current user profile update to server
    *
    * @param {any}                 request body with data.
-   * @param {[{},Number,String]}  [criteria object or a Number|String converted to {id:criteria}]
+   * @param {[{}|Number|String]}  [criteria object or a Number|String converted to {id:criteria}]
    *
    * @return {Promise<response>}
    *
@@ -95,15 +95,32 @@ export class AuthService {
   * @returns {Boolean} true: for Non-JWT tokens and unexpired JWT tokens, false: else
   *
   */
-  isAuthenticated() {
-    const isExpired = this.authentication.isTokenExpired();
-    if (isExpired && this.config.autoUpdateToken) {
+  isAuthenticated(asPromise) {
+    let authenticated = this.authentication.isAuthenticated();
+
+    // auto-update token?
+    if (!authenticated
+      && this.config.autoUpdateToken
+      && this.authentication.accessToken
+      && this.authentication.refreshToken) {
       if (this.isRefreshing) {
-        return true;
+        authenticated = true;
+      } else {
+        authenticated = this.updateToken();
       }
-      this.updateToken();
     }
-    return this.authentication.isAuthenticated();
+
+    // return as boolean or Promise
+    if (asPromise) {
+      if (authenticated instanceof Promise) return authenticated;
+      return Promise.resolve(authenticated);
+    }
+
+    if (authenticated instanceof Promise) {
+      authenticated.catch(()=>{}).then(Promise.resolve);
+      return true;
+    }
+    return authenticated;
   }
 
  /**
@@ -224,6 +241,9 @@ export class AuthService {
    *
    */
   updateToken() {
+    if (this.isRefreshing) {
+
+    }
     this.isRefreshing  = true;
     const refreshToken = this.authentication.refreshToken;
     let content        = {};
@@ -236,15 +256,13 @@ export class AuthService {
 
       return this.client.post(this.config.withBase(this.config.loginUrl), content)
           .then(response => {
+            this.isRefreshing = false;
             this.authentication.setTokensFromResponse(response);
             return response;
           }).catch(err => {
+            this.isRefreshing = false;
             this.authentication.removeTokens();
             throw err;
-          })
-          .then(response => {
-            this.isRefreshing = false;
-            return response;
           });
     }
 

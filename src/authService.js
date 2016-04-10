@@ -2,15 +2,11 @@ import {inject} from 'aurelia-dependency-injection';
 
 import {Authentication} from './authentication';
 import {BaseConfig} from './baseConfig';
-import {OAuth1} from './oAuth1';
-import {OAuth2} from './oAuth2';
 
-@inject(Authentication, OAuth1, OAuth2, BaseConfig)
+@inject(Authentication, BaseConfig)
 export class AuthService {
-  constructor(authentication, oAuth1, oAuth2, config) {
+  constructor(authentication, config) {
     this.authentication = authentication;
-    this.oAuth1         = oAuth1;
-    this.oAuth2         = oAuth2;
     this.config         = config;
   }
 
@@ -156,14 +152,14 @@ export class AuthService {
     return this._signup(content);
   }
 
-  _signup(data) {
+  _signup(data, redirectUri) {
     return this.client.post(this.config.withBase(this.config.signupUrl), data)
       .then(response => {
         if (this.config.loginOnSignup) {
-          this.authentication.setAccessTokenFromResponse(response);
-        } else if (this.config.signupRedirect) {
-          window.location.href = this.config.signupRedirect;
+          this.authentication.setTokensFromResponse(response);
         }
+        this.authentication.redirect(redirectUri, this.config.signupRedirect);
+
         return response;
       });
   }
@@ -189,17 +185,16 @@ export class AuthService {
     return this._login(content);
   }
 
-  _login(data) {
+  _login(data, redirectUri) {
     if (this.config.clientId) {
       data.client_id = this.config.clientId;
     }
 
     return this.client.post(this.config.withBase(this.config.loginUrl), data)
       .then(response => {
-        this.authentication.setAccessTokenFromResponse(response);
-        if (this.config.useRefreshToken) {
-          this.authentication.setRefreshTokenFromResponse(response);
-        }
+        this.authentication.setTokensFromResponse(response);
+
+        this.authentication.redirect(redirectUri, this.config.loginRedirect);
 
         return response;
       });
@@ -214,7 +209,12 @@ export class AuthService {
    *
    */
   logout(redirectUri) {
-    return this.authentication.logout(redirectUri);
+    return this.authentication.logout(redirectUri)
+      .then(response => {
+        this.authentication.redirect(redirectUri, this.config.logoutRedirect);
+
+        return response;
+      });
   }
 
   /**
@@ -224,9 +224,9 @@ export class AuthService {
    *
    */
   updateToken() {
-    this.isRefreshing   = true;
-    const refreshToken  = this.authentication.refreshToken;
-    let content         = {};
+    this.isRefreshing  = true;
+    const refreshToken = this.authentication.refreshToken;
+    let content        = {};
 
     if (refreshToken) {
       content = {grant_type: 'refresh_token', refresh_token: refreshToken};
@@ -236,17 +236,15 @@ export class AuthService {
 
       return this.client.post(this.config.withBase(this.config.loginUrl), content)
           .then(response => {
-            this.authentication.setRefreshTokenFromResponse(response);
-            this.authentication.setAccessTokenFromResponse(response);
-            this.isRefreshing = false;
-
+            this.authentication.setTokensFromResponse(response);
             return response;
           }).catch(err => {
-            this.authentication.accessToken  = null;
-            this.authentication.refreshToken = null;
-            this.isRefreshing = false;
-
+            this.authentication.removeTokens();
             throw err;
+          })
+          .then(response => {
+            this.isRefreshing = false;
+            return response;
           });
     }
 
@@ -264,11 +262,12 @@ export class AuthService {
    *
    */
   authenticate(name, redirectUri, userData = {}) {
-    const provider = this.config.providers[name].type === '1.0' ? this.oAuth1 : this.oAuth2;
-
-    return provider.open(this.config.providers[name], userData)
+    return this.authentication.authenticate(name, userData)
       .then(response => {
-        this.authentication.setAccessTokenFromResponse(response, redirectUri);
+        this.authentication.setTokensFromResponse(response);
+
+        this.authentication.redirect(redirectUri, this.config.loginRedirect);
+
         return response;
       });
   }
@@ -281,8 +280,13 @@ export class AuthService {
    * @return {Promise<response>}
    *
    */
-  unlink(name) {
+  unlink(name, redirectUri) {
     const unlinkUrl = this.config.withBase(this.config.unlinkUrl) + name;
-    return this.client.request(this.config.unlinkMethod, unlinkUrl);
+    return this.client.request(this.config.unlinkMethod, unlinkUrl)
+      .then(response => {
+        this.authentication.redirect(redirectUri);
+
+        return response;
+      });
   }
 }

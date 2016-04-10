@@ -2,12 +2,16 @@ import {inject} from 'aurelia-dependency-injection';
 
 import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
+import {OAuth1} from './oAuth1';
+import {OAuth2} from './oAuth2';
 
-@inject(Storage, BaseConfig)
+@inject(Storage, BaseConfig, OAuth1, OAuth2)
 export class Authentication {
-  constructor(storage, config) {
+  constructor(storage, config, oAuth1, oAuth2) {
     this.storage = storage;
     this.config  = config;
+    this.oAuth1  = oAuth1;
+    this.oAuth2  = oAuth2;
   }
 
   getLoginRoute() {
@@ -128,19 +132,13 @@ export class Authentication {
     return response[tokenName] === undefined ? null : response[tokenName];
   }
 
-  setAccessTokenFromResponse(response, redirect) {
+  setAccessTokenFromResponse(response) {
     const config   = this.config;
     const newToken = this.getTokenFromResponse(response, config.accessTokenProp, config.accessTokenName, config.accessTokenRoot);
 
     if (!newToken) throw new Error('Token not found in response');
 
     this.accessToken = newToken;
-
-    if (this.config.loginRedirect && !redirect) {
-      window.location.href = this.config.loginRedirect;
-    } else if (typeof redirect === 'string') {
-      window.location.href = window.encodeURI(redirect);
-    }
   }
 
   setRefreshTokenFromResponse(response) {
@@ -152,18 +150,57 @@ export class Authentication {
     this.refreshToken = newToken;
   }
 
-  logout(redirect) {
-    return new Promise(resolve => {
-      this.accessToken  = null;
-      this.refreshToken = null;
+  setTokensFromResponse(response) {
+    this.setAccessTokenFromResponse(response);
 
-      if (this.config.logoutRedirect && !redirect) {
-        window.location.href = this.config.logoutRedirect;
-      } else if (typeof redirect === 'string') {
-        window.location.href = redirect;
-      }
+    if (this.config.useRefreshToken) {
+      this.setRefreshTokenFromResponse(response);
+    }
+  }
+
+  removeTokens() {
+    this.accessToken  = null;
+    this.refreshToken = null;
+  }
+
+  logout() {
+    return new Promise(resolve => {
+      this.removeTokens();
 
       resolve();
     });
+  }
+
+  /**
+   * Authenticate with third-party
+   *
+   * @param {String}    name of the provider
+   * @param {[{}]}      [userData]
+   *
+   * @return {Promise<response>}
+   *
+   */
+  authenticate(name, userData = {}) {
+    const provider = this.config.providers[name].type === '1.0' ? this.oAuth1 : this.oAuth2;
+
+    return provider.open(this.config.providers[name], userData);
+  }
+
+  redirect(redirectUrl, defaultRedirectUrl) {
+    // stupid rule to keep it BC
+    if (redirectUrl === true) {
+      console.warn('Setting redirectUrl === true to actually not redirect is deprecated. Set redirectUrl===false instead.');
+      return;
+    }
+    // explicit false means don't redirect
+    if (redirectUrl === false) {
+      console.warn('Setting redirectUrl === false to actually use the defaultRedirectUrl has changed. It means "Do not redirect" now. Set redirectUrl to undefined or null to use the defaultRedirectUrl.');
+      return;
+    }
+    if (typeof redirectUrl === 'string') {
+      window.location.href = window.encodeURI(redirectUrl);
+    } else if (defaultRedirectUrl) {
+      window.location.href = defaultRedirectUrl;
+    }
   }
 }

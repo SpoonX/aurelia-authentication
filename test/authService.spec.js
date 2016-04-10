@@ -235,7 +235,7 @@ describe('AuthService', () => {
     });
 
     it('Should unlink provider using POST.', (done) => {
-      const container = getContainer();
+      const container   = getContainer();
       const authService = container.get(AuthService);
       authService.config.unlinkMethod = 'post';
 
@@ -254,39 +254,30 @@ describe('AuthService', () => {
   });
 
   describe('.authenticate()', () => {
-    let oAuth1;
-    let oAuth2;
+    const container      = getContainer();
+    const authentication = container.get(Authentication);
+    const baseConfig     = container.get(BaseConfig);
 
-    beforeEach(() => {
-      oAuth1 = {
-        open: (provider, userData) => Promise.resolve({
-          provider: provider,
-          userData: userData,
-          access_token: 'oauth1'
-        })
-      };
-      oAuth2 = {
-        open: (provider, userData) => Promise.resolve({
-          provider: provider,
-          userData: userData,
-          access_token: 'oauth2'
-        })
-      };
+    authentication.oAuth1.open = (provider, userData) => Promise.resolve({
+      provider: provider,
+      userData: userData,
+      access_token: 'oauth1'
+    });
+
+    authentication.oAuth2.open = (provider, userData) => Promise.resolve({
+      provider: provider,
+      userData: userData,
+      access_token: 'oauth2'
     });
 
     afterEach((done) => {
-      const container = getContainer();
       const authService = container.get(AuthService);
       authService.logout().then(done);
     });
 
     it('Should authenticate with oAuth1 provider and login.', (done) => {
-      const container      = getContainer();
-      const baseConfig     = container.get(BaseConfig);
-      const authentication = container.get(Authentication);
-
-      const authService = new AuthService(authentication, oAuth1, oAuth2, baseConfig);
-      spyOn(oAuth1, 'open').and.callThrough();
+      const authService = new AuthService(authentication, baseConfig);
+      spyOn(authentication.oAuth1, 'open').and.callThrough();
 
       authService.authenticate('twitter', null, {data: 'some'})
         .then(response => {
@@ -308,12 +299,8 @@ describe('AuthService', () => {
     });
 
     it('Should authenticate with oAuth2 provider and login.', (done) => {
-      const container      = getContainer();
-      const baseConfig     = container.get(BaseConfig);
-      const authentication = container.get(Authentication);
-
-      const authService = new AuthService(authentication, oAuth1, oAuth2, baseConfig);
-      spyOn(oAuth2, 'open').and.callThrough();
+      const authService = new AuthService(authentication, baseConfig);
+      spyOn(authentication.oAuth2, 'open').and.callThrough();
 
       authService.authenticate('facebook', null, {data: 'some'})
         .then(response => {
@@ -335,12 +322,8 @@ describe('AuthService', () => {
     });
 
     it('Should try to authenticate with and fail.', (done) => {
-      const container      = getContainer();
-      const baseConfig     = container.get(BaseConfig);
-      const authentication = container.get(Authentication);
-
-      const authService = new AuthService(authentication, oAuth1, oAuth2, baseConfig);
-      spyOn(oAuth2, 'open').and.returnValue(Promise.resolve());
+      const authService = new AuthService(authentication, baseConfig);
+      spyOn(authentication.oAuth2, 'open').and.returnValue(Promise.resolve());
 
       authService.authenticate('facebook')
         .then(res => {

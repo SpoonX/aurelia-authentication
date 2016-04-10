@@ -276,4 +276,16 @@ describe('Authentication', () => {
       });
     });
   });
+
+  describe('.redirect', () => {
+    const container      = new Container();
+    const authentication = container.get(Authentication);
+
+    it('should not redirect with redirectUri===false', () => {
+      authentication.redirect(false, 'somewhere');
+
+      // basically just don't get the window reload error
+      expect(true).toBe(true);
+    });
+  });
 });

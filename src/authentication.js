@@ -1,184 +1,165 @@
 import {inject} from 'aurelia-dependency-injection';
+
 import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
-import {authUtils} from './authUtils';
 
 @inject(Storage, BaseConfig)
 export class Authentication {
   constructor(storage, config) {
     this.storage = storage;
-    this.config  = config.current;
-  }
-
-  get refreshTokenName() {
-    return authUtils.addTokenPrefix(this.config.refreshTokenPrefix, this.config.refreshTokenName);
-  }
-
-  get tokenName() {
-    return authUtils.addTokenPrefix(this.config.tokenPrefix, this.config.tokenName);
+    this.config  = config;
   }
 
   getLoginRoute() {
+    console.warn('Authentication.getLoginRoute is deprecated. Use baseConfig.loginRoute instead.');
     return this.config.loginRoute;
   }
 
   getLoginRedirect() {
+    console.warn('Authentication.getLoginRedirect is deprecated. Use baseConfig.loginRedirect instead.');
     return this.config.loginRedirect;
   }
 
   getLoginUrl() {
-    return authUtils.joinUrl(this.config.baseUrl, this.config.loginUrl);
+    console.warn('Authentication.getLoginUrl is deprecated. Use baseConfig.withBase(baseConfig.loginUrl) instead.');
+    return this.config.withBase(this.config.loginUrl);
   }
 
   getSignupUrl() {
-    return authUtils.joinUrl(this.config.baseUrl, this.config.signupUrl);
+    console.warn('Authentication.getSignupUrl is deprecated. Use baseConfig.withBase(baseConfig.signupUrl) instead.');
+    return this.config.withBase(this.config.signupUrl);
   }
 
   getProfileUrl() {
-    return authUtils.joinUrl(this.config.baseUrl, this.config.profileUrl);
+    console.warn('Authentication.getProfileUrl is deprecated. Use baseConfig.withBase(baseConfig.profileUrl) instead.');
+    return this.config.withBase(this.config.profileUrl);
   }
 
   getToken() {
-    return this.storage.get(this.tokenName);
+    console.warn('Authentication.getToken is deprecated. Use .accessToken instead.');
+    return this.accessToken;
   }
 
   getRefreshToken() {
-    return this.storage.get(this.refreshTokenName);
+    console.warn('Authentication.getRefreshToken is deprecated. Use .refreshToken instead.');
+    return this.refreshToken;
+  }
+  /* getters/setters for tokens */
+
+  get accessToken() {
+    return this.storage.get(this.config.accessTokenStorage);
   }
 
-  getPayload() {
-    let token = this.storage.get(this.tokenName);
+  set accessToken(newToken) {
+    if (newToken) {
+      return this.storage.set(this.config.accessTokenStorage, newToken);
+    }
+    return this.storage.remove(this.config.accessTokenStorage);
+  }
 
-    if (token && token.split('.').length === 3) {
-      let base64Url = token.split('.')[1];
-      let base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  get refreshToken() {
+    return this.storage.get(this.config.refreshTokenStorage);
+  }
+
+  set refreshToken(newToken) {
+    if (newToken) {
+      return this.storage.set(this.config.refreshTokenStorage, newToken);
+    }
+    return this.storage.remove(this.config.refreshTokenStorage);
+  }
+
+
+  /* work with the token */
+
+  getPayload() {
+    const accessToken = this.accessToken;
+    if (accessToken && accessToken.split('.').length === 3) {
       try {
+        const base64Url = this.accessToken.split('.')[1];
+        const base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         return JSON.parse(decodeURIComponent(escape(window.atob(base64))));
-      } catch (error) {
+      } catch (e) {
         return null;
       }
     }
+    return null;
   }
 
-  setTokenFromResponse(response, redirect) {
-    let tokenName   = this.tokenName;
-    let accessToken = response && response[this.config.responseTokenProp];
-    let token;
+  isTokenExpired() {
+    const payload = this.getPayload();
+    const exp     = payload && payload.exp;
+    if (exp) {
+      return Math.round(new Date().getTime() / 1000) > exp;
+    }
+    return undefined;
+  }
 
-    if (accessToken) {
-      if (authUtils.isObject(accessToken) && authUtils.isObject(accessToken.data)) {
-        response = accessToken;
-      } else if (authUtils.isString(accessToken)) {
-        token = accessToken;
-      }
+  isAuthenticated() {
+    // FAIL: There's no token, so user is not authenticated.
+    if (!this.accessToken) {
+      return false;
+    }
+    // PASS: There is a token, but in a different format
+    if (this.accessToken.split('.').length !== 3) {
+      return true;
+    }
+    // PASS: Non-JWT token that looks like JWT (isTokenExpired === undefined)
+    // PASS or FAIL: test isTokenExpired.
+    return this.isTokenExpired() !== true;
+  }
+
+
+  /* get and set token from response */
+
+  getTokenFromResponse(response, tokenProp, tokenName, tokenRoot) {
+    if (!response) return null;
+
+    const responseTokenProp = response[tokenProp];
+
+    if (typeof responseTokenProp === 'string') {
+      return responseTokenProp;
     }
 
-    if (!token && response) {
-      token = this.config.tokenRoot && response[this.config.tokenRoot] ? response[this.config.tokenRoot][this.config.tokenName] : response[this.config.tokenName];
+    if (typeof responseTokenProp === 'object') {
+      const tokenRootData = tokenRoot && tokenRoot.split('.').reduce(function(o, x) { return o[x]; }, responseTokenProp);
+      return tokenRootData ? tokenRootData[tokenName] : responseTokenProp[tokenName];
     }
 
-    if (!token) {
-      let tokenPath = this.config.tokenRoot ? this.config.tokenRoot + '.' + this.config.tokenName : this.config.tokenName;
+    return response[tokenName] === undefined ? null : response[tokenName];
+  }
 
-      throw new Error('Expecting a token named "' + tokenPath + '" but instead got: ' + JSON.stringify(response));
-    }
+  setAccessTokenFromResponse(response, redirect) {
+    const config   = this.config;
+    const newToken = this.getTokenFromResponse(response, config.accessTokenProp, config.accessTokenName, config.accessTokenRoot);
 
-    this.storage.set(tokenName, token);
+    if (!newToken) throw new Error('Token not found in response');
+
+    this.accessToken = newToken;
 
     if (this.config.loginRedirect && !redirect) {
       window.location.href = this.config.loginRedirect;
-    } else if (redirect && authUtils.isString(redirect)) {
+    } else if (typeof redirect === 'string') {
       window.location.href = window.encodeURI(redirect);
     }
   }
 
   setRefreshTokenFromResponse(response) {
-    let refreshTokenName = this.refreshTokenName;
-    let refreshToken     = response && response.refresh_token;
-    let refreshTokenPath;
-    let token;
+    const config   = this.config;
+    const newToken = this.getTokenFromResponse(response, config.refreshTokenProp, config.refreshTokenName, config.refreshTokenRoot);
 
-    if (refreshToken) {
-      if (authUtils.isObject(refreshToken) && authUtils.isObject(refreshToken.data)) {
-        response = refreshToken;
-      } else if (authUtils.isString(refreshToken)) {
-        token = refreshToken;
-      }
-    }
+    if (!newToken) throw new Error('Token not found in response');
 
-    if (!token && response) {
-      token = this.config.refreshTokenRoot && response[this.config.refreshTokenRoot]
-        ? response[this.config.refreshTokenRoot][this.config.refreshTokenName]
-        : response[this.config.refreshTokenName];
-    }
-    if (!token) {
-      refreshTokenPath = this.config.refreshTokenRoot
-        ? this.config.refreshTokenRoot + '.' + this.config.refreshTokenName
-        : this.config.refreshTokenName;
-
-      throw new Error('Expecting a refresh token named "' + refreshTokenPath + '" but instead got: ' + JSON.stringify(response.content));
-    }
-
-    this.storage.set(refreshTokenName, token);
-  }
-
-  removeToken() {
-    this.storage.remove(this.tokenName);
-  }
-
-  removeRefreshToken() {
-    this.storage.remove(this.refreshTokenName);
-  }
-
-  isAuthenticated() {
-    let token = this.storage.get(this.tokenName);
-
-    // There's no token, so user is not authenticated.
-    if (!token) {
-      return false;
-    }
-
-    // There is a token, but in a different format. Return true.
-    if (token.split('.').length !== 3) {
-      return true;
-    }
-
-    let base64Url = token.split('.')[1];
-    let base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    let exp;
-
-    try {
-      exp = JSON.parse(window.atob(base64)).exp;
-    } catch (error) {
-      return false;
-    }
-
-    if (exp) {
-      return Math.round(new Date().getTime() / 1000) <= exp;
-    }
-
-    return true;
-  }
-
-
-  isTokenExpired() {
-    let payload = this.getPayload();
-    let exp     = payload ? payload.exp : null;
-    if (exp) {
-      return Math.round(new Date().getTime() / 1000) > exp;
-    }
-
-    return undefined;
+    this.refreshToken = newToken;
   }
 
   logout(redirect) {
     return new Promise(resolve => {
-      this.storage.remove(this.tokenName);
-      this.storage.remove(this.refreshTokenName);
+      this.accessToken  = null;
+      this.refreshToken = null;
 
       if (this.config.logoutRedirect && !redirect) {
         window.location.href = this.config.logoutRedirect;
-      } else if (authUtils.isString(redirect)) {
+      } else if (typeof redirect === 'string') {
         window.location.href = redirect;
       }
 

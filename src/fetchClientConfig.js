@@ -1,8 +1,9 @@
 import {HttpClient} from 'aurelia-fetch-client';
-import {AuthService} from './authService';
-import {BaseConfig} from './baseConfig';
 import {inject} from 'aurelia-dependency-injection';
 import {Config, Rest} from 'aurelia-api';
+
+import {AuthService} from './authService';
+import {BaseConfig} from './baseConfig';
 
 @inject(HttpClient, Config, AuthService, BaseConfig)
 export class FetchConfig {
@@ -18,24 +19,24 @@ export class FetchConfig {
     this.httpClient   = httpClient;
     this.clientConfig = clientConfig;
     this.authService  = authService;
-    this.config       = config.current;
+    this.config       = config;
   }
 
   /**
    * Interceptor for HttpClient
    *
-   * @return {{request: Function}}
+   * @return {{request: Function, response: Function}}
    */
   get interceptor() {
     return {
-      request: (request) => {
-        if (!this.authService.isAuthenticated() || !this.config.httpInterceptor) {
+      request: request => {
+        if (!this.config.httpInterceptor || !this.authService.isAuthenticated()) {
           return request;
         }
-        let token = this.authService.getCurrentToken();
+        let token = this.authService.getAccessToken();
 
-        if (this.config.authHeader && this.config.authToken) {
-          token = `${this.config.authToken} ${token}`;
+        if (this.config.authTokenType) {
+          token = `${this.config.authTokenType} ${token}`;
         }
 
         request.headers.set(this.config.authHeader, token);
@@ -50,18 +51,22 @@ export class FetchConfig {
           if (response.status !== 401) {
             return resolve(response);
           }
-          if (!this.authService.isTokenExpired() || !this.config.httpInterceptor) {
+          if (!this.config.httpInterceptor || !this.authService.isTokenExpired()) {
             return resolve(response);
           }
-          if (!this.authService.getRefreshToken()) {
+          if (!this.config.useRefreshToken || !this.authService.getRefreshToken()) {
             return resolve(response);
           }
+
           this.authService.updateToken().then(() => {
-            let token = this.authService.getCurrentToken();
-            if (this.config.authHeader && this.config.authToken) {
-              token = `${this.config.authToken} ${token}`;
+            let token = this.authService.getAccessToken();
+
+            if (this.config.authTokenType) {
+              token = `${this.config.authTokenType} ${token}`;
             }
-            request.headers.append('Authorization', token);
+
+            request.headers.set(this.config.authHeader, token);
+
             return this.client.fetch(request).then(resolve);
           });
         });
@@ -70,7 +75,9 @@ export class FetchConfig {
   }
 
   /**
-   * @param {HttpClient|Rest[]} client
+   * Configure client(s) with authorization interceptor
+   *
+   * @param {HttpClient|Rest|string[]} (array of) httpClient, rest client or api endpoint names
    *
    * @return {HttpClient[]}
    */
@@ -85,7 +92,7 @@ export class FetchConfig {
     }
 
     if (typeof client === 'string') {
-      let endpoint = this.clientConfig.getEndpoint(client);
+      const endpoint = this.clientConfig.getEndpoint(client);
       if (!endpoint) {
         throw new Error(`There is no '${client || 'default'}' endpoint registered.`);
       }

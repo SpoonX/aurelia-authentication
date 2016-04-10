@@ -257,23 +257,18 @@ describe('Authentication', () => {
     });
   });
 
-  describe('.logout', () => {
+  describe('.removeTokens', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
-    it('clear tokens', (done) => {
+    it('clear tokens', () => {
       window.localStorage.setItem('aurelia_access_token', 'some');
       window.localStorage.setItem('aurelia_refresh_token', 'another');
 
-      const promise = authentication.logout();
-      expect(promise instanceof Promise).toBe(true);
+      authentication.removeTokens();
 
-      promise.then(() => {
-        expect(window.localStorage.getItem('aurelia_access_token')).toBe(null);
-        expect(window.localStorage.getItem('aurelia_refresh_token')).toBe(null);
-
-        done();
-      });
+      expect(window.localStorage.getItem('aurelia_access_token')).toBe(null);
+      expect(window.localStorage.getItem('aurelia_refresh_token')).toBe(null);
     });
   });
 

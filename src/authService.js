@@ -28,7 +28,7 @@ export class AuthService {
   }
 
   get auth() {
-    console.warn('AuthService.auth is deprecated. Use .authentication instead.');
+    console.warn('DEPRECATED: AuthService.auth. Use .authentication instead.');
     return this.authentication;
   }
 
@@ -74,7 +74,7 @@ export class AuthService {
   }
 
   getCurrentToken() {
-    console.warn('AuthService.getCurrentToken() is deprecated. Use .getAccessToken() instead.');
+    console.warn('DEPRECATED: AuthService.getCurrentToken(). Use .getAccessToken() instead.');
     return this.getAccessToken();
   }
 
@@ -103,11 +103,7 @@ export class AuthService {
       && this.config.autoUpdateToken
       && this.authentication.accessToken
       && this.authentication.refreshToken) {
-      if (this.isRefreshing) {
-        authenticated = true;
-      } else {
-        authenticated = this.updateToken();
-      }
+      authenticated = this.updateToken();
     }
 
     // return as boolean or Promise
@@ -144,6 +140,38 @@ export class AuthService {
   }
 
   /**
+   * Request new accesss token
+   *
+   * @returns {Promise<Response>} requests new token. can be called multiple times
+   *
+   */
+  updateToken() {
+    if (!this.authentication.refreshToken) {
+      return Promise.reject(new Error('refreshToken not set'));
+    }
+
+    if (this.authentication.updateTokenCallstack.length === 0) {
+      const content = {
+        grant_type: 'refresh_token',
+        refresh_token: this.authentication.refreshToken,
+        client_id: this.config.clientId ? this.config.clientId : undefined
+      };
+
+      this.client.post(this.config.withBase(this.config.loginUrl), content)
+        .then(response => {
+          this.authentication.setTokensFromResponse(response);
+          this.authentication.resolveUpdateTokenCallstack(response);
+        })
+        .catch(err => {
+          this.authentication.removeTokens();
+          this.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
+        });
+    }
+
+    return this.authentication.toUpdateTokenCallstack();
+  }
+
+  /**
    * Signup locally
    *
    * @param {String|{}}  displayName | object with signup data.
@@ -159,7 +187,7 @@ export class AuthService {
     if (typeof arguments[0] === 'object') {
       content = arguments[0];
     } else {
-      console.warn('AuthService.signup(displayName, email, password) is deprecated. Provide an object with signup data instead.');
+      console.warn('DEPRECATED: AuthService.signup(displayName, email, password). Provide an object with signup data instead.');
       content = {
         'displayName': displayName,
         'email': email,
@@ -195,7 +223,7 @@ export class AuthService {
     if (typeof arguments[1] !== 'string') {
       content = arguments[0];
     } else {
-      console.warn('AuthService.login(email, password) is deprecated. Provide an object with login data instead.');
+      console.warn('DEPRECATED: AuthService.login(email, password). Provide an object with login data instead.');
       content = {email: email, password: password};
     }
 
@@ -226,12 +254,13 @@ export class AuthService {
    *
    */
   logout(redirectUri) {
-    return this.authentication.logout(redirectUri)
-      .then(response => {
-        this.authentication.redirect(redirectUri, this.config.logoutRedirect);
+    return new Promise(resolve => {
+      this.authentication.removeTokens();
 
-        return response;
-      });
+      this.authentication.redirect(redirectUri, this.config.logoutRedirect);
+
+      resolve();
+    });
   }
 
   /**
@@ -240,34 +269,6 @@ export class AuthService {
    * @return {Promise<response>}
    *
    */
-  updateToken() {
-    if (this.isRefreshing) {
-
-    }
-    this.isRefreshing  = true;
-    const refreshToken = this.authentication.refreshToken;
-    let content        = {};
-
-    if (refreshToken) {
-      content = {grant_type: 'refresh_token', refresh_token: refreshToken};
-      if (this.config.clientId) {
-        content.client_id = this.config.clientId;
-      }
-
-      return this.client.post(this.config.withBase(this.config.loginUrl), content)
-          .then(response => {
-            this.isRefreshing = false;
-            this.authentication.setTokensFromResponse(response);
-            return response;
-          }).catch(err => {
-            this.isRefreshing = false;
-            this.authentication.removeTokens();
-            throw err;
-          });
-    }
-
-    return Promise.reject('refreshToken not enabled');
-  }
 
   /**
    * Authenticate with third-party and redirect to redirectUri (if set) or redirectUri of config

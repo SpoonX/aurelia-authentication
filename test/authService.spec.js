@@ -6,7 +6,7 @@ import {AuthService} from '../src/aurelia-authentication';
 import {BaseConfig} from '../src/baseConfig';
 import {Authentication} from '../src/authentication';
 
-let noop = () => {};
+const noop = () => {};
 
 function getContainer() {
   const container = new Container();
@@ -31,31 +31,69 @@ function getContainer() {
 
 describe('AuthService', () => {
   describe('.isAuthenticated()', () => {
+    const container      = getContainer();
+    const authentication = container.get(Authentication);
+    const baseConfig     = container.get(BaseConfig);
+    const authService    = container.get(AuthService);
+
     afterEach((done) => {
-      const container = getContainer();
-      const authService = container.get(AuthService);
       authService.logout().then(done);
+      baseConfig.autoUpdateToken = false;
     });
 
     it('should return boolean', () => {
-      const container = getContainer();
-      const authService = container.get(AuthService);
+      const result = authService.isAuthenticated();
 
-      expect(typeof authService.isAuthenticated()).toBe('boolean');
+      expect(typeof result).toBe('boolean');
     });
 
-    it('should return Promise', (done) => {
-      const container = getContainer();
-      const authService = container.get(AuthService);
-
+    it('should return Promise<boolean>', done => {
       const result = authService.isAuthenticated(true);
+
       expect(result instanceof Promise).toBe(true);
-      result.then(done);
+      result.then(authenticated => {
+        expect(typeof authenticated).toBe('boolean');
+        done();
+      });
+    });
+
+    describe('with autoUpdateToken=true', () => {
+      it('should return boolean true', () => {
+        baseConfig.autoUpdateToken  = true;
+        authentication.accessToken  = 'outdated';
+        authentication.refreshToken = 'some';
+
+        spyOn(authService, 'updateToken').and.returnValue(Promise.resolve(false));
+        spyOn(authentication, 'isAuthenticated').and.returnValue(false);
+
+        const result = authService.isAuthenticated();
+
+        expect(typeof result).toBe('boolean');
+        expect(result).toBe(true);
+      });
+
+      it('should return Promise<true>', done => {
+        baseConfig.autoUpdateToken  = true;
+        authentication.accessToken  = 'outdated';
+        authentication.refreshToken = 'some';
+
+        spyOn(authService, 'updateToken').and.returnValue(Promise.resolve(true));
+        spyOn(authentication, 'isAuthenticated').and.returnValue(false);
+
+        const result = authService.isAuthenticated(true);
+
+        expect(result instanceof Promise).toBe(true);
+        result.then(authenticated => {
+          expect(typeof authenticated).toBe('boolean');
+          expect(authenticated).toBe(true);
+          done();
+        });
+      });
     });
   });
 
   describe('.signup()', () => {
-    afterEach((done) => {
+    afterEach(done => {
       const container = getContainer();
       const authService = container.get(AuthService);
       authService.logout().then(done);
@@ -88,7 +126,7 @@ describe('AuthService', () => {
               done();
             })
             .catch(err => {
-              expect(err).toBe('refreshToken not enabled');
+              expect(err instanceof Error).toBe(true);
               done();
             });
         });
@@ -119,7 +157,7 @@ describe('AuthService', () => {
               done();
             })
             .catch(err => {
-              expect(err).toBe('refreshToken not enabled');
+              expect(err instanceof Error).toBe(true);
               done();
             });
         })
@@ -153,7 +191,7 @@ describe('AuthService', () => {
               done();
             })
             .catch(err => {
-              expect(err).toBe('refreshToken not enabled');
+              expect(err instanceof Error).toBe(true);
               done();
             });
         })
@@ -199,7 +237,7 @@ describe('AuthService', () => {
               done();
             })
             .catch(err => {
-              expect(err).toBe('refreshToken not enabled');
+              expect(err instanceof Error).toBe(true);
               done();
             });
         });
@@ -228,7 +266,7 @@ describe('AuthService', () => {
               done();
             })
             .catch(err => {
-              expect(err).toBe('refreshToken not enabled');
+              expect(err instanceof Error).toBe(true);
               done();
             });
         })
@@ -362,6 +400,133 @@ describe('AuthService', () => {
           expect(authService.isTokenExpired()).toBe(undefined);
           expect(authService.isAuthenticated()).toBe(false);
 
+          done();
+        });
+    });
+  });
+
+  describe('.updateToken', () => {
+    const container      = new Container();
+    const authService = container.get(AuthService);
+
+    it('fail without refreshToken', done => {
+      authService.updateToken()
+      .then(res => {
+        expect(res).toBeUndefined();
+        expect(true).toBe(false);
+        done();
+      })
+      .catch(error => {
+        expect(error instanceof Error).toBe(true);
+        done();
+      });
+    });
+
+    it('fail on no token in response', done => {
+      authService.authentication.accessToken = null;
+      authService.authentication.refreshToken = 'some';
+      authService.config.client = {
+        post: () => Promise.resolve({Error: 'serverError'})
+      };
+
+      authService.updateToken()
+        .then(res => {
+          expect(error).toBeUndefined();
+          expect(true).toBe(false);
+          done();
+        })
+        .catch(error => {
+          expect(error instanceof Error).toBe(true);
+          expect(authService.authentication.isAuthenticated()).toBe(false);
+          done();
+        });
+    });
+
+    it('fail with same response if called several times', done => {
+      authService.authentication.accessToken = null;
+      authService.authentication.refreshToken = 'some';
+      authService.config.client = {
+        post: () => Promise.resolve({Error: 'no token'})
+      };
+
+      authService.updateToken()
+        .then(res => {
+          expect(error).toBeUndefined();
+          expect(true).toBe(false);
+          done();
+        })
+        .catch(error => {
+          expect(error instanceof Error).toBe(true);
+          expect(authService.authentication.isAuthenticated()).toBe(false);
+        });
+
+      authService.config.client = {
+        post: () => Promise.resolve({token: 'valid token'})
+      };
+
+      authService.updateToken()
+        .then(res => {
+          expect(error).toBeUndefined();
+          expect(true).toBe(false);
+          done();
+        })
+        .catch(error => {
+          expect(error instanceof Error).toBe(true);
+          expect(authService.authentication.isAuthenticated()).toBe(false);
+          done();
+        });
+    });
+
+    it('get new accessToken', done => {
+      authService.authentication.accessToken = null;
+      authService.authentication.refreshToken = 'some';
+      authService.config.client = {
+        post: () => Promise.resolve({token: 'newToken'})
+      };
+
+      authService.updateToken()
+      .then(res => {
+        expect(authService.authentication.isAuthenticated()).toBe(true);
+        expect(authService.authentication.accessToken).toBe('newToken');
+        done();
+      })
+      .catch(error => {
+        expect(error).toBeUndefined();
+        expect(true).toBe(false);
+        done();
+      });
+    });
+
+    it('get same new accessToken if called several times', done => {
+      authService.authentication.accessToken = null;
+      authService.authentication.refreshToken = 'some';
+      authService.config.client = {
+        post: () => Promise.resolve({token: 'newToken'})
+      };
+
+      authService.updateToken()
+      .then(res => {
+        expect(authService.authentication.isAuthenticated()).toBe(true);
+        expect(authService.authentication.accessToken).toBe('newToken');
+      })
+      .catch(error => {
+        expect(error).toBeUndefined();
+        expect(true).toBe(false);
+        done();
+      });
+
+      authService.config.client = {
+        post: () => Promise.resolve({token: 'other newToken'})
+      };
+      authService.updateToken()
+        .then(res => {
+          expect(authService.authentication.isAuthenticated()).toBe(true);
+          expect(authService.authentication.accessToken).toBe('newToken');
+          done();
+        })
+        .catch(error => {
+          expect(error).toBeUndefined();
+          expect(true).toBe(false);
           done();
         });
     });

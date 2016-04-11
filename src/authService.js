@@ -136,7 +136,7 @@ export class AuthService {
   *
   */
   getTokenPayload() {
-    return this.authentication.getPayload();
+    return this.authentication.getTokenPayload();
   }
 
   /**

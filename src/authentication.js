@@ -77,6 +77,11 @@ export class Authentication {
   /* work with the token */
 
   getPayload() {
+    console.warn('DEPRECATED: Authentication.getPayload(). Use .getTokenPayload() instead.');
+    return this.getTokenPayload();
+  }
+
+  getTokenPayload() {
     const accessToken = this.accessToken;
     if (accessToken && accessToken.split('.').length === 3) {
       try {
@@ -91,7 +96,7 @@ export class Authentication {
   }
 
   isTokenExpired() {
-    const payload = this.getPayload();
+    const payload = this.getTokenPayload();
     const exp     = payload && payload.exp;
     if (exp) {
       return Math.round(new Date().getTime() / 1000) > exp;

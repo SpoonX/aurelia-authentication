@@ -71,7 +71,7 @@ describe('Authentication', () => {
     });
   });
 
-  describe('.getPayload', () => {
+  describe('.getTokenPayload', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
@@ -81,21 +81,21 @@ describe('Authentication', () => {
 
     it('Should return payload of proper JWT token', () => {
       authentication.accessToken = tokenPast.jwt;
-      const payload = authentication.getPayload();
+      const payload = authentication.getTokenPayload();
 
       expect(JSON.stringify(payload)).toBe(JSON.stringify(tokenPast.payload));
     });
 
     it('Should return null for JWT-like token', () => {
       authentication.accessToken = 'xx.yy.zz';
-      const payload = authentication.getPayload();
+      const payload = authentication.getTokenPayload();
 
       expect(payload).toBe(null);
     });
 
     it('Should return null for non-JWT-like token', () => {
       authentication.accessToken = 'xxyyzz';
-      const payload = authentication.getPayload();
+      const payload = authentication.getTokenPayload();
 
       expect(payload).toBe(null);
     });

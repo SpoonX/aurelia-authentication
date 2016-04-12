@@ -184,31 +184,30 @@ export class AuthService {
   /**
    * Signup locally
    *
-   * @param {String|{}}  displayName | object with signup data.
-   * @param {[String]}   [email]
-   * @param {[String]}   [password]
+   * @param {String|{}}   displayName | object with signup data.
+   * @param {[String]|{}} [email | options for post request]
+   * @param {[String]}    [password | redirectUri overwrite]
+   * @param {[{}]}        [options]
+   * @param {[String]}    [redirectUri overwrite]
    *
    * @return {Promise<response>}
    *
    */
-  signup(displayName, email, password) {
+  signup(displayName, email, password, options, redirectUri) {
     let content;
 
     if (typeof arguments[0] === 'object') {
       content = arguments[0];
+      options = arguments[1];
+      redirectUri = arguments[2];
     } else {
-      console.warn('DEPRECATED: AuthService.signup(displayName, email, password). Provide an object with signup data instead.');
       content = {
         'displayName': displayName,
         'email': email,
         'password': password
       };
     }
-    return this._signup(content);
-  }
-
-  _signup(data, redirectUri) {
-    return this.client.post(this.config.withBase(this.config.signupUrl), data)
+    return this.client.post(this.config.withBase(this.config.signupUrl), content, options)
       .then(response => {
         if (this.config.loginOnSignup) {
           this.authentication.responseObject = response;
@@ -222,30 +221,34 @@ export class AuthService {
   /**
    * login locally. Redirect depending on config
    *
-   * @param {{}}  object with login data.
+   * @param {[String]|{}} email | object with signup data.
+   * @param {[String]}    [password | options for post request]
+   * @param {[{}]}        [options | redirectUri overwrite]]
+   * @param {[String]}    [redirectUri overwrite]
    *
    * @return {Promise<response>}
    *
    */
-  login(email, password) {
-    let content  = {};
+  login(email, password, options, redirectUri) {
+    let content;
 
-    if (typeof arguments[1] !== 'string') {
+    if (typeof arguments[0] === 'object') {
       content = arguments[0];
+      options = arguments[1];
+      redirectUri = arguments[2];
     } else {
-      console.warn('DEPRECATED: AuthService.login(email, password). Provide an object with login data instead.');
-      content = {email: email, password: password};
+      content = {
+        'email': email,
+        'password': password
+      };
+      options = options;
     }
 
-    return this._login(content);
-  }
-
-  _login(data, redirectUri) {
     if (this.config.clientId) {
       data.client_id = this.config.clientId;
     }
 
-    return this.client.post(this.config.withBase(this.config.loginUrl), data)
+    return this.client.post(this.config.withBase(this.config.loginUrl), content, options)
       .then(response => {
         this.authentication.responseObject = response;
 

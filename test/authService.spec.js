@@ -380,38 +380,44 @@ describe('AuthService', () => {
         });
     });
 
-    it('Should signup with signup data object and not login.', done => {
+    it('Should signup with signup data object, not login and not redirect.', done => {
       authService.config.loginOnSignup = false;
+      authService.config.signupRedirect = true;
 
-      authService.signup({user: 'some', access_token: 'aToken'})
+      authService.signup({user: 'some', access_token: 'aToken'},  {headers: {Authorization: 'none'}}, false)
         .then(response => {
           expect(response.path).toBe('/auth/signup');
           expect(response.body.user).toBe('some');
+          expect(response.Authorization).toBe('none');
           expect(authService.isAuthenticated()).toBe(false);
 
           expect(authService.getRefreshToken()).toBe(null);
           authService.updateToken()
             .catch(err => {
               expect(err instanceof Error).toBe(true);
+              authService.config.signupRedirect = false;
               done();
             });
         });
     });
 
-    it('Should signup with signup data object and login.', done => {
+    it('Should signup with signup data object, login and not redirect.', done => {
       authService.config.loginOnSignup = true;
+      authService.config.loginRedirect = true;
 
-      authService.signup({user: 'some', access_token: 'aToken'})
+      authService.signup({user: 'some', access_token: 'aToken'}, {headers: {Authorization: 'none'}}, false)
         .then(response => {
           expect(response.path).toBe('/auth/signup');
-          expect(response.body.user).toBe('some');
           expect(authService.getAccessToken()).toBe('aToken');
+          expect(response.body.user).toBe('some');
+          expect(response.Authorization).toBe('none');
           expect(authService.isAuthenticated()).toBe(true);
 
           expect(authService.getRefreshToken()).toBe(null);
           authService.updateToken()
             .catch(err => {
               expect(err instanceof Error).toBe(true);
+              authService.config.loginRedirect = false;
               done();
             });
         });
@@ -441,11 +447,14 @@ describe('AuthService', () => {
         });
     });
 
-    it('Should login with login data object.', done => {
-      authService.login({user: 'some', access_token: 'aToken'})
+    it('Should login with login data object and not redirect.', done => {
+      authService.config.loginRedirect = true;
+
+      authService.login({user: 'some', access_token: 'aToken'},  {headers: {Authorization: 'none'}}, false)
         .then(response => {
           expect(response.path).toBe('/auth/login');
           expect(response.body.user).toBe('some');
+          expect(response.Authorization).toBe('none');
           expect(authService.getAccessToken()).toBe('aToken');
           expect(authService.isAuthenticated()).toBe(true);
 
@@ -453,6 +462,7 @@ describe('AuthService', () => {
           authService.updateToken()
             .catch(err => {
               expect(err instanceof Error).toBe(true);
+              authService.config.loginRedirect = false;
               done();
             });
         });

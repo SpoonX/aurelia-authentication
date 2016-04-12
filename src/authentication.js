@@ -18,6 +18,19 @@ export class Authentication {
     this.payload              = null;
     this.exp                  = null;
     this.hasDataStored        = false;
+
+    // get token stored in previous format over
+    const oldStorageKey = config.tokenPrefix
+                        ? config.tokenPrefix + '_' + config.tokenName
+                        : this.tokenName;
+    const oldToken = storage.get(oldStorageKey);
+
+    if (oldToken) {
+      let fakeOldResponse = {};
+      fakeOldResponse[config.accessTokenProp] = oldToken;
+      this.responseObject = fakeOldResponse;
+      storage.remove(oldStorageKey);
+    }
   }
 
 

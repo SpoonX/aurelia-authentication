@@ -22,6 +22,25 @@ const tokenFuture = {
 
 
 describe('Authentication', () => {
+  describe('.constructor()', () => {
+    const container = new Container();
+
+    afterEach(() => {
+      window.localStorage.removeItem('aurelia_authentication');
+      container.get(Authentication).deleteData();
+    });
+
+    it('should return old accessToken and delete in storage', () => {
+      window.localStorage.setItem('aurelia_token', 'old one');
+
+      const authentication = container.get(Authentication);
+      const token = authentication.getAccessToken();
+
+      expect(token).toBe('old one');
+    });
+  });
+
+
   describe('.responseObject', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);

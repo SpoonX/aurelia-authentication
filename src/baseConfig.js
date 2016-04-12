@@ -301,10 +301,10 @@ export class BaseConfig {
 
   set tokenPrefix(tokenPrefix) {
     console.warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
-    this._tokenPrefix = this.storageKey;
-    return this.storageKey;
+    this._tokenPrefix = tokenPrefix;
+    return tokenPrefix;
   }
   get tokenPrefix() {
-    return this._tokenPrefix;
+    return this._tokenPrefix || 'aurelia';
   }
 }

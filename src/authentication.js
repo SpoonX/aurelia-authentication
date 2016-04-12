@@ -56,7 +56,7 @@ export class Authentication {
   /* getters/setters for responseObject */
 
   get responseObject() {
-    return JSON.parse(this.storage.get(this.config.storageKey));
+    return JSON.parse(this.storage.get(this.config.storageKey || {}));
   }
 
   set responseObject(response) {

@@ -31,17 +31,26 @@ describe('Authentication', () => {
       authentication.deleteData();
     });
 
+    it('Should get {} if no responseObject stored', () => {
+      window.localStorage.removeItem('aurelia_authentication');
+
+      const responseObject = authentication.responseObject;
+      expect(typeof responseObject === 'object').toBe(true);
+      expect(responseObject).toBe(null);
+    });
+
+    it('Should get stored responseObject', () => {
+      window.localStorage.setItem('aurelia_authentication', JSON.stringify({access_token: 'another'}));
+
+      const responseObject = authentication.responseObject;
+      expect(typeof responseObject === 'object').toBe(true);
+      expect(responseObject.access_token).toBe('another');
+    });
+
     it('Should set with object', () => {
       authentication.responseObject = {access_token: 'some'};
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe('some');
-    });
-
-    it('Should get responseObject', () => {
-      window.localStorage.setItem('aurelia_authentication', JSON.stringify({access_token: 'another'}));
-
-      expect(typeof authentication.responseObject === 'object').toBe(true);
-      expect(authentication.responseObject.access_token).toBe('another');
     });
 
     it('Should delete', () => {

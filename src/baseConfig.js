@@ -293,7 +293,6 @@ export class BaseConfig {
     console.warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
     this._tokenName = tokenName;
     this.accessTokenName = tokenName;
-    this.storageKey = this.tokenPrefix ? this.tokenPrefix + '_' + this.tokenName : this.tokenName;
     return tokenName;
   }
   get tokenName() {
@@ -301,12 +300,11 @@ export class BaseConfig {
   }
 
   set tokenPrefix(tokenPrefix) {
-    console.warn('BaseConfig.tokenPrefix is deprecated. Use BaseConfig.storageKey instead.');
-    this._tokenPrefix = tokenPrefix;
-    this.storageKey = this.tokenPrefix ? this.tokenPrefix + '_' + this.tokenName : this.tokenName;
-    return tokenPrefix;
+    console.warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
+    this._tokenPrefix = this.storageKey;
+    return this.storageKey;
   }
   get tokenPrefix() {
-    return this._tokenPrefixx;
+    return this._tokenPrefix;
   }
 }

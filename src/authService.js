@@ -70,7 +70,7 @@ export class AuthService {
    *
    */
   getAccessToken() {
-    return this.authentication.accessToken;
+    return this.authentication.getAccessToken();
   }
 
   getCurrentToken() {
@@ -85,7 +85,7 @@ export class AuthService {
    *
    */
   getRefreshToken() {
-    return this.authentication.refreshToken;
+    return this.authentication.getRefreshToken();
   }
 
  /**
@@ -101,8 +101,8 @@ export class AuthService {
     // auto-update token?
     if (!authenticated
       && this.config.autoUpdateToken
-      && this.authentication.accessToken
-      && this.authentication.refreshToken) {
+      && this.authentication.getAccessToken()
+      && this.authentication.getRefreshToken()) {
       authenticated = this.updateToken();
     }
 
@@ -119,10 +119,20 @@ export class AuthService {
     return authenticated;
   }
 
+  /**
+   * Gets remaining time in seconds
+   *
+   * @returns {Number} remaing time for JWT tokens, NaN for all other tokesn
+   *
+   */
+  getTimeLeft() {
+    return this.authentication.getTimeLeft();
+  }
+
  /**
   * Gets exp from token payload and compares to current time
   *
-  * @returns {Boolean | undefined} undefined: Non-JWT payload, true: unexpired JWT tokens, false: else
+  * @returns {Boolean} getTimeLeft>0 time for JWT tokens, undefined other tokesn
   *
   */
   isTokenExpired() {
@@ -136,7 +146,7 @@ export class AuthService {
   *
   */
   getTokenPayload() {
-    return this.authentication.getTokenPayload();
+    return this.authentication.getPayload();
   }
 
   /**
@@ -146,24 +156,24 @@ export class AuthService {
    *
    */
   updateToken() {
-    if (!this.authentication.refreshToken) {
+    if (!this.authentication.getRefreshToken()) {
       return Promise.reject(new Error('refreshToken not set'));
     }
 
     if (this.authentication.updateTokenCallstack.length === 0) {
       const content = {
         grant_type: 'refresh_token',
-        refresh_token: this.authentication.refreshToken,
+        refresh_token: this.authentication.getRefreshToken(),
         client_id: this.config.clientId ? this.config.clientId : undefined
       };
 
       this.client.post(this.config.withBase(this.config.loginUrl), content)
         .then(response => {
-          this.authentication.setTokensFromResponse(response);
+          this.authentication.responseObject = response;
           this.authentication.resolveUpdateTokenCallstack(response);
         })
         .catch(err => {
-          this.authentication.removeTokens();
+          this.authentication.responseObject = null;
           this.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
         });
     }
@@ -201,7 +211,7 @@ export class AuthService {
     return this.client.post(this.config.withBase(this.config.signupUrl), data)
       .then(response => {
         if (this.config.loginOnSignup) {
-          this.authentication.setTokensFromResponse(response);
+          this.authentication.responseObject = response;
         }
         this.authentication.redirect(redirectUri, this.config.signupRedirect);
 
@@ -237,7 +247,7 @@ export class AuthService {
 
     return this.client.post(this.config.withBase(this.config.loginUrl), data)
       .then(response => {
-        this.authentication.setTokensFromResponse(response);
+        this.authentication.responseObject = response;
 
         this.authentication.redirect(redirectUri, this.config.loginRedirect);
 
@@ -255,7 +265,7 @@ export class AuthService {
    */
   logout(redirectUri) {
     return new Promise(resolve => {
-      this.authentication.removeTokens();
+      this.authentication.responseObject = null;
 
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
@@ -283,7 +293,7 @@ export class AuthService {
   authenticate(name, redirectUri, userData = {}) {
     return this.authentication.authenticate(name, userData)
       .then(response => {
-        this.authentication.setTokensFromResponse(response);
+        this.authentication.responseObject = response;
 
         this.authentication.redirect(redirectUri, this.config.loginRedirect);
 

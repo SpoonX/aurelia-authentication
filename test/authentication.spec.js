@@ -4,138 +4,206 @@ import {Authentication} from '../src/authentication';
 
 const tokenPast = {
   payload: {
-    'name': 'tokenPast',
-    'admin': false,
-    'exp': '0460017154'
+    name: 'tokenPast',
+    admin: false,
+    exp: '0460017154'
   },
   jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9rZW5QYXN0IiwiYWRtaW4iOmZhbHNlLCJleHAiOiIwNDYwMDE3MTU0In0.Z7QE185hOWL6xxVDmlFpNEmgA-_Vg2bjV9uDRkkVaQY'
 };
 
 const tokenFuture = {
   payload: {
-    'name': 'tokenFuture',
-    'admin': true,
-    'exp': '2460017154'
+    name: 'tokenFuture',
+    admin: true,
+    exp: '2460017154'
   },
   jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9rZW5GdXR1cmUiLCJhZG1pbiI6dHJ1ZSwiZXhwIjoiMjQ2MDAxNzE1NCJ9.iHXLzWGY5U9WwVT4IVRLuKTf65XpgrA1Qq_Jlynv6bc'
 };
 
+
 describe('Authentication', () => {
-  describe('.accessToken', () => {
+  describe('.responseObject', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_access_token');
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.deleteData();
     });
 
-    it('Should set accessToken', () => {
-      authentication.accessToken = 'some';
-      expect(window.localStorage.getItem('aurelia_access_token')).toBe('some');
+    it('Should set with object', () => {
+      authentication.responseObject = {access_token: 'some'};
+
+      expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe('some');
     });
 
-    it('Should set accessToken', () => {
-      window.localStorage.setItem('aurelia_access_token', 'another');
-      expect(authentication.accessToken).toBe('another');
+    it('Should get responseObject', () => {
+      window.localStorage.setItem('aurelia_authentication', JSON.stringify({access_token: 'another'}));
+
+      expect(typeof authentication.responseObject === 'object').toBe(true);
+      expect(authentication.responseObject.access_token).toBe('another');
     });
 
-    it('Should delete accessToken', () => {
-      window.localStorage.setItem('aurelia_access_token', 'another');
-      authentication.accessToken = 0;
-      expect(window.localStorage.getItem('aurelia_access_token')).toBe(null);
+    it('Should delete', () => {
+      window.localStorage.setItem('aurelia_authentication', 'another');
+
+      authentication.responseObject = null;
+      expect(window.localStorage.getItem('aurelia_authentication')).toBe(null);
     });
   });
 
-  describe('.refreshToken', () => {
+  describe('.getAccessToken()', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_refresh_token');
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.deleteData();
     });
 
-    it('Should set refreshToken', () => {
-      authentication.refreshToken = 'some';
-      expect(window.localStorage.getItem('aurelia_refresh_token')).toBe('some');
-    });
+    it('Should analyze response first and return accessToken', () => {
+      authentication.responseObject = {access_token: 'some'};
 
-    it('Should set refreshToken', () => {
-      window.localStorage.setItem('aurelia_refresh_token', 'another');
-      expect(authentication.refreshToken).toBe('another');
-    });
-
-    it('Should delete refreshToken', () => {
-      window.localStorage.setItem('aurelia_refresh_token', 'another');
-      authentication.refreshToken = 0;
-      expect(window.localStorage.getItem('aurelia_refresh_token')).toBe(null);
+      expect(authentication.getAccessToken()).toBe('some');
     });
   });
 
-  describe('.getTokenPayload', () => {
+  describe('.getRefreshToken()', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      authentication.accessToken = null;
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.config.useRefreshToken = false;
+      authentication.deleteData();
     });
 
-    it('Should return payload of proper JWT token', () => {
-      authentication.accessToken = tokenPast.jwt;
-      const payload = authentication.getTokenPayload();
+    it('Should analyze response first and return refreshToken', () => {
+      authentication.config.useRefreshToken = true;
+      authentication.responseObject = {token: 'some', refresh_token: 'another'};
 
-      expect(JSON.stringify(payload)).toBe(JSON.stringify(tokenPast.payload));
+      expect(authentication.getRefreshToken()).toBe('another');
+    });
+  });
+
+  describe('.getPayload()', () => {
+    const container      = new Container();
+    const authentication = container.get(Authentication);
+
+    afterEach(() => {
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.deleteData();
     });
 
     it('Should return null for JWT-like token', () => {
-      authentication.accessToken = 'xx.yy.zz';
-      const payload = authentication.getTokenPayload();
+      authentication.responseObject = {token: 'xx.yy.zz'};
+      const payload = authentication.payload;
 
       expect(payload).toBe(null);
     });
 
     it('Should return null for non-JWT-like token', () => {
-      authentication.accessToken = 'xxyyzz';
-      const payload = authentication.getTokenPayload();
+      authentication.responseObject = {token: 'some'};
+      const payload = authentication.payload;
 
       expect(payload).toBe(null);
     });
+
+    it('Should analyze response first and return payload', () => {
+      authentication.responseObject = {token: tokenFuture.jwt};
+
+      const payload = authentication.getPayload();
+      expect(typeof payload === 'object').toBe(true);
+      expect(JSON.stringify(payload)).toBe(JSON.stringify(tokenFuture.payload));
+    });
   });
 
-  describe('.isTokenExpired', () => {
+  describe('.getExp()', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_access_token');
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.deleteData();
     });
 
-    it('Should be undefined if payload.exp is not set', () => {
+    it('Should analyze response first and return exp', () => {
+      authentication.responseObject = {token: tokenPast.jwt};
+
+      const exp = authentication.getExp();
+      expect(typeof exp === 'number').toBe(true);
+      expect(exp).toBe(Number(tokenPast.payload.exp));
+    });
+  });
+
+
+  describe('.getTimeLeft()', () => {
+    const container      = new Container();
+    const authentication = container.get(Authentication);
+
+    afterEach(() => {
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.deleteData();
+    });
+
+    it('Should be NaN for Non-JWT', () => {
+      authentication.responseObject = {token: 'some'};
+      const timeLeft = authentication.getTimeLeft();
+
+      expect(typeof timeLeft === 'number').toBe(true);
+      expect(Number.isNaN(timeLeft)).toBe(true);
+    });
+
+    it('Should be exp-currentTime for JWT', () => {
+      authentication.responseObject = {token: tokenPast.jwt};
+
+      const timeLeft = authentication.getTimeLeft();
+      expect(typeof timeLeft === 'number').toBe(true);
+      expect(timeLeft).toBe(tokenPast.payload.exp - Math.round(new Date().getTime() / 1000));
+    });
+  });
+
+  describe('.isTokenExpired()', () => {
+    const container      = new Container();
+    const authentication = container.get(Authentication);
+
+    afterEach(() => {
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.deleteData();
+    });
+
+    it('Should be undefined for Non-JWT', () => {
+      authentication.responseObject = {token: 'some'};
       const isTokenExpired = authentication.isTokenExpired();
 
       expect(isTokenExpired).toBe(undefined);
     });
 
-    it('Should be true if payload.exp is in the past', () => {
-      authentication.accessToken = tokenPast.jwt;
-      const isTokenExpired = authentication.isTokenExpired();
+    it('Should be true when JWT expired', () => {
+      authentication.responseObject = {token: tokenPast.jwt};
 
+      const isTokenExpired = authentication.isTokenExpired();
+      expect(typeof isTokenExpired === 'boolean').toBe(true);
       expect(isTokenExpired).toBe(true);
     });
 
-    it('Should be false if payload.exp is in the future', () => {
-      authentication.accessToken = tokenFuture.jwt;
-      const isTokenExpired = authentication.isTokenExpired();
+    it('Should false when JWT not expired', () => {
+      authentication.responseObject = {token: tokenFuture.jwt};
 
+      const isTokenExpired = authentication.isTokenExpired();
+      expect(typeof isTokenExpired === 'boolean').toBe(true);
       expect(isTokenExpired).toBe(false);
     });
   });
+
 
   describe('.isAuthenticated', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_access_token');
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.deleteData();
     });
 
     it('Should be false when no token present', () => {
@@ -144,50 +212,55 @@ describe('Authentication', () => {
       expect(isAuthenticated).toBe(false);
     });
 
-    it('Should be true when token not JWT-like ', () => {
-      authentication.accessToken = 'xxyyzz';
+    it('Should be true when non-JWT token present', () => {
+      authentication.responseObject = {token: 'some'};
       const isAuthenticated = authentication.isAuthenticated();
 
       expect(isAuthenticated).toBe(true);
     });
 
-    it('Should be true when token only JWT-like ', () => {
-      authentication.accessToken = 'xx.yy.zz';
+    it('Should be true when JWT-like token present', () => {
+      authentication.responseObject = {token: 'xx.yy.zz'};
       const isAuthenticated = authentication.isAuthenticated();
 
       expect(isAuthenticated).toBe(true);
     });
 
-    it('Should be false if JWT token expired', () => {
-      authentication.accessToken = tokenPast.jwt;
-      const isAuthenticated = authentication.isAuthenticated();
+    it('Should be false when JWT expired', () => {
+      authentication.responseObject = {token: tokenPast.jwt};
 
+      const isAuthenticated = authentication.isAuthenticated();
       expect(isAuthenticated).toBe(false);
     });
 
-    it('Should be true if JWT token not expired', () => {
-      authentication.accessToken = tokenFuture.jwt;
-      spyOn(authentication, 'isTokenExpired').and.returnValue(false);
-      const isAuthenticated = authentication.isAuthenticated();
+    it('Should be false when JWT not expired', () => {
+      authentication.responseObject = {token: tokenFuture.jwt};
 
+      const isAuthenticated = authentication.isAuthenticated();
       expect(isAuthenticated).toBe(true);
     });
   });
+
 
   describe('.getTokenFromResponse', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_access_token');
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.deleteData();
     });
 
-    it('Should return null if response is empty', () => {
-      expect(authentication.getTokenFromResponse()).toBe(null);
+    it('Should not throw if response is empty', () => {
+      const fail = () => authentication.getTokenFromResponse();
+
+      expect(fail).not.toThrow();
     });
 
-    it('Should return null if response is not string or object', () => {
-      expect(authentication.getTokenFromResponse(1)).toBe(null);
+    it('Should throw if response is not string or object', () => {
+      const fail = () => authentication.getTokenFromResponse(1);
+
+      expect(fail).toThrow();
     });
 
     it('Should return token if response has a string in tokenProp', () => {
@@ -215,62 +288,44 @@ describe('Authentication', () => {
     });
   });
 
-  describe('.setAccessTokenFromResponse', () => {
+
+  describe('.getDataFromResponse', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_access_token');
+      window.localStorage.removeItem('aurelia_authentication');
+      authentication.deleteData();
     });
 
-    it('Should throw when no access token response', () => {
-      const fail = () => authentication.setAccessTokenFromResponse;
+    it('Should set data from non-JWT response', () => {
+      authentication.getDataFromResponse({access_token: 'token'});
 
-      expect(fail()).toThrow();
-    });
-
-    it('Should set access token if present in response', () => {
-      authentication.setAccessTokenFromResponse({access_token: 'token'});
-
+      expect(authentication.hasDataStored).toBe(true);
       expect(authentication.accessToken).toBe('token');
+      expect(authentication.payload).toBe(null);
+      expect(Number.isNaN(authentication.exp)).toBe(true);
+    });
+
+    it('Should set data from JWT-like response', () => {
+      authentication.getDataFromResponse({access_token: 'xx.yy.zz'});
+
+      expect(authentication.hasDataStored).toBe(true);
+      expect(authentication.accessToken).toBe('xx.yy.zz');
+      expect(authentication.payload).toBe(null);
+      expect(Number.isNaN(authentication.exp)).toBe(true);
+    });
+
+    it('Should set data from JWT response', () => {
+      authentication.getDataFromResponse({access_token: tokenFuture.jwt});
+
+      expect(authentication.hasDataStored).toBe(true);
+      expect(authentication.accessToken).toBe(tokenFuture.jwt);
+      expect(JSON.stringify(authentication.payload)).toBe(JSON.stringify(tokenFuture.payload));
+      expect(authentication.exp).toBe(Number(tokenFuture.payload.exp));
     });
   });
 
-  describe('.setRefreshTokenFromResponse', () => {
-    const container      = new Container();
-    const authentication = container.get(Authentication);
-
-    afterEach(() => {
-      window.localStorage.removeItem('aurelia_refresh_token');
-    });
-
-    it('Should throw when no refresh token response', () => {
-      const fail = () => authentication.setRefreshTokenFromResponse;
-
-      expect(fail()).toThrow();
-    });
-
-    it('Should set refesh token if present in response', () => {
-      authentication.setRefreshTokenFromResponse({refresh_token: 'token'});
-
-      expect(authentication.refreshToken).toBe('token');
-    });
-  });
-
-  describe('.removeTokens', () => {
-    const container      = new Container();
-    const authentication = container.get(Authentication);
-
-    it('clear tokens', () => {
-      window.localStorage.setItem('aurelia_access_token', 'some');
-      window.localStorage.setItem('aurelia_refresh_token', 'another');
-
-      authentication.removeTokens();
-
-      expect(window.localStorage.getItem('aurelia_access_token')).toBe(null);
-      expect(window.localStorage.getItem('aurelia_refresh_token')).toBe(null);
-    });
-  });
 
   describe('.redirect', () => {
     const container      = new Container();

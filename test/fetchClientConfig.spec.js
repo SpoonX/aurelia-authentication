@@ -27,7 +27,7 @@ describe('FetchConfig', function() {
     it('Should intercept requests when authenticated.', function(done) {
       let client                 = container.get(HttpClient);
       client.baseUrl             = 'http://localhost:1927/';
-      authentication.accessToken = 'xy';
+      authentication.responseObject = {token: 'xy'};
 
       fetchConfig.configure();
       client.fetch('some')

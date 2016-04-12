@@ -13,7 +13,15 @@ export class Authentication {
     this.oAuth1               = oAuth1;
     this.oAuth2               = oAuth2;
     this.updateTokenCallstack = [];
+    this.accessToken          = null;
+    this.refreshToken         = null;
+    this.payload              = null;
+    this.exp                  = null;
+    this.hasDataStored        = false;
   }
+
+
+  /* deprecated methods */
 
   getLoginRoute() {
     console.warn('DEPRECATED: Authentication.getLoginRoute. Use baseConfig.loginRoute instead.');
@@ -41,88 +49,119 @@ export class Authentication {
   }
 
   getToken() {
-    console.warn('DEPRECATED: Authentication.getToken. Use .accessToken instead.');
+    console.warn('DEPRECATED: Authentication.getToken. Use .getAccessToken() instead.');
+    return this.getAccessToken();
+  }
+
+  /* getters/setters for responseObject */
+
+  get responseObject() {
+    return JSON.parse(this.storage.get(this.config.storageKey));
+  }
+
+  set responseObject(response) {
+    if (response) {
+      this.getDataFromResponse(response);
+      return this.storage.set(this.config.storageKey, JSON.stringify(response));
+    }
+    this.deleteData();
+    return this.storage.remove(this.config.storageKey);
+  }
+
+
+  /* get data, update if needed first */
+
+  getAccessToken() {
+    if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
     return this.accessToken;
   }
 
   getRefreshToken() {
-    console.warn('DEPRECATED: Authentication.getRefreshToken. Use .refreshToken instead.');
+    if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
     return this.refreshToken;
   }
-  /* getters/setters for tokens */
-
-  get accessToken() {
-    return this.storage.get(this.config.accessTokenStorage);
-  }
-
-  set accessToken(newToken) {
-    if (newToken) {
-      return this.storage.set(this.config.accessTokenStorage, newToken);
-    }
-    return this.storage.remove(this.config.accessTokenStorage);
-  }
-
-  get refreshToken() {
-    return this.storage.get(this.config.refreshTokenStorage);
-  }
-
-  set refreshToken(newToken) {
-    if (newToken) {
-      return this.storage.set(this.config.refreshTokenStorage, newToken);
-    }
-    return this.storage.remove(this.config.refreshTokenStorage);
-  }
-
-
-  /* work with the token */
 
   getPayload() {
-    console.warn('DEPRECATED: Authentication.getPayload(). Use .getTokenPayload() instead.');
-    return this.getTokenPayload();
+    if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+    return this.payload;
   }
 
-  getTokenPayload() {
-    const accessToken = this.accessToken;
-    if (accessToken && accessToken.split('.').length === 3) {
-      try {
-        const base64Url = this.accessToken.split('.')[1];
-        const base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(decodeURIComponent(escape(window.atob(base64))));
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
+  getExp() {
+    if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+    return this.exp;
+  }
+
+
+ /* get status from data */
+
+  getTimeLeft() {
+    const exp = this.getExp();
+    return  Number.isNaN(exp) ? NaN : exp - Math.round(new Date().getTime() / 1000);
   }
 
   isTokenExpired() {
-    const payload = this.getTokenPayload();
-    const exp     = payload && payload.exp;
-    if (exp) {
-      return Math.round(new Date().getTime() / 1000) > exp;
-    }
-    return undefined;
+    const timeLeft = this.getTimeLeft();
+    return Number.isNaN(timeLeft) ? undefined : timeLeft < 0;
   }
 
   isAuthenticated() {
-    // FAIL: There's no token, so user is not authenticated.
-    if (!this.accessToken) {
-      return false;
-    }
-    // PASS: There is a token, but in a different format
-    if (this.accessToken.split('.').length !== 3) {
-      return true;
-    }
-    // PASS: Non-JWT token that looks like JWT (isTokenExpired === undefined)
-    // PASS or FAIL: test isTokenExpired.
-    return this.isTokenExpired() !== true;
+    const isTokenExpired = this.isTokenExpired();
+    if (isTokenExpired === undefined ) return this.accessToken ? true : false;
+    return !isTokenExpired;
   }
 
 
-  /* get and set token from response */
+  /* get and set from response */
+
+  getDataFromResponse(response) {
+    const config   = this.config;
+
+    this.accessToken = this.getTokenFromResponse(response, config.accessTokenProp, config.accessTokenName, config.accessTokenRoot);
+
+    this.refreshToken = null;
+    if (config.useRefreshToken) {
+      try {
+        this.refreshToken = this.getTokenFromResponse(response, config.refreshTokenProp, config.refreshTokenName, config.refreshTokenRoot);
+      } catch (e) {
+        this.refreshToken = null;
+      }
+    }
+
+    let payload = null;
+
+    if (this.accessToken && this.accessToken.split('.').length === 3) {
+      try {
+        const base64 = this.accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        payload = JSON.parse(decodeURIComponent(escape(window.atob(base64))));
+      } catch (e) {
+        payload = null;
+      }
+    }
+
+    this.payload = payload;
+    this.exp = payload ? parseInt(payload.exp, 10) : NaN;
+
+    this.hasDataStored = true;
+
+    return {
+      accessToken: this.accessToken,
+      refreshToken: this.refreshToken,
+      payload: this.payload,
+      exp: this.exp
+    };
+  }
+
+  deleteData() {
+    this.accessToken = null;
+    this.refreshToken = null;
+    this.payload = null;
+    this.exp = null;
+
+    this.hasDataStored = false;
+  }
 
   getTokenFromResponse(response, tokenProp, tokenName, tokenRoot) {
-    if (!response) return null;
+    if (!response) return undefined;
 
     const responseTokenProp = response[tokenProp];
 
@@ -135,38 +174,11 @@ export class Authentication {
       return tokenRootData ? tokenRootData[tokenName] : responseTokenProp[tokenName];
     }
 
-    return response[tokenName] === undefined ? null : response[tokenName];
-  }
+    const token = response[tokenName] === undefined ? null : response[tokenName];
 
-  setAccessTokenFromResponse(response) {
-    const config   = this.config;
-    const newToken = this.getTokenFromResponse(response, config.accessTokenProp, config.accessTokenName, config.accessTokenRoot);
+    if (!token) throw new Error('Token not found in response');
 
-    if (!newToken) throw new Error('Token not found in response');
-
-    this.accessToken = newToken;
-  }
-
-  setRefreshTokenFromResponse(response) {
-    const config   = this.config;
-    const newToken = this.getTokenFromResponse(response, config.refreshTokenProp, config.refreshTokenName, config.refreshTokenRoot);
-
-    if (!newToken) throw new Error('Token not found in response');
-
-    this.refreshToken = newToken;
-  }
-
-  setTokensFromResponse(response) {
-    this.setAccessTokenFromResponse(response);
-
-    if (this.config.useRefreshToken) {
-      this.setRefreshTokenFromResponse(response);
-    }
-  }
-
-  removeTokens() {
-    this.accessToken  = null;
-    this.refreshToken = null;
+    return token;
   }
 
 

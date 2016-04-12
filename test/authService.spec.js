@@ -139,7 +139,7 @@ describe('AuthService', () => {
     const authService    = container.get(AuthService);
 
     it('should return authentication.accessToken', () => {
-      authService.authentication.accessToken = 'some';
+      authService.authentication.responseObject = {token: 'some'};
 
       const token = authService.getAccessToken();
 
@@ -153,14 +153,13 @@ describe('AuthService', () => {
     const authService    = container.get(AuthService);
 
     it('should return authentication.refreshToken', () => {
-      authService.authentication.refreshToken = 'some other';
+      authService.config.useRefreshToken = true;
+      authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
 
-      const token = authService.getRefreshToken();
-
-      expect(token).toBe('some other');
+      expect(authService.getRefreshToken()).toBe('another');
+      authService.config.useRefreshToken = false;
     });
   });
-
 
   describe('.isAuthenticated()', () => {
     const container      = getContainer();
@@ -191,9 +190,9 @@ describe('AuthService', () => {
 
     describe('with autoUpdateToken=true', () => {
       it('should return boolean true', () => {
+        authService.config.useRefreshToken = true;
         baseConfig.autoUpdateToken  = true;
-        authentication.accessToken  = 'outdated';
-        authentication.refreshToken = 'some';
+        authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
 
         spyOn(authService, 'updateToken').and.returnValue(Promise.resolve(false));
         spyOn(authentication, 'isAuthenticated').and.returnValue(false);
@@ -205,9 +204,9 @@ describe('AuthService', () => {
       });
 
       it('should return Promise<true>', done => {
+        authService.config.useRefreshToken = true;
         baseConfig.autoUpdateToken  = true;
-        authentication.accessToken  = 'outdated';
-        authentication.refreshToken = 'some';
+        authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
 
         spyOn(authService, 'updateToken').and.returnValue(Promise.resolve(true));
         spyOn(authentication, 'isAuthenticated').and.returnValue(false);
@@ -221,6 +220,19 @@ describe('AuthService', () => {
           done();
         });
       });
+    });
+  });
+
+  describe('.getTimeLeft()', () => {
+    const container      = getContainer();
+    const authService    = container.get(AuthService);
+
+    it('should return authentication.getTimeLeft() result', () => {
+      spyOn(authService.authentication, 'getTimeLeft').and.returnValue('any');
+
+      const expired = authService.getTimeLeft();
+
+      expect(expired).toBe('any');
     });
   });
 
@@ -244,7 +256,7 @@ describe('AuthService', () => {
     const authService    = container.get(AuthService);
 
     it('should return authentication.getTokenPayload() result ', () => {
-      spyOn(authService.authentication, 'getTokenPayload').and.returnValue('payload');
+      spyOn(authService.authentication, 'getPayload').and.returnValue('payload');
 
       const payload = authService.getTokenPayload();
 
@@ -256,6 +268,7 @@ describe('AuthService', () => {
   describe('.updateToken()', () => {
     const container      = new Container();
     const authService = container.get(AuthService);
+    authService.config.useRefreshToken = true;
 
     afterEach(done => {
       authService.logout().then(done);
@@ -270,8 +283,6 @@ describe('AuthService', () => {
     });
 
     it('fail on no token in response', done => {
-      authService.authentication.accessToken = null;
-      authService.authentication.refreshToken = 'some';
       authService.config.client = {
         post: () => Promise.resolve({Error: 'serverError'})
       };
@@ -285,8 +296,6 @@ describe('AuthService', () => {
     });
 
     it('fail with same response if called several times', done => {
-      authService.authentication.accessToken = null;
-      authService.authentication.refreshToken = 'some';
       authService.config.client = {
         post: () => Promise.resolve({Error: 'no token'})
       };
@@ -310,8 +319,7 @@ describe('AuthService', () => {
     });
 
     it('get new accessToken', done => {
-      authService.authentication.accessToken = null;
-      authService.authentication.refreshToken = 'some';
+      authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
       authService.config.client = {
         post: () => Promise.resolve({token: 'newToken'})
       };
@@ -325,8 +333,7 @@ describe('AuthService', () => {
     });
 
     it('get same new accessToken if called several times', done => {
-      authService.authentication.accessToken = null;
-      authService.authentication.refreshToken = 'some';
+      authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
       authService.config.client = {
         post: () => Promise.resolve({token: 'newToken'})
       };
@@ -457,7 +464,7 @@ describe('AuthService', () => {
     const container      = getContainer();
     const authService = container.get(AuthService);
 
-    authService.authentication.accessToken = 'some';
+    authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
     authService.config.logoutRedirect = 'nowhere';
 
     it('Should logout and not redirect.', done => {
@@ -506,8 +513,6 @@ describe('AuthService', () => {
           expect(response.access_token).toBe('oauth1');
 
           expect(authService.getAccessToken()).toBe('oauth1');
-          expect(authService.getTokenPayload()).toBe(null);
-          expect(authService.isTokenExpired()).toBe(undefined);
           expect(authService.isAuthenticated()).toBe(true);
           done();
         });
@@ -525,23 +530,18 @@ describe('AuthService', () => {
           expect(response.access_token).toBe('oauth2');
 
           expect(authService.getAccessToken()).toBe('oauth2');
-          expect(authService.getTokenPayload()).toBe(null);
-          expect(authService.isTokenExpired()).toBe(undefined);
           expect(authService.isAuthenticated()).toBe(true);
           done();
         });
     });
 
-    it('Should try to authenticate with and fail.', done => {
+    it('Should try to authenticate and fail.', done => {
       const authService = new AuthService(authentication, baseConfig);
-      spyOn(authentication.oAuth2, 'open').and.returnValue(Promise.resolve());
+      spyOn(authentication.oAuth2, 'open').and.returnValue(Promise.resolve({error: 'any'}));
 
       authService.authenticate('facebook')
         .catch(error => {
           expect(error instanceof Error).toBe(true);
-          expect(authService.getAccessToken()).toBe(null);
-          expect(authService.getTokenPayload()).toBe(null);
-          expect(authService.isTokenExpired()).toBe(undefined);
           expect(authService.isAuthenticated()).toBe(false);
 
           done();

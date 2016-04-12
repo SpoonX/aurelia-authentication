@@ -122,10 +122,7 @@ export class BaseConfig {
   // Determines the `window` property name upon which aurelia-authentication data is stored (Default: `window.localStorage`)
   storage = 'localStorage';
   // The property name used when storing the access token locally
-  accessTokenStorage = 'aurelia_access_token';
-  // The property name used when storing the refresh token locally
-  refreshTokenStorage = 'aurelia_refresh_token';
-
+  storageKey = 'aurelia_authentication';
 
   //OAuth provider specific related configuration
   // ============================================
@@ -296,7 +293,7 @@ export class BaseConfig {
     console.warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
     this._tokenName = tokenName;
     this.accessTokenName = tokenName;
-    this.accessTokenStorage = this.tokenPrefix ? this.tokenPrefix + '_' + this.tokenName : this.tokenName;
+    this.storageKey = this.tokenPrefix ? this.tokenPrefix + '_' + this.tokenName : this.tokenName;
     return tokenName;
   }
   get tokenName() {
@@ -304,9 +301,9 @@ export class BaseConfig {
   }
 
   set tokenPrefix(tokenPrefix) {
-    console.warn('BaseConfig.tokenPrefix is deprecated. Use BaseConfig.accessTokenStorage instead.');
+    console.warn('BaseConfig.tokenPrefix is deprecated. Use BaseConfig.storageKey instead.');
     this._tokenPrefix = tokenPrefix;
-    this.accessTokenStorage = this.tokenPrefix ? this.tokenPrefix + '_' + this.tokenName : this.tokenName;
+    this.storageKey = this.tokenPrefix ? this.tokenPrefix + '_' + this.tokenName : this.tokenName;
     return tokenPrefix;
   }
   get tokenPrefix() {

@@ -1,8 +1,6 @@
 import {join} from 'aurelia-path';
 import extend from 'extend';
-
 import * as LogManager from 'aurelia-logging';
-const logger = LogManager.getLogger('authentication');
 
 export class BaseConfig {
   // prepends baseUrl
@@ -273,7 +271,7 @@ export class BaseConfig {
   }
 
   set responseTokenProp(responseTokenProp) {
-    logger.warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
     this._responseTokenProp = responseTokenProp;
     this.accessTokenProp = responseTokenProp;
     return responseTokenProp;
@@ -283,7 +281,7 @@ export class BaseConfig {
   }
 
   set tokenRoot(tokenRoot) {
-    logger.warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
     this._tokenRoot = tokenRoot;
     this.accessTokenRoot = tokenRoot;
     return tokenRoot;
@@ -293,7 +291,7 @@ export class BaseConfig {
   }
 
   set tokenName(tokenName) {
-    logger.warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
     this._tokenName = tokenName;
     this.accessTokenName = tokenName;
     return tokenName;
@@ -303,7 +301,7 @@ export class BaseConfig {
   }
 
   set tokenPrefix(tokenPrefix) {
-    logger.warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
     this._tokenPrefix = tokenPrefix;
     return tokenPrefix;
   }

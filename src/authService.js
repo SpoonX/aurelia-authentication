@@ -1,6 +1,6 @@
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
-
+import * as LogManager from 'aurelia-logging';
 
 import {Authentication} from './authentication';
 import {BaseConfig} from './baseConfig';
@@ -21,8 +21,8 @@ export class AuthService {
     return this.config.client;
   }
 
-  @deprecated({message: 'Use .authentication instead.'})
   get auth() {
+    LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
     return this.authentication;
   }
 

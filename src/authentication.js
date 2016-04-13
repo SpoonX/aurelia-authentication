@@ -1,8 +1,6 @@
 import {inject} from 'aurelia-dependency-injection';
-
-import * as LogManager from 'aurelia-logging';
-const logger = LogManager.getLogger('authentication');
 import {deprecated} from 'aurelia-metadata';
+import * as LogManager from 'aurelia-logging';
 
 import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
@@ -30,7 +28,7 @@ export class Authentication {
     const oldToken = storage.get(oldStorageKey);
 
     if (oldToken) {
-      logger.info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
+      LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
       let fakeOldResponse = {};
       fakeOldResponse[config.accessTokenProp] = oldToken;
       this.responseObject = fakeOldResponse;
@@ -227,12 +225,12 @@ export class Authentication {
   redirect(redirectUrl, defaultRedirectUrl) {
     // stupid rule to keep it BC
     if (redirectUrl === true) {
-      logger.warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === false instead.');
+      LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === false instead.');
       return;
     }
     // explicit false means don't redirect
     if (redirectUrl === false) {
-      logger.warn('BREAKING CHANGE: redirectUrl === false means "Do not redirect" now! Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
+      LogManager.getLogger('authentication').warn('BREAKING CHANGE: redirectUrl === false means "Do not redirect" now! Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
       return;
     }
     if (typeof redirectUrl === 'string') {

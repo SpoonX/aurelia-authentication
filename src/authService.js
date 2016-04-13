@@ -16,7 +16,6 @@ export class AuthService {
    * Getter: The configured client for all aurelia-authentication requests
    *
    * @return {HttpClient}
-   *
    */
   get client() {
     return this.config.client;
@@ -33,7 +32,6 @@ export class AuthService {
    * @param {[{}|number|string]}  [criteria object or a Number|String converted to {id:criteria}]
    *
    * @return {Promise<response>}
-   *
    */
   getMe(criteria) {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
@@ -49,7 +47,6 @@ export class AuthService {
    * @param {[{}|Number|String]}  [criteria object or a Number|String converted to {id:criteria}]
    *
    * @return {Promise<response>}
-   *
    */
   updateMe(body, criteria) {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
@@ -62,7 +59,6 @@ export class AuthService {
    * Get accessToken from storage
    *
    * @returns {String} current accessToken
-   *
    */
   getAccessToken() {
     return this.authentication.getAccessToken();
@@ -77,7 +73,6 @@ export class AuthService {
    * Get refreshToken from storage
    *
    * @returns {String} current refreshToken
-   *
    */
   getRefreshToken() {
     return this.authentication.getRefreshToken();
@@ -87,7 +82,6 @@ export class AuthService {
   * Gets authentication status
   *
   * @returns {Boolean} true: for Non-JWT and unexpired JWT, false: else
-  *
   */
   isAuthenticated() {
     let authenticated = this.authentication.isAuthenticated();
@@ -108,7 +102,6 @@ export class AuthService {
    * Gets ttl in seconds
    *
    * @returns {Number} ttl for JWT tokens, NaN for all other tokens
-   *
    */
   getTtl() {
     return this.authentication.getTtl();
@@ -118,7 +111,6 @@ export class AuthService {
   * Gets exp from token payload and compares to current time
   *
   * @returns {Boolean} returns (ttl > 0)? for JWT, undefined other tokens
-  *
   */
   isTokenExpired() {
     return this.authentication.isTokenExpired();
@@ -128,7 +120,6 @@ export class AuthService {
   * Get payload from tokens
   *
   * @returns {null | String} null: Non-JWT payload, String: JWT token payload
-  *
   */
   getTokenPayload() {
     return this.authentication.getPayload();
@@ -138,7 +129,6 @@ export class AuthService {
    * Request new accesss token
    *
    * @returns {Promise<Response>} requests new token. can be called multiple times
-   *
    */
   updateToken() {
     if (!this.authentication.getRefreshToken()) {
@@ -176,7 +166,6 @@ export class AuthService {
    * @param {[String]}    [redirectUri overwrite]
    *
    * @return {Promise<response>}
-   *
    */
   signup(displayName, email, password, options, redirectUri) {
     let content;
@@ -212,7 +201,6 @@ export class AuthService {
    * @param {[String]}    [redirectUri overwrite]
    *
    * @return {Promise<response>}
-   *
    */
   login(email, password, options, redirectUri) {
     let content;
@@ -249,7 +237,6 @@ export class AuthService {
    * @param {[String]}  [redirectUri]
    *
    * @return {Promise<>}
-   *
    */
   logout(redirectUri) {
     return new Promise(resolve => {
@@ -262,13 +249,6 @@ export class AuthService {
   }
 
   /**
-   * update accessToken using the refreshToken
-   *
-   * @return {Promise<response>}
-   *
-   */
-
-  /**
    * Authenticate with third-party and redirect to redirectUri (if set) or redirectUri of config
    *
    * @param {String}    name of the provider
@@ -276,7 +256,6 @@ export class AuthService {
    * @param {[{}]}      [userData]
    *
    * @return {Promise<response>}
-   *
    */
   authenticate(name, redirectUri, userData = {}) {
     return this.authentication.authenticate(name, userData)
@@ -295,7 +274,6 @@ export class AuthService {
    * @param {String}  name of the provider
    *
    * @return {Promise<response>}
-   *
    */
   unlink(name, redirectUri) {
     const unlinkUrl = this.config.withBase(this.config.unlinkUrl) + name;

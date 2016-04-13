@@ -11,13 +11,6 @@ export class AuthService {
   }
 
   /**
-   * Set true during updateToken process
-   *
-   * @param {Boolean} isRefreshing
-   */
-   isRefreshing = false;
-
-  /**
    * Getter: The configured client for all aurelia-authentication requests
    *
    * @return {HttpClient}
@@ -170,7 +163,7 @@ export class AuthService {
       this.client.post(this.config.withBase(this.config.loginUrl), content)
         .then(response => {
           this.authentication.responseObject = response;
-          this.authentication.resolveUpdateTokenCallstack(response);
+          this.authentication.resolveUpdateTokenCallstack(this.authentication.isAuthenticated());
         })
         .catch(err => {
           this.authentication.responseObject = null;

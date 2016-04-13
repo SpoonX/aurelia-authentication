@@ -121,7 +121,7 @@ export class BaseConfig {
   platform = 'browser';
   // Determines the `window` property name upon which aurelia-authentication data is stored (Default: `window.localStorage`)
   storage = 'localStorage';
-  // The property name used when storing the access token locally
+  // The key used for storing the authentication response locally
   storageKey = 'aurelia_authentication';
 
   //OAuth provider specific related configuration

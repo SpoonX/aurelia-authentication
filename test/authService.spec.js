@@ -325,9 +325,10 @@ describe('AuthService', () => {
       };
 
       authService.updateToken()
-      .then(res => {
+      .then(result => {
         expect(authService.authentication.isAuthenticated()).toBe(true);
         expect(authService.authentication.accessToken).toBe('newToken');
+        expect(result).toBe(true);
         done();
       });
     });
@@ -339,18 +340,20 @@ describe('AuthService', () => {
       };
 
       authService.updateToken()
-      .then(res => {
+      .then(result => {
         expect(authService.authentication.isAuthenticated()).toBe(true);
         expect(authService.authentication.accessToken).toBe('newToken');
+        expect(result).toBe(true);
       });
 
       authService.config.client = {
         post: () => Promise.resolve({token: 'other newToken'})
       };
       authService.updateToken()
-        .then(res => {
+        .then(result => {
           expect(authService.authentication.isAuthenticated()).toBe(true);
           expect(authService.authentication.accessToken).toBe('newToken');
+          expect(result).toBe(true);
           done();
         });
     });

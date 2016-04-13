@@ -1,5 +1,9 @@
 import {inject} from 'aurelia-dependency-injection';
 
+import * as LogManager from 'aurelia-logging';
+const logger = LogManager.getLogger('authentication');
+import {deprecated} from 'aurelia-metadata';
+
 import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
 import {OAuth1} from './oAuth1';
@@ -26,6 +30,7 @@ export class Authentication {
     const oldToken = storage.get(oldStorageKey);
 
     if (oldToken) {
+      logger.info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
       let fakeOldResponse = {};
       fakeOldResponse[config.accessTokenProp] = oldToken;
       this.responseObject = fakeOldResponse;
@@ -36,33 +41,33 @@ export class Authentication {
 
   /* deprecated methods */
 
+  @deprecated({message: 'Use baseConfig.loginRoute instead.'})
   getLoginRoute() {
-    console.warn('DEPRECATED: Authentication.getLoginRoute. Use baseConfig.loginRoute instead.');
     return this.config.loginRoute;
   }
 
+  @deprecated({message: 'Use baseConfig.loginRedirect instead.'})
   getLoginRedirect() {
-    console.warn('DEPRECATED: Authentication.getLoginRedirect. Use baseConfig.loginRedirect instead.');
     return this.config.loginRedirect;
   }
 
+  @deprecated({message: 'Use baseConfig.withBase(baseConfig.loginUrl) instead.'})
   getLoginUrl() {
-    console.warn('DEPRECATED: Authentication.getLoginUrl. Use baseConfig.withBase(baseConfig.loginUrl) instead.');
     return this.config.withBase(this.config.loginUrl);
   }
 
+  @deprecated({message: 'Use baseConfig.withBase(baseConfig.signupUrl) instead.'})
   getSignupUrl() {
-    console.warn('DEPRECATED: Authentication.getSignupUrl. Use baseConfig.withBase(baseConfig.signupUrl) instead.');
     return this.config.withBase(this.config.signupUrl);
   }
 
+  @deprecated({message: 'Use baseConfig.withBase(baseConfig.profileUrl) instead.'})
   getProfileUrl() {
-    console.warn('DEPRECATED: Authentication.getProfileUrl. Use baseConfig.withBase(baseConfig.profileUrl) instead.');
     return this.config.withBase(this.config.profileUrl);
   }
 
+  @deprecated({message: 'Use .getAccessToken() instead.'})
   getToken() {
-    console.warn('DEPRECATED: Authentication.getToken. Use .getAccessToken() instead.');
     return this.getAccessToken();
   }
 
@@ -107,13 +112,13 @@ export class Authentication {
 
  /* get status from data */
 
-  getTimeLeft() {
+  getTtl() {
     const exp = this.getExp();
     return  Number.isNaN(exp) ? NaN : exp - Math.round(new Date().getTime() / 1000);
   }
 
   isTokenExpired() {
-    const timeLeft = this.getTimeLeft();
+    const timeLeft = this.getTtl();
     return Number.isNaN(timeLeft) ? undefined : timeLeft < 0;
   }
 
@@ -212,7 +217,6 @@ export class Authentication {
    * @param {[{}]}      [userData]
    *
    * @return {Promise<response>}
-   *
    */
   authenticate(name, userData = {}) {
     const provider = this.config.providers[name].type === '1.0' ? this.oAuth1 : this.oAuth2;
@@ -223,12 +227,12 @@ export class Authentication {
   redirect(redirectUrl, defaultRedirectUrl) {
     // stupid rule to keep it BC
     if (redirectUrl === true) {
-      console.warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === false instead.');
+      logger.warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === false instead.');
       return;
     }
     // explicit false means don't redirect
     if (redirectUrl === false) {
-      console.warn('BREAKING CHANGE: redirectUrl === false means "Do not redirect" now! Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
+      logger.warn('BREAKING CHANGE: redirectUrl === false means "Do not redirect" now! Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
       return;
     }
     if (typeof redirectUrl === 'string') {

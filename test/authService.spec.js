@@ -178,16 +178,6 @@ describe('AuthService', () => {
       expect(typeof result).toBe('boolean');
     });
 
-    it('should return Promise<boolean>', done => {
-      const result = authService.isAuthenticated(true);
-
-      expect(result instanceof Promise).toBe(true);
-      result.then(authenticated => {
-        expect(typeof authenticated).toBe('boolean');
-        done();
-      });
-    });
-
     describe('with autoUpdateToken=true', () => {
       it('should return boolean true', () => {
         authService.config.useRefreshToken = true;
@@ -202,35 +192,17 @@ describe('AuthService', () => {
         expect(typeof result).toBe('boolean');
         expect(result).toBe(true);
       });
-
-      it('should return Promise<true>', done => {
-        authService.config.useRefreshToken = true;
-        baseConfig.autoUpdateToken  = true;
-        authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
-
-        spyOn(authService, 'updateToken').and.returnValue(Promise.resolve(true));
-        spyOn(authentication, 'isAuthenticated').and.returnValue(false);
-
-        const result = authService.isAuthenticated(true);
-
-        expect(result instanceof Promise).toBe(true);
-        result.then(authenticated => {
-          expect(typeof authenticated).toBe('boolean');
-          expect(authenticated).toBe(true);
-          done();
-        });
-      });
     });
   });
 
-  describe('.getTimeLeft()', () => {
+  describe('.getTtl()', () => {
     const container      = getContainer();
     const authService    = container.get(AuthService);
 
-    it('should return authentication.getTimeLeft() result', () => {
-      spyOn(authService.authentication, 'getTimeLeft').and.returnValue('any');
+    it('should return authentication.getTtl() result', () => {
+      spyOn(authService.authentication, 'getTtl').and.returnValue('any');
 
-      const expired = authService.getTimeLeft();
+      const expired = authService.getTtl();
 
       expect(expired).toBe('any');
     });

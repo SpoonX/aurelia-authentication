@@ -1,6 +1,9 @@
 import {join} from 'aurelia-path';
 import extend from 'extend';
 
+import * as LogManager from 'aurelia-logging';
+const logger = LogManager.getLogger('authentication');
+
 export class BaseConfig {
   // prepends baseUrl
   withBase(url) {
@@ -255,12 +258,12 @@ export class BaseConfig {
 
   /* deprecated methods and parameteres */
   get current() {
-    console.warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
+    logger.warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
     return this;
   }
 
   set authToken(authToken) {
-    console.warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
+    logger.warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
     this._authTokenType = authToken;
     this.authTokenType = authToken;
     return authToken;
@@ -270,7 +273,7 @@ export class BaseConfig {
   }
 
   set responseTokenProp(responseTokenProp) {
-    console.warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
+    logger.warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
     this._responseTokenProp = responseTokenProp;
     this.accessTokenProp = responseTokenProp;
     return responseTokenProp;
@@ -280,7 +283,7 @@ export class BaseConfig {
   }
 
   set tokenRoot(tokenRoot) {
-    console.warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
+    logger.warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
     this._tokenRoot = tokenRoot;
     this.accessTokenRoot = tokenRoot;
     return tokenRoot;
@@ -290,7 +293,7 @@ export class BaseConfig {
   }
 
   set tokenName(tokenName) {
-    console.warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
+    logger.warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
     this._tokenName = tokenName;
     this.accessTokenName = tokenName;
     return tokenName;
@@ -300,7 +303,7 @@ export class BaseConfig {
   }
 
   set tokenPrefix(tokenPrefix) {
-    console.warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
+    logger.warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
     this._tokenPrefix = tokenPrefix;
     return tokenPrefix;
   }

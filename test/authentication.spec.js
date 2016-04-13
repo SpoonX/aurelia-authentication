@@ -165,7 +165,7 @@ describe('Authentication', () => {
   });
 
 
-  describe('.getTimeLeft()', () => {
+  describe('.getTtl()', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
@@ -176,7 +176,7 @@ describe('Authentication', () => {
 
     it('Should be NaN for Non-JWT', () => {
       authentication.responseObject = {token: 'some'};
-      const timeLeft = authentication.getTimeLeft();
+      const timeLeft = authentication.getTtl();
 
       expect(typeof timeLeft === 'number').toBe(true);
       expect(Number.isNaN(timeLeft)).toBe(true);
@@ -185,7 +185,7 @@ describe('Authentication', () => {
     it('Should be exp-currentTime for JWT', () => {
       authentication.responseObject = {token: tokenPast.jwt};
 
-      const timeLeft = authentication.getTimeLeft();
+      const timeLeft = authentication.getTtl();
       expect(typeof timeLeft === 'number').toBe(true);
       expect(timeLeft).toBe(tokenPast.payload.exp - Math.round(new Date().getTime() / 1000));
     });

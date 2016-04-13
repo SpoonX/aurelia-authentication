@@ -1,4 +1,6 @@
 import {inject} from 'aurelia-dependency-injection';
+import {deprecated} from 'aurelia-metadata';
+
 
 import {Authentication} from './authentication';
 import {BaseConfig} from './baseConfig';
@@ -20,8 +22,8 @@ export class AuthService {
     return this.config.client;
   }
 
+  @deprecated({message: 'Use .authentication instead.'})
   get auth() {
-    console.warn('DEPRECATED: AuthService.auth. Use .authentication instead.');
     return this.authentication;
   }
 
@@ -66,8 +68,8 @@ export class AuthService {
     return this.authentication.getAccessToken();
   }
 
+  @deprecated({message: 'Use .getAccessToken() instead.'})
   getCurrentToken() {
-    console.warn('DEPRECATED: AuthService.getCurrentToken(). Use .getAccessToken() instead.');
     return this.getAccessToken();
   }
 
@@ -82,13 +84,12 @@ export class AuthService {
   }
 
  /**
-  * Gets authentication status from token. If autoUpdateToken === true,
-  * updates token and returns true meanwhile
+  * Gets authentication status
   *
-  * @returns {Boolean} true: for Non-JWT tokens and unexpired JWT tokens, false: else
+  * @returns {Boolean} true: for Non-JWT and unexpired JWT, false: else
   *
   */
-  isAuthenticated(asPromise) {
+  isAuthenticated() {
     let authenticated = this.authentication.isAuthenticated();
 
     // auto-update token?
@@ -96,36 +97,27 @@ export class AuthService {
       && this.config.autoUpdateToken
       && this.authentication.getAccessToken()
       && this.authentication.getRefreshToken()) {
-      authenticated = this.updateToken();
+      this.updateToken();
+      authenticated = true;
     }
 
-    // return as boolean or Promise
-    if (asPromise) {
-      if (authenticated instanceof Promise) return authenticated;
-      return Promise.resolve(authenticated);
-    }
-
-    if (authenticated instanceof Promise) {
-      authenticated.catch(()=>{}).then(Promise.resolve);
-      return true;
-    }
     return authenticated;
   }
 
   /**
-   * Gets remaining time in seconds
+   * Gets ttl in seconds
    *
-   * @returns {Number} remaing time for JWT tokens, NaN for all other tokesn
+   * @returns {Number} ttl for JWT tokens, NaN for all other tokens
    *
    */
-  getTimeLeft() {
-    return this.authentication.getTimeLeft();
+  getTtl() {
+    return this.authentication.getTtl();
   }
 
  /**
   * Gets exp from token payload and compares to current time
   *
-  * @returns {Boolean} getTimeLeft>0 time for JWT tokens, undefined other tokesn
+  * @returns {Boolean} returns (ttl > 0)? for JWT, undefined other tokens
   *
   */
   isTokenExpired() {

@@ -225,12 +225,15 @@ export class Authentication {
   redirect(redirectUrl, defaultRedirectUrl) {
     // stupid rule to keep it BC
     if (redirectUrl === true) {
-      LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === false instead.');
+      LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
       return;
     }
-    // explicit false means don't redirect
+    // stupid rule to keep it BC
     if (redirectUrl === false) {
-      LogManager.getLogger('authentication').warn('BREAKING CHANGE: redirectUrl === false means "Do not redirect" now! Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
+      LogManager.getLogger('authentication').warn('BREAKING CHANGE: Setting redirectUrl === false to actually *do redirect* is deprecated. Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
+    }
+    // BC hack. explicit 0 means don't redirect. false will be added later and 0 deprecated
+    if (redirectUrl === 0) {
       return;
     }
     if (typeof redirectUrl === 'string') {

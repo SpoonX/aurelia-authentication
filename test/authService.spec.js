@@ -359,7 +359,7 @@ describe('AuthService', () => {
       authService.config.loginOnSignup = false;
       authService.config.signupRedirect = true;
 
-      authService.signup({user: 'some', access_token: 'aToken'},  {headers: {Authorization: 'none'}}, false)
+      authService.signup({user: 'some', access_token: 'aToken'},  {headers: {Authorization: 'none'}}, 0)
         .then(response => {
           expect(response.path).toBe('/auth/signup');
           expect(response.body.user).toBe('some');
@@ -380,7 +380,7 @@ describe('AuthService', () => {
       authService.config.loginOnSignup = true;
       authService.config.loginRedirect = true;
 
-      authService.signup({user: 'some', access_token: 'aToken'}, {headers: {Authorization: 'none'}}, false)
+      authService.signup({user: 'some', access_token: 'aToken'}, {headers: {Authorization: 'none'}}, 0)
         .then(response => {
           expect(response.path).toBe('/auth/signup');
           expect(authService.getAccessToken()).toBe('aToken');
@@ -425,7 +425,7 @@ describe('AuthService', () => {
     it('Should login with login data object and not redirect.', done => {
       authService.config.loginRedirect = true;
 
-      authService.login({user: 'some', access_token: 'aToken'},  {headers: {Authorization: 'none'}}, false)
+      authService.login({user: 'some', access_token: 'aToken'},  {headers: {Authorization: 'none'}}, 0)
         .then(response => {
           expect(response.path).toBe('/auth/login');
           expect(response.body.user).toBe('some');
@@ -453,7 +453,7 @@ describe('AuthService', () => {
     authService.config.logoutRedirect = 'nowhere';
 
     it('Should logout and not redirect.', done => {
-      authService.logout(false)
+      authService.logout(0)
         .then(() => {
           expect(authService.isAuthenticated()).toBe(false);
           authService.config.logoutRedirect = null;
@@ -491,7 +491,7 @@ describe('AuthService', () => {
       spyOn(authentication.oAuth1, 'open').and.callThrough();
       authService.config.loginRedirect = 'nowhere';
 
-      authService.authenticate('twitter', false, {data: 'some'})
+      authService.authenticate('twitter', 0, {data: 'some'})
         .then(response => {
           expect(response.provider).toBe(baseConfig.providers['twitter']);
           expect(response.userData.data).toBe('some');

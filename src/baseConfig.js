@@ -256,12 +256,12 @@ export class BaseConfig {
 
   /* deprecated methods and parameteres */
   get current() {
-    logger.warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
     return this;
   }
 
   set authToken(authToken) {
-    logger.warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
     this._authTokenType = authToken;
     this.authTokenType = authToken;
     return authToken;

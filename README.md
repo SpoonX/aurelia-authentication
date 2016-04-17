@@ -29,7 +29,7 @@ Run `jspm i aurelia-authentication`, or (for webpack) `npm i aurelia-authenticat
 
 ## Documentation
 
-You can find usage examples and the documentation at [aurelia-authentication-docs](http://aurelia-authentication.spoonx.org/).
+You can find usage examples and the documentation at the [aurelia-authentication-docs](http://aurelia-authentication.spoonx.org/).
 
 The [changelog](doc/changelog.md) provides you with information about important changes.
 
@@ -37,7 +37,7 @@ The [changelog](doc/changelog.md) provides you with information about important 
 
 ### Add a configuration file
 
-Set your custom configuration. You can find  all options and the default values in the [baseConfig](http://aurelia-authentication.spoonx.org/baseConfig).
+Set your custom configuration. You can find all options and the default values in the [baseConfig](http://aurelia-authentication.spoonx.org/baseConfig).
 
 ```js
 /* authConfig.js */
@@ -80,18 +80,17 @@ export class Login {
     constructor(authService) {
         this.authService   = authService;
         this.authenticated = false;
-        this.providers     = [];
     };
 
     // use authService.login(credentialsObject) to login to your auth server
     login(credentialsObject) {
       return this.authService.login(credentialsObject)
-        .then(response => {
+        .then(() => {
             this.authenticated = this.authService.isAuthenticated();
         });
     };
 
-    // use authService.logout to delete stored tokens
+    // use authService.logout to delete stored data
     logout() {
       return this.authService.logout()
         .then(() => {
@@ -99,42 +98,46 @@ export class Login {
         });
     }
 
-    // use authenticate(providerName) to get third-party authenticaten
-    authenticate(name) {
-      return this.authService.authenticate(name)
-        .then(response => {
+    // use authService.authenticate(name) to get third-party authentication
+    authenticateFacebook() {
+      return this.authService.authenticate('facebook')
+        .then(() => {
           this.authenticated  = this.authService.isAuthenticated();
-          this.provider[name] = true;
         });
     }
 }
 ```
 
-### Quick api overview
+### Quick authService api overview
 
 ```js
-// signup into server with credentials and optionally logs in
-signup(credentials: Object)): Promise<Response>
- // log into server with credentials. Stores token if successful
-login(credentials: Object): Promise<Response>
-// deletes stored tokens
-logout([redirectUri: string]): Promise<>
-// manually refresh token. Needs refreshToken options to be configured
-updateToken(): Promise<Response> {
-// link thrird-party accounts or use it to log into server. Stores token if successful
-authenticate(provider: string[, redirectUri: string][, userData: Object]): Promise<Response>
-// unlink third-party
-unlink(provider: string): Promise<Response>
-// get profile
-getMe([criteria: Object|string|number]): Promise<Response>
-// update profile
-updateMe(data: Object[,criteria: Object|string|number]): Promise<Response>
-// check if token is available and, if applicable, not expired
-isAuthenticated(): boolean
-// get token if available
-getTokenPayload(): string
+authService
+  // the Rest instance of aurelia-api used for requests. '.client.client' is the used httpClient instance (from aurelia-fetch-client)
+  .client
+  // signup into server with credentials and optionally logs in
+  .signup(credentials: Object)): Promise<Response>
+   // log into server with credentials. Stores response if successful
+  .login(credentials: Object): Promise<Response>
+  // deletes stored response
+  .logout([redirectUri: string]): Promise<>
+  // manually refresh authentication. Needs refreshToken options to be configured
+  .updateToken(): Promise<Response> {
+  // link third-party account or log into server via third-party authentication. Stores response if successful
+  .authenticate(provider: string[, redirectUri: string][, userData: Object]): Promise<Response>
+  // unlink third-party
+  .unlink(provider: string): Promise<Response>
+  // get profile
+  .getMe([criteria: Object|string|number]): Promise<Response>
+  // update profile
+  .updateMe(data: Object[,criteria: Object|string|number]): Promise<Response>
+  // check if token is available and, if applicable, not expired
+  .isAuthenticated(): boolean
+  // get token payload if available
+  .getTokenPayload(): string
+  // get the token ttl if available
+  .getTtl(): Number
 ```
 
 Additionnally, you can use `AuthFilterValueConverter` and `AuthorizeStep` for UI feedback.
 
-More information you can find in [aurelia-authentication-docs](http://aurelia-authentication.spoonx.org/).
+You can find more information in the [aurelia-authentication-docs](http://aurelia-authentication.spoonx.org/).

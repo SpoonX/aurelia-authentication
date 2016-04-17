@@ -1,4 +1,6 @@
 import {inject} from 'aurelia-dependency-injection';
+import {deprecated} from 'aurelia-metadata';
+import * as LogManager from 'aurelia-logging';
 
 import {Authentication} from './authentication';
 import {BaseConfig} from './baseConfig';
@@ -11,34 +13,25 @@ export class AuthService {
   }
 
   /**
-   * Set true during updateToken process
-   *
-   * @param {Boolean} isRefreshing
-   */
-   isRefreshing = false;
-
-  /**
    * Getter: The configured client for all aurelia-authentication requests
    *
    * @return {HttpClient}
-   *
    */
   get client() {
     return this.config.client;
   }
 
   get auth() {
-    console.warn('AuthService.auth is deprecated. Use .authentication instead.');
+    LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
     return this.authentication;
   }
 
   /**
    * Get current user profile from server
    *
-   * @param {[{},Number,String]}  [criteria object or a Number|String converted to {id:criteria}]
+   * @param {[{}|number|string]}  [criteria object or a Number|String converted to {id:criteria}]
    *
    * @return {Promise<response>}
-   *
    */
   getMe(criteria) {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
@@ -51,10 +44,9 @@ export class AuthService {
    * Send current user profile update to server
    *
    * @param {any}                 request body with data.
-   * @param {[{},Number,String]}  [criteria object or a Number|String converted to {id:criteria}]
+   * @param {[{}|Number|String]}  [criteria object or a Number|String converted to {id:criteria}]
    *
    * @return {Promise<response>}
-   *
    */
   updateMe(body, criteria) {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
@@ -67,14 +59,13 @@ export class AuthService {
    * Get accessToken from storage
    *
    * @returns {String} current accessToken
-   *
    */
   getAccessToken() {
-    return this.authentication.accessToken;
+    return this.authentication.getAccessToken();
   }
 
+  @deprecated({message: 'Use .getAccessToken() instead.'})
   getCurrentToken() {
-    console.warn('AuthService.getCurrentToken() is deprecated. Use .getAccessToken() instead.');
     return this.getAccessToken();
   }
 
@@ -82,35 +73,44 @@ export class AuthService {
    * Get refreshToken from storage
    *
    * @returns {String} current refreshToken
-   *
    */
   getRefreshToken() {
-    return this.authentication.refreshToken;
+    return this.authentication.getRefreshToken();
   }
 
  /**
-  * Gets authentication status from token. If autoUpdateToken === true,
-  * updates token and returns true meanwhile
+  * Gets authentication status
   *
-  * @returns {Boolean} true: for Non-JWT tokens and unexpired JWT tokens, false: else
-  *
+  * @returns {Boolean} true: for Non-JWT and unexpired JWT, false: else
   */
   isAuthenticated() {
-    const isExpired = this.authentication.isTokenExpired();
-    if (isExpired && this.config.autoUpdateToken) {
-      if (this.isRefreshing) {
-        return true;
-      }
+    let authenticated = this.authentication.isAuthenticated();
+
+    // auto-update token?
+    if (!authenticated
+      && this.config.autoUpdateToken
+      && this.authentication.getAccessToken()
+      && this.authentication.getRefreshToken()) {
       this.updateToken();
+      authenticated = true;
     }
-    return this.authentication.isAuthenticated();
+
+    return authenticated;
+  }
+
+  /**
+   * Gets ttl in seconds
+   *
+   * @returns {Number} ttl for JWT tokens, NaN for all other tokens
+   */
+  getTtl() {
+    return this.authentication.getTtl();
   }
 
  /**
   * Gets exp from token payload and compares to current time
   *
-  * @returns {Boolean | undefined} undefined: Non-JWT payload, true: unexpired JWT tokens, false: else
-  *
+  * @returns {Boolean} returns (ttl > 0)? for JWT, undefined other tokens
   */
   isTokenExpired() {
     return this.authentication.isTokenExpired();
@@ -120,43 +120,71 @@ export class AuthService {
   * Get payload from tokens
   *
   * @returns {null | String} null: Non-JWT payload, String: JWT token payload
-  *
   */
   getTokenPayload() {
     return this.authentication.getPayload();
   }
 
   /**
+   * Request new accesss token
+   *
+   * @returns {Promise<Response>} requests new token. can be called multiple times
+   */
+  updateToken() {
+    if (!this.authentication.getRefreshToken()) {
+      return Promise.reject(new Error('refreshToken not set'));
+    }
+
+    if (this.authentication.updateTokenCallstack.length === 0) {
+      const content = {
+        grant_type: 'refresh_token',
+        refresh_token: this.authentication.getRefreshToken(),
+        client_id: this.config.clientId ? this.config.clientId : undefined
+      };
+
+      this.client.post(this.config.withBase(this.config.loginUrl), content)
+        .then(response => {
+          this.authentication.responseObject = response;
+          this.authentication.resolveUpdateTokenCallstack(this.authentication.isAuthenticated());
+        })
+        .catch(err => {
+          this.authentication.responseObject = null;
+          this.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
+        });
+    }
+
+    return this.authentication.toUpdateTokenCallstack();
+  }
+
+  /**
    * Signup locally
    *
-   * @param {String|{}}  displayName | object with signup data.
-   * @param {[String]}   [email]
-   * @param {[String]}   [password]
+   * @param {String|{}}   displayName | object with signup data.
+   * @param {[String]|{}} [email | options for post request]
+   * @param {[String]}    [password | redirectUri overwrite]
+   * @param {[{}]}        [options]
+   * @param {[String]}    [redirectUri overwrite]
    *
    * @return {Promise<response>}
-   *
    */
-  signup(displayName, email, password) {
+  signup(displayName, email, password, options, redirectUri) {
     let content;
 
     if (typeof arguments[0] === 'object') {
       content = arguments[0];
+      options = arguments[1];
+      redirectUri = arguments[2];
     } else {
-      console.warn('AuthService.signup(displayName, email, password) is deprecated. Provide an object with signup data instead.');
       content = {
         'displayName': displayName,
         'email': email,
         'password': password
       };
     }
-    return this._signup(content);
-  }
-
-  _signup(data, redirectUri) {
-    return this.client.post(this.config.withBase(this.config.signupUrl), data)
+    return this.client.post(this.config.withBase(this.config.signupUrl), content, options)
       .then(response => {
         if (this.config.loginOnSignup) {
-          this.authentication.setTokensFromResponse(response);
+          this.authentication.responseObject = response;
         }
         this.authentication.redirect(redirectUri, this.config.signupRedirect);
 
@@ -167,32 +195,35 @@ export class AuthService {
   /**
    * login locally. Redirect depending on config
    *
-   * @param {{}}  object with login data.
+   * @param {[String]|{}} email | object with signup data.
+   * @param {[String]}    [password | options for post request]
+   * @param {[{}]}        [options | redirectUri overwrite]]
+   * @param {[String]}    [redirectUri overwrite]
    *
    * @return {Promise<response>}
-   *
    */
-  login(email, password) {
-    let content  = {};
+  login(email, password, options, redirectUri) {
+    let content;
 
-    if (typeof arguments[1] !== 'string') {
+    if (typeof arguments[0] === 'object') {
       content = arguments[0];
+      options = arguments[1];
+      redirectUri = arguments[2];
     } else {
-      console.warn('AuthService.login(email, password) is deprecated. Provide an object with login data instead.');
-      content = {email: email, password: password};
+      content = {
+        'email': email,
+        'password': password
+      };
+      options = options;
     }
 
-    return this._login(content);
-  }
-
-  _login(data, redirectUri) {
     if (this.config.clientId) {
       data.client_id = this.config.clientId;
     }
 
-    return this.client.post(this.config.withBase(this.config.loginUrl), data)
+    return this.client.post(this.config.withBase(this.config.loginUrl), content, options)
       .then(response => {
-        this.authentication.setTokensFromResponse(response);
+        this.authentication.responseObject = response;
 
         this.authentication.redirect(redirectUri, this.config.loginRedirect);
 
@@ -206,49 +237,15 @@ export class AuthService {
    * @param {[String]}  [redirectUri]
    *
    * @return {Promise<>}
-   *
    */
   logout(redirectUri) {
-    return this.authentication.logout(redirectUri)
-      .then(response => {
-        this.authentication.redirect(redirectUri, this.config.logoutRedirect);
+    return new Promise(resolve => {
+      this.authentication.responseObject = null;
 
-        return response;
-      });
-  }
+      this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
-  /**
-   * update accessToken using the refreshToken
-   *
-   * @return {Promise<response>}
-   *
-   */
-  updateToken() {
-    this.isRefreshing  = true;
-    const refreshToken = this.authentication.refreshToken;
-    let content        = {};
-
-    if (refreshToken) {
-      content = {grant_type: 'refresh_token', refresh_token: refreshToken};
-      if (this.config.clientId) {
-        content.client_id = this.config.clientId;
-      }
-
-      return this.client.post(this.config.withBase(this.config.loginUrl), content)
-          .then(response => {
-            this.authentication.setTokensFromResponse(response);
-            return response;
-          }).catch(err => {
-            this.authentication.removeTokens();
-            throw err;
-          })
-          .then(response => {
-            this.isRefreshing = false;
-            return response;
-          });
-    }
-
-    return Promise.reject('refreshToken not enabled');
+      resolve();
+    });
   }
 
   /**
@@ -259,12 +256,11 @@ export class AuthService {
    * @param {[{}]}      [userData]
    *
    * @return {Promise<response>}
-   *
    */
   authenticate(name, redirectUri, userData = {}) {
     return this.authentication.authenticate(name, userData)
       .then(response => {
-        this.authentication.setTokensFromResponse(response);
+        this.authentication.responseObject = response;
 
         this.authentication.redirect(redirectUri, this.config.loginRedirect);
 
@@ -278,7 +274,6 @@ export class AuthService {
    * @param {String}  name of the provider
    *
    * @return {Promise<response>}
-   *
    */
   unlink(name, redirectUri) {
     const unlinkUrl = this.config.withBase(this.config.unlinkUrl) + name;

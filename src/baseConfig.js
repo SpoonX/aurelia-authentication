@@ -1,5 +1,6 @@
 import {join} from 'aurelia-path';
 import extend from 'extend';
+import * as LogManager from 'aurelia-logging';
 
 export class BaseConfig {
   // prepends baseUrl
@@ -121,11 +122,8 @@ export class BaseConfig {
   platform = 'browser';
   // Determines the `window` property name upon which aurelia-authentication data is stored (Default: `window.localStorage`)
   storage = 'localStorage';
-  // The property name used when storing the access token locally
-  accessTokenStorage = 'aurelia_access_token';
-  // The property name used when storing the refresh token locally
-  refreshTokenStorage = 'aurelia_refresh_token';
-
+  // The key used for storing the authentication response locally
+  storageKey = 'aurelia_authentication';
 
   //OAuth provider specific related configuration
   // ============================================
@@ -258,12 +256,12 @@ export class BaseConfig {
 
   /* deprecated methods and parameteres */
   get current() {
-    console.warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
     return this;
   }
 
   set authToken(authToken) {
-    console.warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
     this._authTokenType = authToken;
     this.authTokenType = authToken;
     return authToken;
@@ -273,7 +271,7 @@ export class BaseConfig {
   }
 
   set responseTokenProp(responseTokenProp) {
-    console.warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
     this._responseTokenProp = responseTokenProp;
     this.accessTokenProp = responseTokenProp;
     return responseTokenProp;
@@ -283,7 +281,7 @@ export class BaseConfig {
   }
 
   set tokenRoot(tokenRoot) {
-    console.warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
     this._tokenRoot = tokenRoot;
     this.accessTokenRoot = tokenRoot;
     return tokenRoot;
@@ -293,10 +291,9 @@ export class BaseConfig {
   }
 
   set tokenName(tokenName) {
-    console.warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
     this._tokenName = tokenName;
     this.accessTokenName = tokenName;
-    this.accessTokenStorage = this.tokenPrefix ? this.tokenPrefix + '_' + this.tokenName : this.tokenName;
     return tokenName;
   }
   get tokenName() {
@@ -304,12 +301,11 @@ export class BaseConfig {
   }
 
   set tokenPrefix(tokenPrefix) {
-    console.warn('BaseConfig.tokenPrefix is deprecated. Use BaseConfig.accessTokenStorage instead.');
+    LogManager.getLogger('authentication').warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
     this._tokenPrefix = tokenPrefix;
-    this.accessTokenStorage = this.tokenPrefix ? this.tokenPrefix + '_' + this.tokenName : this.tokenName;
     return tokenPrefix;
   }
   get tokenPrefix() {
-    return this._tokenPrefixx;
+    return this._tokenPrefix || 'aurelia';
   }
 }

@@ -1,3 +1,12 @@
+<a name"2.1.2"></a>
+### 2.1.2 (2016-04-18)
+
+
+#### Bug Fixes
+
+* **refreshToken:** use set(Refresh)TokenFromResponse to get new token ([fed52f7a](https://github.com/spoonx/aurelia-authentication/commit/fed52f7a))
+
+
 <a name"2.1.1"></a>
 ### 2.1.1 (2016-04-04)
 

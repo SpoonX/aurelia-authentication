@@ -160,8 +160,8 @@ define(['exports', 'aurelia-dependency-injection', './authentication', './baseCo
         }
 
         return this.client.post(loginUrl, content).then(function (response) {
-          _this3.auth.setRefreshToken(response);
-          _this3.auth.setToken(response);
+          _this3.auth.setTokenFromResponse(response);
+          _this3.auth.setRefreshTokenFromResponse(response);
           _this3.isRefreshing = false;
 
           return response;

@@ -124,8 +124,8 @@ export let AuthService = (_dec = inject(Authentication, OAuth1, OAuth2, BaseConf
       }
 
       return this.client.post(loginUrl, content).then(response => {
-        this.auth.setRefreshToken(response);
-        this.auth.setToken(response);
+        this.auth.setTokenFromResponse(response);
+        this.auth.setRefreshTokenFromResponse(response);
         this.isRefreshing = false;
 
         return response;

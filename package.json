@@ -1,6 +1,6 @@
 {
   "name": "aurelia-authentication",
-  "version": "2.1.0",
+  "version": "3.0.0-rc1",
   "description": "Plugin for social media authentication and local authentication together with other authentication utilities.",
   "keywords": [
     "aurelia",
@@ -30,7 +30,7 @@
       "dist": "dist/amd"
     },
     "dependencies": {
-      "aurelia-api": "^2.2.0",
+      "aurelia-api": "^3.0.0-rc1",
       "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
       "aurelia-fetch-client": "^1.0.0-beta.1.2.1",
       "aurelia-logging": "^1.0.0-beta.1.2.0",
@@ -40,7 +40,7 @@
       "extend": "^3.0.0"
     },
     "peerDependencies": {
-      "aurelia-api": "^2.2.0",
+      "aurelia-api": "^3.0.0-rc1",
       "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
       "aurelia-fetch-client": "^1.0.0-beta.1.2.1",
       "aurelia-logging": "^1.0.0-beta.1.2.0",
@@ -56,7 +56,7 @@
     }
   },
   "dependencies": {
-    "aurelia-api": "^2.2.0",
+    "aurelia-api": "^3.0.0-rc1",
     "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
     "aurelia-fetch-client": "^1.0.0-beta.1.2.1",
     "aurelia-logging": "^1.0.0-beta.1.2.0",

@@ -7,7 +7,7 @@ System.config({
   },
 
   map: {
-    "aurelia-api": "npm:aurelia-api@2.2.0",
+    "aurelia-api": "npm:aurelia-api@3.0.0-rc1",
     "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0",
     "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.2.1",
     "aurelia-logging": "npm:aurelia-logging@1.0.0-beta.1.2.0",
@@ -18,7 +18,7 @@ System.config({
     "aurelia-router": "npm:aurelia-router@1.0.0-beta.1.2.0",
     "extend": "npm:extend@3.0.0",
     "fetch": "github:github/fetch@0.11.0",
-    "npm:aurelia-api@2.2.0": {
+    "npm:aurelia-api@3.0.0-rc1": {
       "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.0",
       "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.2.1",
       "extend": "npm:extend@3.0.0",

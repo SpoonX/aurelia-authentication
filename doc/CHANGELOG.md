@@ -1,3 +1,68 @@
+<a name"3.0.0-rc1"></a>
+## 3.0.0-rc1 (2016-04-28)
+
+
+#### Bug Fixes
+
+* **BaseConfig:** encode redirect url for all providers ([adc90827](https://github.com/spoonx/aurelia-authentication/commit/adc90827))
+* **authUtils:** quote string ([ab4756f2](https://github.com/spoonx/aurelia-authentication/commit/ab4756f2))
+* **d.ts:** include only necessary imports ([2c292ac4](https://github.com/spoonx/aurelia-authentication/commit/2c292ac4))
+
+
+#### Features
+
+* **AuthService:**
+  * updateToken handles multiple calls ([b6199531](https://github.com/spoonx/aurelia-authentication/commit/b6199531))
+  * isAuthenticated optionally as promise ([9c85af79](https://github.com/spoonx/aurelia-authentication/commit/9c85af79))
+* **authService:** add request options to signup and login as well as optional redirecUri overwrite ([e8072e54](https://github.com/spoonx/aurelia-authentication/commit/e8072e54))
+* **baseConfig:**
+  * standardize access token option names (breaking) ([29d22c5a](https://github.com/spoonx/aurelia-authentication/commit/29d22c5a))
+  * change `refreshTokenName` option value and add `refreshTokenProp` (breaking) ([c8885d7b](https://github.com/spoonx/aurelia-authentication/commit/c8885d7b))
+  * replace both `tokenPrefix` options with `tokenStorage` (breaking) ([4f98493b](https://github.com/spoonx/aurelia-authentication/commit/4f98493b))
+* **project:**
+  * revert isAuthenticated to just boolean again. use aurelia-logger and @deprecated ([49fe1e0f](https://github.com/spoonx/aurelia-authentication/commit/49fe1e0f))
+  * store the complete response in storage. AuthService.getTimeLeft() added ([b98d839e](https://github.com/spoonx/aurelia-authentication/commit/b98d839e))
+  * bundle into single file ([6984c590](https://github.com/spoonx/aurelia-authentication/commit/6984c590))
+  * Rename project to remove spoonx prefix. enable npm installation ([637aac41](https://github.com/spoonx/aurelia-authentication/commit/637aac41))
+  * name auth appropriatly and refactor ([95259767](https://github.com/spoonx/aurelia-authentication/commit/95259767))
+
+
+#### Breaking Changes
+
+* for AuthService(provider, redirectUri, userData) redirectUri===false means "Do not redirect" now. Set redirectUrl to undefined or null to use the defaultRedirectUrl.(which is in this case  BaseConfig.loginRedirect)
+DEPRECATED: for AuthService(provider, redirectUri, userData) redirectUri === true to actually not redirect is deprecated. Set redirectUrl===false instead.
+
+ ([2c15244b](https://github.com/spoonx/aurelia-authentication/commit/2c15244b))
+* authUtils got removed. Extend and aurelia-path are used instead for some functions
+
+ ([671f087a](https://github.com/spoonx/aurelia-authentication/commit/671f087a))
+* This aligns access token option names with the refresh token option names. The option changes are as follows:
+
+```
+tokenStorage      => accessTokenStorage
+responseTokenProp => accessTokenProp
+tokenName         => accessTokenName
+tokenRoot         => accessTokenRoot
+```
+
+ ([29d22c5a](https://github.com/spoonx/aurelia-authentication/commit/29d22c5a))
+* `refreshTokenName` option value has been changed from 'refresh_token' to 'token'. The new `refreshTokenProp` option is set to 'refresh_token' by default (a non-breaking change).
+
+ ([c8885d7b](https://github.com/spoonx/aurelia-authentication/commit/c8885d7b))
+* Token prefixes were using another 'unrelated' option to make up the full storage keys. This was unnecessary, confusing and could have resulted in the same storage location being shared between both the refresh and access tokens. README updated to reflect current design.
+
+ ([4f98493b](https://github.com/spoonx/aurelia-authentication/commit/4f98493b))
+* all imports need to use 'aurelia-authenticaton'
+
+ ([6984c590](https://github.com/spoonx/aurelia-authentication/commit/6984c590))
+* `spoonx/` prefix dropped from install name for authentication and api. Update `package.json` and `config.js` accordingly.
+
+ ([637aac41](https://github.com/spoonx/aurelia-authentication/commit/637aac41))
+* AuthService instance renamed to authService and Authentication instance renamed to authentication
+
+ ([95259767](https://github.com/spoonx/aurelia-authentication/commit/95259767))
+
+
 <a name"2.1.0"></a>
 ## 2.1.0 (2016-03-31)
 

@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/SpoonX/aurelia-authentication.svg)](https://travis-ci.org/SpoonX/aurelia-authentication)
 [![Known Vulnerabilities](https://snyk.io/test/npm/name/badge.svg)](https://snyk.io/test/npm/aurelia-authentication)
-[![Join the chat at https://gitter.im/aurelia/discuss](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/aurelia/discuss?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg?maxAge=2592000?style=plastic)](https://gitter.im/SpoonX/Dev)
 
 > Aurelia-authentication is a token-based authentication plugin for [Aurelia](http://aurelia.io/) with support for popular social authentication providers (Google, Twitter, Facebook, LinkedIn, Windows Live, FourSquare, Yahoo, Github, Instagram) and a local stragegy, i.e. simple username / email and password. It developed of a fork of [paul van bladel's aurelia-auth](https://github.com/paulvanbladel/aurelia-auth/) which itself is a port of the great [Satellizer](https://github.com/sahat/satellizer/) library.
 

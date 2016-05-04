@@ -108,7 +108,6 @@ describe('OAuth2', () => {
   describe('.buildQuery()', () => {
     it('return query', () => {
       const query = oAuth2.buildQuery(baseConfig.providers['facebook']);
-      expect(query.nonce).toMatch(/.\d/);
       expect(query.display).toBe('popup');
       expect(query.scope).toBe('email');
     });

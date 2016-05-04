@@ -30,7 +30,7 @@
       "dist": "dist/amd"
     },
     "dependencies": {
-      "aurelia-api": "^3.0.0-rc1",
+      "aurelia-api": "^3.0.0-rc2",
       "aurelia-dependency-injection": "^1.0.0-beta.1.2.0",
       "aurelia-fetch-client": "^1.0.0-beta.1.2.1",
       "aurelia-logging": "^1.0.0-beta.1.2.0",

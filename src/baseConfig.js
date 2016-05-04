@@ -154,7 +154,7 @@ export class BaseConfig {
       oauthType: '2.0',
       popupOptions: { width: 452, height: 633 },
       state: function() {
-        var rand = Math.random().toString(36).substr(2);
+        let rand = Math.random().toString(36).substr(2);
         return encodeURIComponent(rand);
       }
     },

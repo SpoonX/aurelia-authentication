@@ -1,3 +1,13 @@
+<a name"3.0.0-rc2"></a>
+### 3.0.0-rc2 (2016-05-04)
+
+
+#### Bug Fixes
+
+* **authentication:** let the storageKey be  the storageKey ([a302352b](https://github.com/spoonx/aurelia-authentication/commit/a302352b))
+* **typings:** mark optional parameters ([f56df76a](https://github.com/spoonx/aurelia-authentication/commit/f56df76a))
+
+
 <a name"3.0.0-rc1"></a>
 ## 3.0.0-rc1 (2016-04-28)
 

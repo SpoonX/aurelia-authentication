@@ -673,7 +673,7 @@ export class Authentication {
   /* getters/setters for responseObject */
 
   get responseObject() {
-    return JSON.parse(this.storage.get(this.config.storageKey || {}));
+    return JSON.parse(this.storage.get(this.config.storageKey));
   }
 
   set responseObject(response) {
@@ -842,6 +842,28 @@ export class Authentication {
     } else if (defaultRedirectUrl) {
       window.location.href = defaultRedirectUrl;
     }
+  }
+}
+
+@inject(Authentication)
+export class AuthorizeStep {
+  constructor(authentication) {
+    this.authentication = authentication;
+  }
+
+  run(routingContext, next) {
+    const isLoggedIn = this.authentication.isAuthenticated();
+    const loginRoute = this.authentication.config.loginRoute;
+
+    if (routingContext.getAllInstructions().some(i => i.config.auth)) {
+      if (!isLoggedIn) {
+        return next.cancel(new Redirect(loginRoute));
+      }
+    } else if (isLoggedIn && routingContext.getAllInstructions().some(i => i.fragment === loginRoute)) {
+      return next.cancel(new Redirect( this.authentication.config.loginRedirect ));
+    }
+
+    return next();
   }
 }
 
@@ -1123,28 +1145,6 @@ export class AuthService {
 
         return response;
       });
-  }
-}
-
-@inject(Authentication)
-export class AuthorizeStep {
-  constructor(authentication) {
-    this.authentication = authentication;
-  }
-
-  run(routingContext, next) {
-    const isLoggedIn = this.authentication.isAuthenticated();
-    const loginRoute = this.authentication.config.loginRoute;
-
-    if (routingContext.getAllInstructions().some(i => i.config.auth)) {
-      if (!isLoggedIn) {
-        return next.cancel(new Redirect(loginRoute));
-      }
-    } else if (isLoggedIn && routingContext.getAllInstructions().some(i => i.fragment === loginRoute)) {
-      return next.cancel(new Redirect( this.authentication.config.loginRedirect ));
-    }
-
-    return next();
   }
 }
 

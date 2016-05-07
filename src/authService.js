@@ -218,7 +218,7 @@ export class AuthService {
     }
 
     if (this.config.clientId) {
-      data.client_id = this.config.clientId;
+      content.client_id = this.config.clientId;
     }
 
     return this.client.post(this.config.withBase(this.config.loginUrl), content, options)

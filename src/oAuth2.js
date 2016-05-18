@@ -41,7 +41,7 @@ export class OAuth2 {
 
     const url       = provider.authorizationEndpoint
                     + '?' + buildQueryString(this.buildQuery(provider));
-    const popup     = this.popup.open(url, provider.name, provider.popupOptions, provider.redirectUri);
+    const popup     = this.popup.open(url, provider.name, provider.popupOptions);
     const openPopup = (this.config.platform === 'mobile')
                     ? popup.eventListener(provider.redirectUri)
                     : popup.pollPopup();

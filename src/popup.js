@@ -107,7 +107,7 @@ const buildPopupWindowOptions = options => {
   }, options);
 
   let parts = [];
-  Object.keys(extended).map(key => parts.push(key + '=' + extended[key]));
+  Object.keys(extended).map(key => parts.push(key + '=' + encodeURIComponent(extended[key])));
 
   return parts.join(',');
 };

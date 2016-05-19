@@ -14,6 +14,11 @@ import './authFilter';
  * @param {{}|Function}                                         config
  */
 function configure(aurelia, config) {
+  // ie9 polyfill
+  if (!window.location.origin) {
+   window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+ }
+
   aurelia.globalResources('./authFilter');
 
   const baseConfig = aurelia.container.get(BaseConfig);

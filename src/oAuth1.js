@@ -34,7 +34,7 @@ export class OAuth1 {
         const url = provider.authorizationEndpoint + '?' + buildQueryString(response);
 
         if (this.config.platform === 'mobile') {
-          this.popup = this.popup.open(url, provider.name, provider.popupOptions,  provider.redirectUri);
+          this.popup = this.popup.open(url, provider.name, provider.popupOptions);
         } else {
           this.popup.popupWindow.location = url;
         }

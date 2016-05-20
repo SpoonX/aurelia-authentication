@@ -93,7 +93,7 @@ describe('OAuth2', () => {
           expect(res.path).toBe('/auth/facebook');
           expect(res.body.access_token).toBe('someToken');
           expect(res.body.userData).toBe('some');
-          expect(popup.url).toMatch(/https:\/\/www.facebook.com\/v2.3\/dialog\/oauth\?display=popup\&nonce=0\.\d+\&redirect_uri=http%3A%2F%2Flocalhost%3A9876%2F&response_type=code&scope=email/);
+          expect(popup.url).toBe('https://www.facebook.com/v2.5/dialog/oauth?display=popup&redirect_uri=http%3A%2F%2Flocalhost%3A9876%2F&response_type=code&scope=email');
 
           done();
         })

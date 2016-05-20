@@ -59,6 +59,10 @@ export class BaseConfig {
   baseUrl = '';
   // The API endpoint to which login requests are sent
   loginUrl = '/auth/login';
+  // The API endpoint to which logout requests are sent (not needed for jwt)
+  logoutUrl = null;
+  // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
+  logoutMethod = 'get';
   // The API endpoint to which signup requests are sent
   signupUrl = '/auth/signup';
   // The API endpoint used in profile requests (inc. `find/get` and `update`)

@@ -239,13 +239,16 @@ export class AuthService {
    * @return {Promise<>}
    */
   logout(redirectUri) {
-    return new Promise(resolve => {
+    let localLogout = () => new Promise(resolve => {
       this.authentication.responseObject = null;
-
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
       resolve();
     });
+
+    return (this.config.logoutUrl
+      ? this.client.request(this.config.logoutMethod, this.config.withBase(this.config.logoutUrl)).then(localLogout)
+      : localLogout());
   }
 
   /**

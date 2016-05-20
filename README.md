@@ -4,19 +4,19 @@
 [![Known Vulnerabilities](https://snyk.io/test/npm/name/badge.svg)](https://snyk.io/test/npm/aurelia-authentication)
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg?maxAge=2592000?style=plastic)](https://gitter.im/SpoonX/Dev)
 
-> Aurelia-authentication is a token-based authentication plugin for [Aurelia](http://aurelia.io/) with support for popular social authentication providers (Google, Twitter, Facebook, LinkedIn, Windows Live, FourSquare, Yahoo, Github, Instagram) and a local stragegy, i.e. simple username / email and password. It developed of a fork of [paul van bladel's aurelia-auth](https://github.com/paulvanbladel/aurelia-auth/) which itself is a port of the great [Satellizer](https://github.com/sahat/satellizer/) library.
+> Aurelia-authentication is a token-based authentication plugin for [Aurelia](http://aurelia.io/) with support for popular social authentication providers (Google, Twitter, Facebook, LinkedIn, Windows Live, FourSquare, Yahoo, Github, Instagram) and a local strategy, i.e. simple username / email and password. It developed of a fork of [paul van bladel's aurelia-auth](https://github.com/paulvanbladel/aurelia-auth/) which itself is a port of the great [Satellizer](https://github.com/sahat/satellizer/) library.
 
-Aurelia-authentication makes local and third-party authentication easy. Burelia-authentication does not use any cookies but relies on a token (designed for JWT, but has basic support for others as well) stored in the local storage of the browser. If your server is setup right, it can be a simple as just to select your server endpoint from your [aurelia-api](https://github.com/SpoonX/aurelia-api) setup, add your third-party client ids and you are ready to go.
+Aurelia-authentication makes local and third-party authentication easy. Aurelia-authentication does not use any cookies but relies on a token (designed for JWT, but has basic support for others as well) stored in the local storage of the browser. If your server is setup right, it can be a simple as just to select your server endpoint from your [aurelia-api](https://github.com/SpoonX/aurelia-api) setup, add your third-party client ids and you are ready to go.
 
-You have multiple endpoints? No problem! In the recommended setting,  aurelia-authentication makes use of [aurelia-api](https://github.com/SpoonX/aurelia-api) which can set up multiple endpoints. Just specifiy in your aurelia-authentication configuration which endpoint you want to use for your server and which further endpoints you want to be configured and your token will be sent automatically to your protected API when the user is authenticated.
+You have multiple endpoints? No problem! In the recommended setting, aurelia-authentication makes use of [aurelia-api](https://github.com/SpoonX/aurelia-api) which can set up multiple endpoints. Just specify in your aurelia-authentication configuration which endpoint you want to use for your server and which further endpoints you want to be configured and your token will be sent automatically to your protected API when the user is authenticated.
 
 With aurelia-authentication you can:
 
 * Use local or third-party providers to authenticate the user
 * Automatically add your token to requests to the specified endpoints
 * Automatically refresh your token
-* Extensivly customize the settings
-* Use standalone or in conjuction with [aurelia-api](https://github.com/SpoonX/aurelia-api)
+* Extensively customize the settings
+* Use standalone or in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api)
 * And more
 
 ## Important note
@@ -154,6 +154,6 @@ authService
   .getTtl(): Number
 ```
 
-Additionnally, you can use `AuthFilterValueConverter` and `AuthorizeStep` for UI feedback.
+Additionally, you can use `AuthFilterValueConverter` and `AuthorizeStep` for UI feedback.
 
 You can find more information in the [aurelia-authentication-docs](http://aurelia-authentication.spoonx.org/).

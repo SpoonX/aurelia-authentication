@@ -8,7 +8,7 @@ export class Popup {
     this.url         = '';
   }
 
-  open(url, windowName, options, redirectUri) {
+  open(url, windowName, options) {
     this.url = url;
     const optionsString = buildPopupWindowOptions(options || {});
 

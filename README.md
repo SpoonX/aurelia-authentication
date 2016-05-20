@@ -134,8 +134,8 @@ authService
   .signup(credentials: Object)): Promise<Response>
    // log into server with credentials. Stores response if successful
   .login(credentials: Object): Promise<Response>
-  // deletes stored response
-  .logout([redirectUri: string]): Promise<>
+  // deletes stored response. Sends optionally a logout request
+  .logout([redirectUri: string]): Promise<>|Promise<Response>
   // manually refresh authentication. Needs refreshToken options to be configured
   .updateToken(): Promise<Response> {
   // link third-party account or log into server via third-party authentication. Stores response if successful

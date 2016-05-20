@@ -449,14 +449,34 @@ describe('AuthService', () => {
     const container      = getContainer();
     const authService = container.get(AuthService);
 
-    authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
-    authService.config.logoutRedirect = 'nowhere';
+    beforeEach(() => {
+      authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
+      authService.config.logoutRedirect = 'nowhere';
+    });
+
+    afterEach(() => {
+      authService.config.logoutRedirect = null;
+      authService.config.logoutUrl = null;
+    });
 
     it('Should logout and not redirect.', done => {
       authService.logout(0)
         .then(() => {
           expect(authService.isAuthenticated()).toBe(false);
-          authService.config.logoutRedirect = null;
+
+          done();
+        });
+    });
+
+    it('Should send logout request and not redirect.', done => {
+      authService.config.logoutUrl = '/auth/logout';
+
+      authService.logout(0)
+        .then(response => {
+          expect(authService.isAuthenticated()).toBe(false);
+          expect(response.path).toBe('/auth/logout');
+          expect(response.method).toBe('GET');
+
           done();
         });
     });

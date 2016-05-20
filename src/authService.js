@@ -232,18 +232,18 @@ export class AuthService {
   }
 
   /**
-   * logout locally and redirect to redirectUri (if set) or redirectUri of config
+   * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first if set in config
    *
    * @param {[String]}  [redirectUri]
    *
-   * @return {Promise<>}
+   * @return {Promise<>|Promise<response>}
    */
   logout(redirectUri) {
-    let localLogout = () => new Promise(resolve => {
+    let localLogout = response => new Promise(resolve => {
       this.authentication.responseObject = null;
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
-      resolve();
+      resolve(response);
     });
 
     return (this.config.logoutUrl

@@ -217,9 +217,17 @@ export class Authentication {
    * @return {Promise<response>}
    */
   authenticate(name, userData = {}) {
-    const provider = this.config.providers[name].type === '1.0' ? this.oAuth1 : this.oAuth2;
+    let oauthType = this.config.providers[name].type;
 
-    return provider.open(this.config.providers[name], userData);
+    if (oauthType) {
+      LogManager.getLogger('authentication').warn('DEPRECATED: Setting provider.type is deprecated and replaced by provider.oauthType');
+    } else {
+      oauthType = this.config.providers[name].oauthType;
+    }
+
+    const providerLogin = oauthType === '1.0' ? this.oAuth1 : this.oAuth2;
+
+    return providerLogin.open(this.config.providers[name], userData);
   }
 
   redirect(redirectUrl, defaultRedirectUrl) {

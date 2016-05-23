@@ -71,6 +71,8 @@ export class BaseConfig {
   unlinkUrl = '/auth/unlink/';
   // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
   unlinkMethod = 'get';
+  // The API endpoint to which refreshToken requests are sent. null = loginUrl
+  refreshTokenUrl = null;
 
 
   // Token Options

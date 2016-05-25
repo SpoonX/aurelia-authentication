@@ -142,7 +142,9 @@ export class AuthService {
         client_id: this.config.clientId ? this.config.clientId : undefined
       };
 
-      this.client.post(this.config.withBase(this.config.loginUrl), content)
+      this.client.post(this.config.withBase(this.config.refreshTokenUrl
+                                            ? this.config.refreshTokenUrl
+                                            : this.config.loginUrl), content)
         .then(response => {
           this.authentication.responseObject = response;
           this.authentication.resolveUpdateTokenCallstack(this.authentication.isAuthenticated());

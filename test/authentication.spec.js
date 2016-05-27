@@ -298,6 +298,13 @@ describe('Authentication', () => {
       )).toBe('some');
     });
 
+    it('Should return token if response has a string in dotted tokenProp', () => {
+      expect(authentication.getTokenFromResponse(
+        {tokenProp: {tokenName: 'some'}},
+        'tokenProp.tokenName'
+      )).toBe('some');
+    });
+
     it('Should return token if response has a string in tokenName of tokenProp', () => {
       expect(authentication.getTokenFromResponse(
         {tokenProp: {tokenName: 'some'}},

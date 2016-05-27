@@ -315,6 +315,15 @@ describe('Authentication', () => {
       expect(fail).toThrow();
     });
 
+    it('Should throw if token not found in nested', () => {
+      const fail = () => authentication.getTokenFromResponse(
+        {tokenProp: {wrongTokenName: 'some'}},
+        'tokenProp',
+        'tokenName'
+      );
+      expect(fail).toThrow();
+    });
+
     it('Should return token if response has a string in tokenName in tokenRoot of tokenProp', () => {
       expect(authentication.getTokenFromResponse(
         {tokenProp: {tokenRoot1: {tokenRoot2: {tokenName: 'some'}}}},

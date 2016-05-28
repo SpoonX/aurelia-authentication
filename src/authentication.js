@@ -24,20 +24,6 @@ export class Authentication {
     this.payload              = null;
     this.exp                  = null;
     this.hasDataStored        = false;
-
-    // get token stored in previous format over
-    const oldStorageKey = config.tokenPrefix
-                        ? config.tokenPrefix + '_' + config.tokenName
-                        : this.tokenName;
-    const oldToken = storage.get(oldStorageKey);
-
-    if (oldToken) {
-      LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
-      let fakeOldResponse = {};
-      fakeOldResponse[config.accessTokenProp] = oldToken;
-      this.responseObject = fakeOldResponse;
-      storage.remove(oldStorageKey);
-    }
   }
 
 
@@ -73,41 +59,48 @@ export class Authentication {
     return this.getAccessToken();
   }
 
-  /* getters/setters for responseObject */
+  /* get/set responseObject */
 
-  get responseObject() {
+  getResponseObject() {
     return JSON.parse(this.storage.get(this.config.storageKey));
   }
 
-  set responseObject(response) {
+  setResponseObject(response) {
     if (response) {
       this.getDataFromResponse(response);
-      return this.storage.set(this.config.storageKey, JSON.stringify(response));
+      this.storage.set(this.config.storageKey, JSON.stringify(response));
+      return;
     }
-    this.deleteData();
-    return this.storage.remove(this.config.storageKey);
+    this.accessToken = null;
+    this.refreshToken = null;
+    this.payload = null;
+    this.exp = null;
+
+    this.hasDataStored = false;
+
+    this.storage.remove(this.config.storageKey);
   }
 
 
   /* get data, update if needed first */
 
   getAccessToken() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
     return this.accessToken;
   }
 
   getRefreshToken() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
     return this.refreshToken;
   }
 
   getPayload() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
     return this.payload;
   }
 
   getExp() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
     return this.exp;
   }
 
@@ -163,15 +156,6 @@ export class Authentication {
       payload: this.payload,
       exp: this.exp
     };
-  }
-
-  deleteData() {
-    this.accessToken = null;
-    this.refreshToken = null;
-    this.payload = null;
-    this.exp = null;
-
-    this.hasDataStored = false;
   }
 
   getTokenFromResponse(response, tokenProp, tokenName, tokenRoot) {

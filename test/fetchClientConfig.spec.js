@@ -2,8 +2,8 @@ import {Container} from 'aurelia-dependency-injection';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Config} from 'aurelia-api';
 
-import {FetchConfig} from '../src/aurelia-authentication';
-import {Authentication} from '../src/authentication';
+import {FetchConfig} from '../src/fetchClientConfig';
+import {AuthService} from '../src/authService';
 
 function getContainer() {
   let container = new Container();
@@ -21,13 +21,13 @@ describe('FetchConfig', function() {
   let container      = getContainer();
   let clientConfig   = container.get(Config);
   let fetchConfig    = container.get(FetchConfig);
-  let authentication = container.get(Authentication);
+  let authService    = container.get(AuthService);
 
   describe('.intercept()', function() {
     it('Should intercept requests when authenticated.', function(done) {
-      let client                 = container.get(HttpClient);
-      client.baseUrl             = 'http://localhost:1927/';
-      authentication.responseObject = {token: 'xy'};
+      let client     = container.get(HttpClient);
+      client.baseUrl = 'http://localhost:1927/';
+      authService.setResponseObject({token: 'xy'});
 
       fetchConfig.configure();
       client.fetch('some')
@@ -46,7 +46,7 @@ describe('FetchConfig', function() {
     it('Should not intercept requests when unauthenticated.', function(done) {
       let client                 = new HttpClient();
       client.baseUrl             = 'http://localhost:1927/';
-      authentication.accessToken = null;
+      authService.accessToken = null;
 
       fetchConfig.configure();
       client.fetch('some')
@@ -65,7 +65,7 @@ describe('FetchConfig', function() {
     it('Should not intercept requests when authenticated with the httpInterceptor disabled.', function(done) {
       let client                   = new HttpClient();
       client.baseUrl               = 'http://localhost:1927/';
-      authentication.accessToken   = 'xy';
+      authService.accessToken   = 'xy';
       clientConfig.httpInterceptor = false;
 
       fetchConfig.configure();
@@ -89,7 +89,7 @@ describe('FetchConfig', function() {
     it('Should configure the HttpClient singleton without any arguments.', function(done) {
       let client                 = container.get(HttpClient);
       client.baseUrl             = 'http://localhost:1927/';
-      authentication.accessToken = 'xy';
+      authService.accessToken = 'xy';
 
       fetchConfig.configure();
       client.fetch('some')
@@ -112,7 +112,7 @@ describe('FetchConfig', function() {
     it('Should configure given client as instance of HttpClient.', function(done) {
       let client                 = new HttpClient();
       client.baseUrl             = 'http://localhost:1927/';
-      authentication.accessToken = 'xy';
+      authService.accessToken = 'xy';
 
       fetchConfig.configure(client);
       client.fetch('some')
@@ -134,7 +134,7 @@ describe('FetchConfig', function() {
 
     it('Should configure given client as instance of Rest.', function(done) {
       let rest = clientConfig.getEndpoint('sx/default');
-      authentication.accessToken = 'xy';
+      authService.accessToken = 'xy';
 
       fetchConfig.configure(rest);
       rest.find('some')
@@ -160,7 +160,7 @@ describe('FetchConfig', function() {
     it('Should configure given client being the default endpoint.', function(done) {
       let rest                   = clientConfig.getEndpoint('sx/default');
       let endpoint               = '';
-      authentication.accessToken = 'xy';
+      authService.accessToken = 'xy';
 
       fetchConfig.configure(endpoint);
       rest.find('some')
@@ -179,7 +179,7 @@ describe('FetchConfig', function() {
     it('Should configure given client being an endpoint string.', function(done) {
       let rest                   = clientConfig.getEndpoint('sx/default');
       let endpoint               = 'sx/default';
-      authentication.accessToken = 'xy';
+      authService.accessToken = 'xy';
 
       fetchConfig.configure(endpoint);
       rest.find('some')
@@ -198,7 +198,7 @@ describe('FetchConfig', function() {
     it('Should configure given client as array of HttpClient instances.', function(done) {
       let clients                = [new HttpClient(), new HttpClient()];
       clients[1].baseUrl         = 'http://localhost:1927/';
-      authentication.accessToken = 'xy';
+      authService.accessToken = 'xy';
 
       fetchConfig.configure(clients);
       clients[1].fetch('some')
@@ -221,7 +221,7 @@ describe('FetchConfig', function() {
     it('Should configure given client as array of Rest instances.', function(done) {
       let rests                  = [clientConfig.getEndpoint('sx/default'), clientConfig.getEndpoint('sx/custom')];
       rests[1]                   = clientConfig.getEndpoint('sx/default');
-      authentication.accessToken = 'xy';
+      authService.accessToken = 'xy';
 
       fetchConfig.configure(rests);
       rests[1].find('some')
@@ -240,7 +240,7 @@ describe('FetchConfig', function() {
     it('Should configure given client as array of strings.', function(done) {
       let endpoints              = ['sx/default', 'sx/custom'];
       let rest                   = clientConfig.getEndpoint('sx/default');
-      authentication.accessToken = 'xy';
+      authService.accessToken = 'xy';
 
       fetchConfig.configure(endpoints);
       rest.find('some')
@@ -257,5 +257,5 @@ describe('FetchConfig', function() {
     });
   });
 
-  authentication.accessToken = null;
+  authService.accessToken = null;
 });

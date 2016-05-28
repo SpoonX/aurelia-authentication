@@ -249,6 +249,20 @@ export class BaseConfig {
       scopeDelimiter: ' ',
       oauthType: '2.0',
       popupOptions: { width: 1028, height: 529 }
+    },
+    auth0: {
+      name: 'auth0',
+      oauthType: 'auth0-lock',
+      clientId: 'your_client_id',
+      clientDomain: 'your_domain_url',
+      display: 'popup',
+      lockOptions: {
+        popup: true
+      },
+      responseType: 'token',
+      state: function() {
+        return Math.random().toString(36).substr(2);
+      }
     }
   };
 

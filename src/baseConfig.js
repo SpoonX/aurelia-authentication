@@ -1,3 +1,4 @@
+import {PLATFORM} from 'aurelia-pal';
 import {join} from 'aurelia-path';
 import extend from 'extend';
 import * as LogManager from 'aurelia-logging';
@@ -128,7 +129,7 @@ export class BaseConfig {
   withCredentials = true;
   // Controls how the popup is shown for different devices (Options: 'browser' or 'mobile')
   platform = 'browser';
-  // Determines the `window` property name upon which aurelia-authentication data is stored (Default: `window.localStorage`)
+  // Determines the `PLATFORM` property name upon which aurelia-authentication data is stored (Default: `PLATFORM.localStorage`)
   storage = 'localStorage';
   // The key used for storing the authentication response locally
   storageKey = 'aurelia_authentication';
@@ -140,7 +141,7 @@ export class BaseConfig {
       name: 'facebook',
       url: '/auth/facebook',
       authorizationEndpoint: 'https://www.facebook.com/v2.5/dialog/oauth',
-      redirectUri: window.location.origin + '/',
+      redirectUri: PLATFORM.location.origin + '/',
       requiredUrlParams: ['display', 'scope'],
       scope: ['email'],
       scopeDelimiter: ',',
@@ -152,7 +153,7 @@ export class BaseConfig {
       name: 'google',
       url: '/auth/google',
       authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
-      redirectUri: window.location.origin,
+      redirectUri: PLATFORM.location.origin,
       requiredUrlParams: ['scope'],
       optionalUrlParams: ['display', 'state'],
       scope: ['profile', 'email'],
@@ -170,7 +171,7 @@ export class BaseConfig {
       name: 'github',
       url: '/auth/github',
       authorizationEndpoint: 'https://github.com/login/oauth/authorize',
-      redirectUri: window.location.origin,
+      redirectUri: PLATFORM.location.origin,
       optionalUrlParams: ['scope'],
       scope: ['user:email'],
       scopeDelimiter: ' ',
@@ -181,7 +182,7 @@ export class BaseConfig {
       name: 'instagram',
       url: '/auth/instagram',
       authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
-      redirectUri: window.location.origin,
+      redirectUri: PLATFORM.location.origin,
       requiredUrlParams: ['scope'],
       scope: ['basic'],
       scopeDelimiter: '+',
@@ -191,7 +192,7 @@ export class BaseConfig {
       name: 'linkedin',
       url: '/auth/linkedin',
       authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
-      redirectUri: window.location.origin,
+      redirectUri: PLATFORM.location.origin,
       requiredUrlParams: ['state'],
       scope: ['r_emailaddress'],
       scopeDelimiter: ' ',
@@ -203,7 +204,7 @@ export class BaseConfig {
       name: 'twitter',
       url: '/auth/twitter',
       authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
-      redirectUri: window.location.origin,
+      redirectUri: PLATFORM.location.origin,
       oauthType: '1.0',
       popupOptions: { width: 495, height: 645 }
     },
@@ -211,7 +212,7 @@ export class BaseConfig {
       name: 'twitch',
       url: '/auth/twitch',
       authorizationEndpoint: 'https://api.twitch.tv/kraken/oauth2/authorize',
-      redirectUri: window.location.origin,
+      redirectUri: PLATFORM.location.origin,
       requiredUrlParams: ['scope'],
       scope: ['user_read'],
       scopeDelimiter: ' ',
@@ -223,7 +224,7 @@ export class BaseConfig {
       name: 'live',
       url: '/auth/live',
       authorizationEndpoint: 'https://login.live.com/oauth20_authorize.srf',
-      redirectUri: window.location.origin,
+      redirectUri: PLATFORM.location.origin,
       requiredUrlParams: ['display', 'scope'],
       scope: ['wl.emails'],
       scopeDelimiter: ' ',
@@ -235,7 +236,7 @@ export class BaseConfig {
       name: 'yahoo',
       url: '/auth/yahoo',
       authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
-      redirectUri: window.location.origin,
+      redirectUri: PLATFORM.location.origin,
       scope: [],
       scopeDelimiter: ',',
       oauthType: '2.0',
@@ -245,7 +246,7 @@ export class BaseConfig {
       name: 'bitbucket',
       url: '/auth/bitbucket',
       authorizationEndpoint: 'https://bitbucket.org/site/oauth2/authorize',
-      redirectUri: window.location.origin + '/',
+      redirectUri: PLATFORM.location.origin + '/',
       requiredUrlParams: ['scope'],
       scope: ['email'],
       scopeDelimiter: ' ',

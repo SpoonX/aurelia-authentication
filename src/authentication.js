@@ -1,3 +1,4 @@
+import {PLATFORM} from 'aurelia-pal';
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import * as LogManager from 'aurelia-logging';
@@ -150,7 +151,7 @@ export class Authentication {
     if (this.accessToken && this.accessToken.split('.').length === 3) {
       try {
         const base64 = this.accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        payload = JSON.parse(decodeURIComponent(escape(window.atob(base64))));
+        payload = JSON.parse(decodeURIComponent(escape(atob(base64))));
       } catch (e) {
         payload = null;
       }
@@ -256,9 +257,9 @@ export class Authentication {
       return;
     }
     if (typeof redirectUrl === 'string') {
-      window.location.href = window.encodeURI(redirectUrl);
+      PLATFORM.location.href = encodeURI(redirectUrl);
     } else if (defaultRedirectUrl) {
-      window.location.href = defaultRedirectUrl;
+      PLATFORM.location.href = defaultRedirectUrl;
     }
   }
 }

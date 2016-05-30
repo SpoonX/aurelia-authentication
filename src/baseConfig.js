@@ -67,6 +67,8 @@ export class BaseConfig {
   signupUrl = '/auth/signup';
   // The API endpoint used in profile requests (inc. `find/get` and `update`)
   profileUrl = '/auth/me';
+  // The method used to update the profile ('put' or 'patch')
+  profileMethod = 'put';
   // The API endpoint used with oAuth to unlink authentication
   unlinkUrl = '/auth/unlink/';
   // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')

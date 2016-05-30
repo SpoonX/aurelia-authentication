@@ -59,6 +59,16 @@ export class Authentication {
     return this.getAccessToken();
   }
 
+  get responseObject() {
+    LogManager.getLogger('authentication').warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
+    return this.getResponseObject();
+  }
+
+  set responseObject(response) {
+    LogManager.getLogger('authentication').warn('Setter Authentication.responseObject is deprecated. Use Authentication.setResponseObject(response) instead.');
+    this.setResponseObject(response);
+  }
+
   /* get/set responseObject */
 
   getResponseObject() {

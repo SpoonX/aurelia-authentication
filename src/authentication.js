@@ -65,7 +65,7 @@ export class Authentication {
   }
 
   set responseObject(response) {
-    LogManager.getLogger('authentication').warn('Setter Authentication.responseObject is deprecated. Use Authentication.setResponseObject(response) instead.');
+    LogManager.getLogger('authentication').warn('Setter Authentication.responseObject is deprecated. Use AuthServive.setResponseObject(response) instead.');
     this.setResponseObject(response);
   }
 

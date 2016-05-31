@@ -151,7 +151,7 @@ export class Authentication {
 
     try {
       this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
-    } catch (_) {}
+    } catch (_) {_;}
 
     this.exp = this.payload ? parseInt(this.payload.exp, 10) : NaN;
 

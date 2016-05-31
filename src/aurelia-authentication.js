@@ -3,6 +3,7 @@ import {Config, Rest} from 'aurelia-api';
 
 import {AuthService} from './authService';
 import {AuthorizeStep} from './authorizeStep';
+import {AuthenticateStep} from './authenticateStep';
 import {BaseConfig} from './baseConfig';
 import {FetchConfig} from './fetchClientConfig';
 import './authFilter';
@@ -67,5 +68,6 @@ export {
   configure,
   FetchConfig,
   AuthService,
-  AuthorizeStep
+  AuthorizeStep,
+  AuthenticateStep
 };

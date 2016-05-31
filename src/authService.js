@@ -37,7 +37,7 @@ export class AuthService {
     if (typeof criteria === 'string' || typeof criteria === 'number') {
       criteria = {id: criteria};
     }
-    return this.client.find(this.config.withBase(this.config.profileUrl), criteria);
+    return this.client.find(this.config.joinBase(this.config.profileUrl), criteria);
   }
 
   /**
@@ -154,7 +154,7 @@ export class AuthService {
         client_id: this.config.clientId ? this.config.clientId : undefined
       };
 
-      this.client.post(this.config.withBase(this.config.refreshTokenUrl
+      this.client.post(this.config.joinBase(this.config.refreshTokenUrl
                                             ? this.config.refreshTokenUrl
                                             : this.config.loginUrl), content)
         .then(response => {
@@ -195,7 +195,7 @@ export class AuthService {
         'password': password
       };
     }
-    return this.client.post(this.config.withBase(this.config.signupUrl), content, options)
+    return this.client.post(this.config.joinBase(this.config.signupUrl), content, options)
       .then(response => {
         if (this.config.loginOnSignup) {
           this.authentication.responseObject = response;
@@ -235,7 +235,7 @@ export class AuthService {
       content.client_id = this.config.clientId;
     }
 
-    return this.client.post(this.config.withBase(this.config.loginUrl), content, options)
+    return this.client.post(this.config.joinBase(this.config.loginUrl), content, options)
       .then(response => {
         this.authentication.responseObject = response;
 
@@ -261,7 +261,7 @@ export class AuthService {
     });
 
     return (this.config.logoutUrl
-      ? this.client.request(this.config.logoutMethod, this.config.withBase(this.config.logoutUrl)).then(localLogout)
+      ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout)
       : localLogout());
   }
 
@@ -293,7 +293,7 @@ export class AuthService {
    * @return {Promise<response>}
    */
   unlink(name, redirectUri) {
-    const unlinkUrl = this.config.withBase(this.config.unlinkUrl) + name;
+    const unlinkUrl = this.config.joinBase(this.config.unlinkUrl) + name;
     return this.client.request(this.config.unlinkMethod, unlinkUrl)
       .then(response => {
         this.authentication.redirect(redirectUri);

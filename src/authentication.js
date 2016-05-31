@@ -53,19 +53,19 @@ export class Authentication {
     return this.config.loginRedirect;
   }
 
-  @deprecated({message: 'Use baseConfig.withBase(baseConfig.loginUrl) instead.'})
+  @deprecated({message: 'Use baseConfig.joinBase(baseConfig.loginUrl) instead.'})
   getLoginUrl() {
-    return this.config.withBase(this.config.loginUrl);
+    return this.Config.joinBase(this.config.loginUrl);
   }
 
-  @deprecated({message: 'Use baseConfig.withBase(baseConfig.signupUrl) instead.'})
+  @deprecated({message: 'Use baseConfig.joinBase(baseConfig.signupUrl) instead.'})
   getSignupUrl() {
-    return this.config.withBase(this.config.signupUrl);
+    return this.Config.joinBase(this.config.signupUrl);
   }
 
-  @deprecated({message: 'Use baseConfig.withBase(baseConfig.profileUrl) instead.'})
+  @deprecated({message: 'Use baseConfig.joinBase(baseConfig.profileUrl) instead.'})
   getProfileUrl() {
-    return this.config.withBase(this.config.profileUrl);
+    return this.Config.joinBase(this.config.profileUrl);
   }
 
   @deprecated({message: 'Use .getAccessToken() instead.'})

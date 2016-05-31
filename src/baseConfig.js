@@ -5,7 +5,7 @@ import * as LogManager from 'aurelia-logging';
 
 export class BaseConfig {
   // prepends baseUrl
-  withBase(url) {
+  joinBase(url) {
     return join(this.baseUrl, url);
   }
 

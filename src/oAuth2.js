@@ -67,7 +67,7 @@ export class OAuth2 {
       redirectUri: provider.redirectUri
     }, oauthData);
 
-    const serverUrl   = this.config.withBase(provider.url);
+    const serverUrl   = this.config.joinBase(provider.url);
     const credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
     return this.config.client.post(serverUrl, data, {credentials: credentials});

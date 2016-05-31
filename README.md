@@ -152,6 +152,8 @@ authService
   .getTokenPayload(): string
   // get the token ttl if available
   .getTtl(): Number
+  // get the token exp if available
+  .getExp(): Number
 ```
 
 Additionally, you can use `AuthFilterValueConverter` and `AuthorizeStep` for UI feedback.

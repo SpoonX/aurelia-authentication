@@ -106,6 +106,15 @@ export class AuthService {
    *
    * @returns {Number} ttl for JWT tokens, NaN for all other tokens
    */
+  getExp() {
+    return this.authentication.getExp();
+  }
+
+  /**
+   * Gets ttl in seconds
+   *
+   * @returns {Number} ttl for JWT tokens, NaN for all other tokens
+   */
   getTtl() {
     return this.authentication.getTtl();
   }

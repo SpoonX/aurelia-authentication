@@ -1,6 +1,7 @@
 import {PLATFORM} from 'aurelia-pal';
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
+import jwtDecode from 'jwt-decode';
 import * as LogManager from 'aurelia-logging';
 
 import {BaseConfig}  from './baseConfig';
@@ -146,19 +147,13 @@ export class Authentication {
       }
     }
 
-    let payload = null;
+    this.payload = null;
 
-    if (this.accessToken && this.accessToken.split('.').length === 3) {
-      try {
-        const base64 = this.accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        payload = JSON.parse(decodeURIComponent(escape(atob(base64))));
-      } catch (e) {
-        payload = null;
-      }
-    }
+    try {
+      this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
+    } catch (_) {}
 
-    this.payload = payload;
-    this.exp = payload ? parseInt(payload.exp, 10) : NaN;
+    this.exp = this.payload ? parseInt(this.payload.exp, 10) : NaN;
 
     this.hasDataStored = true;
 

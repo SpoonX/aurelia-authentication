@@ -8,7 +8,7 @@ import {BaseConfig} from './baseConfig';
 @inject(Authentication, BaseConfig)
 export class AuthService {
   /**
-   * The Authetnication instance that handles the token
+   * The Authentication instance that handles the token
    * @type {Authentication}
    */
   authentication;

@@ -84,7 +84,7 @@ export class BaseConfig {
   authHeader = 'Authorization';
   // The token name used in the header of API requests that require authentication
   authTokenType = 'Bearer';
-  // The the property from which to get the access token after a successful login or signup
+  // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
   accessTokenProp = 'access_token';
 
 
@@ -106,7 +106,7 @@ export class BaseConfig {
   autoUpdateToken = true;
   // Oauth Client Id
   clientId = false;
-  // The the property from which to get the refresh token after a successful token refresh
+  // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
   refreshTokenProp = 'refresh_token';
 
   // If the property defined by `refreshTokenProp` is an object:

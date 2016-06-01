@@ -179,7 +179,7 @@ export class Authentication {
   getTokenFromResponse(response, tokenProp, tokenName, tokenRoot) {
     if (!response) return undefined;
 
-    const responseTokenProp = response[tokenProp];
+    const responseTokenProp = tokenProp.split('.').reduce((o, x) => o[x], response);
 
     if (typeof responseTokenProp === 'string') {
       return responseTokenProp;

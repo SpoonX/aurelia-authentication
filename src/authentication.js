@@ -186,8 +186,12 @@ export class Authentication {
     }
 
     if (typeof responseTokenProp === 'object') {
-      const tokenRootData = tokenRoot && tokenRoot.split('.').reduce(function(o, x) { return o[x]; }, responseTokenProp);
-      return tokenRootData ? tokenRootData[tokenName] : responseTokenProp[tokenName];
+      const tokenRootData = tokenRoot && tokenRoot.split('.').reduce((o, x) => o[x], responseTokenProp);
+      const token = tokenRootData ? tokenRootData[tokenName] : responseTokenProp[tokenName];
+
+      if (!token) throw new Error('Token not found in response');
+
+      return token;
     }
 
     const token = response[tokenName] === undefined ? null : response[tokenName];

@@ -6,6 +6,15 @@ import {AuthService} from '../src/aurelia-authentication';
 import {BaseConfig} from '../src/baseConfig';
 import {Authentication} from '../src/authentication';
 
+const tokenFuture = {
+  payload: {
+    name: 'tokenFuture',
+    admin: true,
+    exp: '2460017154'
+  },
+  jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9rZW5GdXR1cmUiLCJhZG1pbiI6dHJ1ZSwiZXhwIjoiMjQ2MDAxNzE1NCJ9.iHXLzWGY5U9WwVT4IVRLuKTf65XpgrA1Qq_Jlynv6bc'
+};
+
 const noop = () => {};
 
 function getContainer() {
@@ -209,16 +218,50 @@ describe('AuthService', () => {
   });
 
 
+  describe('.setTimeout()', () => {
+    const container = new Container();
+    let authService = container.get(AuthService);
+
+    it('Should queue timeout', done => {
+      authService.authenticated = true;
+      authService.setTimeout(0);
+
+      expect(authService.authenticated).toBe(true);
+
+      setTimeout(done, 0);
+    });
+
+    it('Should have timed out', () => {
+      expect(authService.authenticated).toBe(false);
+    });
+  });
+
+
   describe('.setResponseObject()', () => {
     const container    = new Container();
     let authService    = container.get(AuthService);
+    authService.getTtl = () => 0;
 
     it('Should set with object', () => {
       authService.setResponseObject({access_token: 'some'});
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe('some');
+      expect(authService.authenticated).toBe(true);
 
       authService.setResponseObject(null);
+    });
+
+    it('Should set with jwt and timeout', done => {
+      authService.setResponseObject({access_token: tokenFuture.jwt});
+
+      expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);
+      expect(authService.authenticated).toBe(true);
+
+      setTimeout(done, 0);
+    });
+
+    it('Should have timed out', () => {
+      expect(authService.authenticated).toBe(false);
     });
 
     it('Should delete', () => {
@@ -226,6 +269,7 @@ describe('AuthService', () => {
 
       authService.setResponseObject(null);
       expect(window.localStorage.getItem('aurelia_authentication')).toBe(null);
+      expect(authService.authenticated).toBe(false);
 
       authService.authentication.setResponseObject(null);
     });

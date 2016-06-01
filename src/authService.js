@@ -86,9 +86,9 @@ export class AuthService {
       criteria = { id: criteria };
     }
     if (this.config.profileMethod === 'put') {
-      return this.client.update(this.config.withBase(this.config.profileUrl), criteria, body);
+      return this.client.update(this.config.joinBase(this.config.profileUrl), criteria, body);
     }
-    return this.client.patch(this.config.withBase(this.config.profileUrl), criteria, body);
+    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteria, body);
   }
 
   /**

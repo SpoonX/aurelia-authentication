@@ -87,11 +87,11 @@ describe('AuthService', () => {
   describe('.updateMe() with PUT', () => {
     const container      = getContainer();
     const authService    = container.get(AuthService);
-    
+
     beforeEach(() => {
       authService.config.profileMethod = 'put';
     });
-    
+
     it('without criteria', done => {
       authService.updateMe({data: 'some'})
         .then(result => {
@@ -141,7 +141,7 @@ describe('AuthService', () => {
   describe('.updateMe() with PATCH', () => {
     const container      = getContainer();
     const authService    = container.get(AuthService);
-    
+
     beforeEach(() => {
       authService.config.profileMethod = 'patch';
     });

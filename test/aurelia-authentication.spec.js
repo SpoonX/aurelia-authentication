@@ -6,7 +6,8 @@ import {
   configure,
   FetchConfig,
   AuthService,
-  AuthorizeStep
+  AuthorizeStep,
+  AuthenticateStep
 } from '../src/aurelia-authentication';
 import {BaseConfig} from '../src/baseConfig';
 
@@ -40,6 +41,10 @@ describe('aurelia-authentication', function() {
 
     it('Should export AuthorizeStep', function() {
       expect(AuthorizeStep).toBeDefined();
+    });
+
+    it('Should export AuthenticateStep', function() {
+      expect(AuthenticateStep).toBeDefined();
     });
   });
 

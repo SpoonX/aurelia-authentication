@@ -6,14 +6,16 @@ import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
 import {OAuth1} from './oAuth1';
 import {OAuth2} from './oAuth2';
+import {Auth0Lock} from './auth0Lock';
 
-@inject(Storage, BaseConfig, OAuth1, OAuth2)
+@inject(Storage, BaseConfig, OAuth1, OAuth2, Auth0Lock)
 export class Authentication {
-  constructor(storage, config, oAuth1, oAuth2) {
+  constructor(storage, config, oAuth1, oAuth2, auth0Lock) {
     this.storage              = storage;
     this.config               = config;
     this.oAuth1               = oAuth1;
     this.oAuth2               = oAuth2;
+    this.auth0Lock            = auth0Lock;
     this.updateTokenCallstack = [];
     this.accessToken          = null;
     this.refreshToken         = null;
@@ -229,7 +231,12 @@ export class Authentication {
       oauthType = this.config.providers[name].oauthType;
     }
 
-    const providerLogin = oauthType === '1.0' ? this.oAuth1 : this.oAuth2;
+    let providerLogin;
+    if (oauthType === 'auth0-lock') {
+      providerLogin = this.auth0Lock;
+    } else {
+      providerLogin = (oauthType === '1.0' ? this.oAuth1 : this.oAuth2);
+    }
 
     return providerLogin.open(this.config.providers[name], userData);
   }

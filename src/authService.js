@@ -7,9 +7,35 @@ import {BaseConfig} from './baseConfig';
 
 @inject(Authentication, BaseConfig)
 export class AuthService {
+  /**
+   * The Authentication instance that handles the token
+   * @type {Authentication}
+   */
+  authentication;
+
+  /**
+   * The Config instance that contains the current configuration setting
+   * @type {Config}
+   */
+  config;
+
   constructor(authentication, config) {
     this.authentication = authentication;
     this.config         = config;
+
+    // get token stored in previous format over
+    const oldStorageKey = config.tokenPrefix
+                        ? config.tokenPrefix + '_' + config.tokenName
+                        : config.tokenName;
+    const oldToken = authentication.storage.get(oldStorageKey);
+
+    if (oldToken) {
+      LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
+      let fakeOldResponse = {};
+      fakeOldResponse[config.accessTokenProp] = oldToken;
+      this.setResponseObject(fakeOldResponse);
+      authentication.storage.remove(oldStorageKey);
+    }
   }
 
   /**
@@ -24,6 +50,13 @@ export class AuthService {
   get auth() {
     LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
     return this.authentication;
+  }
+
+  /**
+   * @param {Object} response The servers response as GOJO
+   */
+  setResponseObject(response) {
+    this.authentication.setResponseObject(response);
   }
 
   /**
@@ -53,9 +86,9 @@ export class AuthService {
       criteria = { id: criteria };
     }
     if (this.config.profileMethod === 'put') {
-      return this.client.update(this.config.withBase(this.config.profileUrl), criteria, body);
+      return this.client.update(this.config.joinBase(this.config.profileUrl), criteria, body);
     }
-    return this.client.patch(this.config.withBase(this.config.profileUrl), criteria, body);
+    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteria, body);
   }
 
   /**
@@ -158,11 +191,11 @@ export class AuthService {
                                             ? this.config.refreshTokenUrl
                                             : this.config.loginUrl), content)
         .then(response => {
-          this.authentication.responseObject = response;
-          this.authentication.resolveUpdateTokenCallstack(this.authentication.isAuthenticated());
+          this.setResponseObject(response);
+          this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
         })
         .catch(err => {
-          this.authentication.responseObject = null;
+          this.setResponseObject(null);
           this.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
         });
     }
@@ -198,7 +231,7 @@ export class AuthService {
     return this.client.post(this.config.joinBase(this.config.signupUrl), content, options)
       .then(response => {
         if (this.config.loginOnSignup) {
-          this.authentication.responseObject = response;
+          this.setResponseObject(response);
         }
         this.authentication.redirect(redirectUri, this.config.signupRedirect);
 
@@ -237,7 +270,7 @@ export class AuthService {
 
     return this.client.post(this.config.joinBase(this.config.loginUrl), content, options)
       .then(response => {
-        this.authentication.responseObject = response;
+        this.setResponseObject(response);
 
         this.authentication.redirect(redirectUri, this.config.loginRedirect);
 
@@ -254,7 +287,7 @@ export class AuthService {
    */
   logout(redirectUri) {
     let localLogout = response => new Promise(resolve => {
-      this.authentication.responseObject = null;
+      this.setResponseObject(null);
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
       resolve(response);
@@ -277,7 +310,7 @@ export class AuthService {
   authenticate(name, redirectUri, userData = {}) {
     return this.authentication.authenticate(name, userData)
       .then(response => {
-        this.authentication.responseObject = response;
+        this.setResponseObject(response);
 
         this.authentication.redirect(redirectUri, this.config.loginRedirect);
 

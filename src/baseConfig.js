@@ -4,12 +4,20 @@ import extend from 'extend';
 import * as LogManager from 'aurelia-logging';
 
 export class BaseConfig {
-  // prepends baseUrl
+  /**
+   * Prepends baseUrl to a given url
+   * @param  {String} url The relative url to append
+   * @return {String}     joined baseUrl and url
+   */
   joinBase(url) {
     return join(this.baseUrl, url);
   }
 
-  // merge current settings with incomming settings
+  /**
+   * Merge current settings with incomming settings
+   * @param  {Object} incomming Settings object to be merged into the current configuration
+   * @return {Config}           this
+   */
   configure(incomming) {
     for (let key in incomming) {
       const value = incomming[key];

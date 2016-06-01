@@ -30,6 +30,23 @@ function getContainer() {
 
 
 describe('AuthService', () => {
+  describe('.constructor()', () => {
+    const container = new Container();
+
+    afterEach(() => {
+      container.get(Authentication).setResponseObject(null);
+    });
+
+    it('should return old accessToken and delete in storage', () => {
+      window.localStorage.setItem('aurelia_token', 'old one');
+
+      const authService = container.get(AuthService);
+      const token = authService.getAccessToken();
+
+      expect(token).toBe('old one');
+    });
+  });
+
   describe('.client', () => {
     const container      = getContainer();
     const authService    = container.get(AuthService);
@@ -192,12 +209,35 @@ describe('AuthService', () => {
   });
 
 
+  describe('.setResponseObject()', () => {
+    const container    = new Container();
+    let authService    = container.get(AuthService);
+
+    it('Should set with object', () => {
+      authService.setResponseObject({access_token: 'some'});
+
+      expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe('some');
+
+      authService.setResponseObject(null);
+    });
+
+    it('Should delete', () => {
+      window.localStorage.setItem('aurelia_authentication', 'another');
+
+      authService.setResponseObject(null);
+      expect(window.localStorage.getItem('aurelia_authentication')).toBe(null);
+
+      authService.authentication.setResponseObject(null);
+    });
+  });
+
+
   describe('.getAccessToken()', () => {
     const container      = getContainer();
     const authService    = container.get(AuthService);
 
     it('should return authentication.accessToken', () => {
-      authService.authentication.responseObject = {token: 'some'};
+      authService.setResponseObject({token: 'some'});
 
       const token = authService.getAccessToken();
 
@@ -212,7 +252,7 @@ describe('AuthService', () => {
 
     it('should return authentication.refreshToken', () => {
       authService.config.useRefreshToken = true;
-      authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
+      authService.setResponseObject({token: 'some', refresh_token: 'another'});
 
       expect(authService.getRefreshToken()).toBe('another');
       authService.config.useRefreshToken = false;
@@ -240,7 +280,7 @@ describe('AuthService', () => {
       it('should return boolean true', () => {
         authService.config.useRefreshToken = true;
         baseConfig.autoUpdateToken  = true;
-        authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
+        authService.setResponseObject({token: 'some', refresh_token: 'another'});
 
         spyOn(authService, 'updateToken').and.returnValue(Promise.resolve(false));
         spyOn(authentication, 'isAuthenticated').and.returnValue(false);
@@ -349,7 +389,7 @@ describe('AuthService', () => {
     });
 
     it('get new accessToken', done => {
-      authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
+      authService.setResponseObject({token: 'some', refresh_token: 'another'});
       authService.config.client = {
         post: () => Promise.resolve({token: 'newToken'})
       };
@@ -364,7 +404,7 @@ describe('AuthService', () => {
     });
 
     it('get same new accessToken if called several times', done => {
-      authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
+      authService.setResponseObject({token: 'some', refresh_token: 'another'});
       authService.config.client = {
         post: () => Promise.resolve({token: 'newToken'})
       };
@@ -508,7 +548,7 @@ describe('AuthService', () => {
     const authService = container.get(AuthService);
 
     beforeEach(() => {
-      authService.authentication.responseObject = {token: 'some', refresh_token: 'another'};
+      authService.setResponseObject({token: 'some', refresh_token: 'another'});
       authService.config.logoutRedirect = 'nowhere';
     });
 

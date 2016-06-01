@@ -22,38 +22,18 @@ const tokenFuture = {
 
 
 describe('Authentication', () => {
-  describe('.constructor()', () => {
-    const container = new Container();
-
-    afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      container.get(Authentication).deleteData();
-    });
-
-    it('should return old accessToken and delete in storage', () => {
-      window.localStorage.setItem('aurelia_token', 'old one');
-
-      const authentication = container.get(Authentication);
-      const token = authentication.getAccessToken();
-
-      expect(token).toBe('old one');
-    });
-  });
-
-
-  describe('.responseObject', () => {
+  describe('.getResponseObject', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should get {} if no responseObject stored', () => {
       window.localStorage.removeItem('aurelia_authentication');
 
-      const responseObject = authentication.responseObject;
+      const responseObject = authentication.getResponseObject();
       expect(typeof responseObject === 'object').toBe(true);
       expect(responseObject).toBe(null);
     });
@@ -61,13 +41,22 @@ describe('Authentication', () => {
     it('Should get stored responseObject', () => {
       window.localStorage.setItem('aurelia_authentication', JSON.stringify({access_token: 'another'}));
 
-      const responseObject = authentication.responseObject;
+      const responseObject = authentication.getResponseObject();
       expect(typeof responseObject === 'object').toBe(true);
       expect(responseObject.access_token).toBe('another');
     });
+  });
+
+  describe('.setResponseObject()', () => {
+    const container      = new Container();
+    const authentication = container.get(Authentication);
+
+    afterEach(() => {
+      authentication.setResponseObject(null);
+    });
 
     it('Should set with object', () => {
-      authentication.responseObject = {access_token: 'some'};
+      authentication.setResponseObject({access_token: 'some'});
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe('some');
     });
@@ -75,7 +64,7 @@ describe('Authentication', () => {
     it('Should delete', () => {
       window.localStorage.setItem('aurelia_authentication', 'another');
 
-      authentication.responseObject = null;
+      authentication.setResponseObject(null);
       expect(window.localStorage.getItem('aurelia_authentication')).toBe(null);
     });
   });
@@ -85,12 +74,11 @@ describe('Authentication', () => {
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should analyze response first and return accessToken', () => {
-      authentication.responseObject = {access_token: 'some'};
+      authentication.setResponseObject({access_token: 'some'});
 
       expect(authentication.getAccessToken()).toBe('some');
     });
@@ -101,14 +89,13 @@ describe('Authentication', () => {
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
       authentication.config.useRefreshToken = false;
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should analyze response first and return refreshToken', () => {
       authentication.config.useRefreshToken = true;
-      authentication.responseObject = {token: 'some', refresh_token: 'another'};
+      authentication.setResponseObject({token: 'some', refresh_token: 'another'});
 
       expect(authentication.getRefreshToken()).toBe('another');
     });
@@ -119,26 +106,25 @@ describe('Authentication', () => {
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should return null for JWT-like token', () => {
-      authentication.responseObject = {token: 'xx.yy.zz'};
+      authentication.setResponseObject({token: 'xx.yy.zz'});
       const payload = authentication.payload;
 
       expect(payload).toBe(null);
     });
 
     it('Should return null for non-JWT-like token', () => {
-      authentication.responseObject = {token: 'some'};
+      authentication.setResponseObject({token: 'some'});
       const payload = authentication.payload;
 
       expect(payload).toBe(null);
     });
 
     it('Should analyze response first and return payload', () => {
-      authentication.responseObject = {token: tokenFuture.jwt};
+      authentication.setResponseObject({token: tokenFuture.jwt});
 
       const payload = authentication.getPayload();
       expect(typeof payload === 'object').toBe(true);
@@ -151,12 +137,11 @@ describe('Authentication', () => {
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should analyze response first and return exp', () => {
-      authentication.responseObject = {token: tokenPast.jwt};
+      authentication.setResponseObject({token: tokenPast.jwt});
 
       const exp = authentication.getExp();
       expect(typeof exp === 'number').toBe(true);
@@ -170,12 +155,11 @@ describe('Authentication', () => {
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should be NaN for Non-JWT', () => {
-      authentication.responseObject = {token: 'some'};
+      authentication.setResponseObject({token: 'some'});
       const timeLeft = authentication.getTtl();
 
       expect(typeof timeLeft === 'number').toBe(true);
@@ -183,7 +167,7 @@ describe('Authentication', () => {
     });
 
     it('Should be exp-currentTime for JWT', () => {
-      authentication.responseObject = {token: tokenPast.jwt};
+      authentication.setResponseObject({token: tokenPast.jwt});
 
       const timeLeft = authentication.getTtl();
       expect(typeof timeLeft === 'number').toBe(true);
@@ -196,19 +180,18 @@ describe('Authentication', () => {
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should be undefined for Non-JWT', () => {
-      authentication.responseObject = {token: 'some'};
+      authentication.setResponseObject({token: 'some'});
       const isTokenExpired = authentication.isTokenExpired();
 
       expect(isTokenExpired).toBe(undefined);
     });
 
     it('Should be true when JWT expired', () => {
-      authentication.responseObject = {token: tokenPast.jwt};
+      authentication.setResponseObject({token: tokenPast.jwt});
 
       const isTokenExpired = authentication.isTokenExpired();
       expect(typeof isTokenExpired === 'boolean').toBe(true);
@@ -216,7 +199,7 @@ describe('Authentication', () => {
     });
 
     it('Should false when JWT not expired', () => {
-      authentication.responseObject = {token: tokenFuture.jwt};
+      authentication.setResponseObject({token: tokenFuture.jwt});
 
       const isTokenExpired = authentication.isTokenExpired();
       expect(typeof isTokenExpired === 'boolean').toBe(true);
@@ -230,8 +213,7 @@ describe('Authentication', () => {
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should be false when no token present', () => {
@@ -241,28 +223,28 @@ describe('Authentication', () => {
     });
 
     it('Should be true when non-JWT token present', () => {
-      authentication.responseObject = {token: 'some'};
+      authentication.setResponseObject({token: 'some'});
       const isAuthenticated = authentication.isAuthenticated();
 
       expect(isAuthenticated).toBe(true);
     });
 
     it('Should be true when JWT-like token present', () => {
-      authentication.responseObject = {token: 'xx.yy.zz'};
+      authentication.setResponseObject({token: 'xx.yy.zz'});
       const isAuthenticated = authentication.isAuthenticated();
 
       expect(isAuthenticated).toBe(true);
     });
 
     it('Should be false when JWT expired', () => {
-      authentication.responseObject = {token: tokenPast.jwt};
+      authentication.setResponseObject({token: tokenPast.jwt});
 
       const isAuthenticated = authentication.isAuthenticated();
       expect(isAuthenticated).toBe(false);
     });
 
     it('Should be false when JWT not expired', () => {
-      authentication.responseObject = {token: tokenFuture.jwt};
+      authentication.setResponseObject({token: tokenFuture.jwt});
 
       const isAuthenticated = authentication.isAuthenticated();
       expect(isAuthenticated).toBe(true);
@@ -275,8 +257,7 @@ describe('Authentication', () => {
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should not throw if response is empty', () => {
@@ -347,8 +328,7 @@ describe('Authentication', () => {
     const authentication = container.get(Authentication);
 
     afterEach(() => {
-      window.localStorage.removeItem('aurelia_authentication');
-      authentication.deleteData();
+      authentication.setResponseObject(null);
     });
 
     it('Should set data from non-JWT response', () => {

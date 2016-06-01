@@ -23,7 +23,7 @@ export class OAuth1 {
 
   open(options, userData) {
     const provider  = extend(true, {}, this.defaults, options);
-    const serverUrl = this.config.withBase(provider.url);
+    const serverUrl = this.config.joinBase(provider.url);
 
     if (this.config.platform !== 'mobile') {
       this.popup = this.popup.open('', provider.name, provider.popupOptions);
@@ -49,7 +49,7 @@ export class OAuth1 {
 
   exchangeForToken(oauthData, userData, provider) {
     const data        = extend(true, {}, userData, oauthData);
-    const serverUrl   = this.config.withBase(provider.url);
+    const serverUrl   = this.config.joinBase(provider.url);
     const credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
     return this.config.client.post(serverUrl, data, {credentials: credentials});

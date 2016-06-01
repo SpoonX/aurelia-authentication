@@ -1,5 +1,7 @@
+import {PLATFORM} from 'aurelia-pal';
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
+import jwtDecode from 'jwt-decode';
 import * as LogManager from 'aurelia-logging';
 
 import {BaseConfig}  from './baseConfig';
@@ -51,19 +53,19 @@ export class Authentication {
     return this.config.loginRedirect;
   }
 
-  @deprecated({message: 'Use baseConfig.withBase(baseConfig.loginUrl) instead.'})
+  @deprecated({message: 'Use baseConfig.joinBase(baseConfig.loginUrl) instead.'})
   getLoginUrl() {
-    return this.config.withBase(this.config.loginUrl);
+    return this.Config.joinBase(this.config.loginUrl);
   }
 
-  @deprecated({message: 'Use baseConfig.withBase(baseConfig.signupUrl) instead.'})
+  @deprecated({message: 'Use baseConfig.joinBase(baseConfig.signupUrl) instead.'})
   getSignupUrl() {
-    return this.config.withBase(this.config.signupUrl);
+    return this.Config.joinBase(this.config.signupUrl);
   }
 
-  @deprecated({message: 'Use baseConfig.withBase(baseConfig.profileUrl) instead.'})
+  @deprecated({message: 'Use baseConfig.joinBase(baseConfig.profileUrl) instead.'})
   getProfileUrl() {
-    return this.config.withBase(this.config.profileUrl);
+    return this.Config.joinBase(this.config.profileUrl);
   }
 
   @deprecated({message: 'Use .getAccessToken() instead.'})
@@ -145,19 +147,13 @@ export class Authentication {
       }
     }
 
-    let payload = null;
+    this.payload = null;
 
-    if (this.accessToken && this.accessToken.split('.').length === 3) {
-      try {
-        const base64 = this.accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        payload = JSON.parse(decodeURIComponent(escape(window.atob(base64))));
-      } catch (e) {
-        payload = null;
-      }
-    }
+    try {
+      this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
+    } catch (_) {_;}
 
-    this.payload = payload;
-    this.exp = payload ? parseInt(payload.exp, 10) : NaN;
+    this.exp = this.payload ? parseInt(this.payload.exp, 10) : NaN;
 
     this.hasDataStored = true;
 
@@ -256,9 +252,9 @@ export class Authentication {
       return;
     }
     if (typeof redirectUrl === 'string') {
-      window.location.href = window.encodeURI(redirectUrl);
+      PLATFORM.location.href = encodeURI(redirectUrl);
     } else if (defaultRedirectUrl) {
-      window.location.href = defaultRedirectUrl;
+      PLATFORM.location.href = defaultRedirectUrl;
     }
   }
 }

@@ -1,5 +1,6 @@
 import {HttpClient} from 'aurelia-fetch-client';
 import {Config, Rest} from 'aurelia-api';
+import {PLATFORM} from 'aurelia-pal';
 
 import {AuthService} from './authService';
 import {AuthorizeStep} from './authorizeStep';
@@ -16,8 +17,8 @@ import './authFilter';
  */
 function configure(aurelia, config) {
   // ie9 polyfill
-  if (!window.location.origin) {
-    window.location.origin = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+  if (!PLATFORM.location.origin) {
+    PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
   }
 
   aurelia.globalResources('./authFilter');

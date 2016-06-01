@@ -1,3 +1,4 @@
+import {PLATFORM} from 'aurelia-pal';
 import {inject} from 'aurelia-dependency-injection';
 
 import {BaseConfig} from './baseConfig';
@@ -9,20 +10,14 @@ export class Storage {
   }
 
   get(key) {
-    if (window[this.config.storage]) {
-      return window[this.config.storage].getItem(key);
-    }
+    return PLATFORM.global[this.config.storage].getItem(key);
   }
 
   set(key, value) {
-    if (window[this.config.storage]) {
-      return window[this.config.storage].setItem(key, value);
-    }
+    PLATFORM.global[this.config.storage].setItem(key, value);
   }
 
   remove(key) {
-    if (window[this.config.storage]) {
-      return window[this.config.storage].removeItem(key);
-    }
+    PLATFORM.global[this.config.storage].removeItem(key);
   }
 }

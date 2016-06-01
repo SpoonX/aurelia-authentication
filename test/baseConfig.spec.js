@@ -18,13 +18,13 @@ describe('BaseConfig', () => {
     });
   });
 
-  describe('.withBase()', () => {
+  describe('.joinBase()', () => {
     it('Should join baseUrl with path', () => {
       const container = new Container();
       const baseConfig = container.get(BaseConfig);
       baseConfig.baseUrl = 'http://localhost:1927/';
 
-      expect(baseConfig.withBase('/xy')).toBe('http://localhost:1927/xy');
+      expect(baseConfig.joinBase('/xy')).toBe('http://localhost:1927/xy');
     });
   });
 });

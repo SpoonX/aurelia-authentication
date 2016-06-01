@@ -1,3 +1,4 @@
+import {PLATFORM, DOM} from 'aurelia-pal';
 import {parseQueryString} from 'aurelia-path';
 import extend from 'extend';
 
@@ -12,7 +13,7 @@ export class Popup {
     this.url = url;
     const optionsString = buildPopupWindowOptions(options || {});
 
-    this.popupWindow = window.open(url, windowName, optionsString);
+    this.popupWindow = PLATFORM.global.open(url, windowName, optionsString);
 
     if (this.popupWindow && this.popupWindow.focus) {
       this.popupWindow.focus();
@@ -28,7 +29,7 @@ export class Popup {
           return;
         }
 
-        const parser  = document.createElement('a');
+        const parser  = DOM.createElement('a');
         parser.href = event.url;
 
         if (parser.search || parser.hash) {
@@ -60,7 +61,7 @@ export class Popup {
         let errorData;
 
         try {
-          if (this.popupWindow.location.host ===  document.location.host
+          if (this.popupWindow.location.host ===  DOM.location.host
             && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
             const qs = parseUrl(this.popupWindow.location);
 
@@ -102,8 +103,8 @@ const buildPopupWindowOptions = options => {
   const extended = extend({
     width: width,
     height: height,
-    left: window.screenX + ((window.outerWidth - width) / 2),
-    top: window.screenY + ((window.outerHeight - height) / 2.5)
+    left: PLATFORM.global.screenX + ((PLATFORM.global.outerWidth - width) / 2),
+    top: PLATFORM.global.screenY + ((PLATFORM.global.outerHeight - height) / 2.5)
   }, options);
 
   let parts = [];

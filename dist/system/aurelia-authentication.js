@@ -1,7 +1,7 @@
 'use strict';
 
-System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependency-injection', 'aurelia-metadata', 'aurelia-router', 'aurelia-fetch-client', 'aurelia-api', './authFilter'], function (_export, _context) {
-  var extend, LogManager, parseQueryString, join, buildQueryString, inject, deprecated, Redirect, HttpClient, Config, Rest, _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _class5, _desc, _value, _class6, _dec11, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class10, _typeof, _createClass, Popup, buildPopupWindowOptions, parseUrl, BaseConfig, Storage, OAuth1, OAuth2, camelCase, Authentication, AuthorizeStep, AuthService, FetchConfig;
+System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia-dependency-injection', 'aurelia-metadata', 'aurelia-router', 'aurelia-fetch-client', 'aurelia-api', './authFilter'], function (_export, _context) {
+  var extend, LogManager, jwtDecode, PLATFORM, DOM, parseQueryString, join, buildQueryString, inject, deprecated, Redirect, HttpClient, Config, Rest, _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _class5, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _class6, _desc, _value, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class11, _dec15, _class12, _dec16, _class13, _typeof, _createClass, Popup, buildPopupWindowOptions, parseUrl, BaseConfig, Storage, Auth0Lock, OAuth1, OAuth2, camelCase, Authentication, AuthService, AuthenticateStep, AuthorizeStep, FetchConfig;
 
   function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
     var desc = {};
@@ -39,6 +39,10 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
   }
 
   function configure(aurelia, config) {
+    if (!PLATFORM.location.origin) {
+      PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
+    }
+
     aurelia.globalResources('./authFilter');
 
     var baseConfig = aurelia.container.get(BaseConfig);
@@ -84,6 +88,11 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
       extend = _extend.default;
     }, function (_aureliaLogging) {
       LogManager = _aureliaLogging;
+    }, function (_jwtDecode) {
+      jwtDecode = _jwtDecode.default;
+    }, function (_aureliaPal) {
+      PLATFORM = _aureliaPal.PLATFORM;
+      DOM = _aureliaPal.DOM;
     }, function (_aureliaPath) {
       parseQueryString = _aureliaPath.parseQueryString;
       join = _aureliaPath.join;
@@ -134,11 +143,11 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
           this.url = '';
         }
 
-        Popup.prototype.open = function open(url, windowName, options, redirectUri) {
+        Popup.prototype.open = function open(url, windowName, options) {
           this.url = url;
           var optionsString = buildPopupWindowOptions(options || {});
 
-          this.popupWindow = window.open(url, windowName, optionsString);
+          this.popupWindow = PLATFORM.global.open(url, windowName, optionsString);
 
           if (this.popupWindow && this.popupWindow.focus) {
             this.popupWindow.focus();
@@ -156,7 +165,7 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
                 return;
               }
 
-              var parser = document.createElement('a');
+              var parser = DOM.createElement('a');
               parser.href = event.url;
 
               if (parser.search || parser.hash) {
@@ -190,7 +199,7 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
               var errorData = void 0;
 
               try {
-                if (_this2.popupWindow.location.host === document.location.host && (_this2.popupWindow.location.search || _this2.popupWindow.location.hash)) {
+                if (_this2.popupWindow.location.host === DOM.location.host && (_this2.popupWindow.location.search || _this2.popupWindow.location.hash)) {
                   var qs = parseUrl(_this2.popupWindow.location);
 
                   if (qs.error) {
@@ -235,8 +244,8 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         var extended = extend({
           width: width,
           height: height,
-          left: window.screenX + (window.outerWidth - width) / 2,
-          top: window.screenY + (window.outerHeight - height) / 2.5
+          left: PLATFORM.global.screenX + (PLATFORM.global.outerWidth - width) / 2,
+          top: PLATFORM.global.screenY + (PLATFORM.global.outerHeight - height) / 2.5
         }, options);
 
         var parts = [];
@@ -265,10 +274,14 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
           this.signupRedirect = '#/login';
           this.baseUrl = '';
           this.loginUrl = '/auth/login';
+          this.logoutUrl = null;
+          this.logoutMethod = 'get';
           this.signupUrl = '/auth/signup';
           this.profileUrl = '/auth/me';
+          this.profileMethod = 'put';
           this.unlinkUrl = '/auth/unlink/';
           this.unlinkMethod = 'get';
+          this.refreshTokenUrl = null;
           this.authHeader = 'Authorization';
           this.authTokenType = 'Bearer';
           this.accessTokenProp = 'access_token';
@@ -286,121 +299,134 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
           this.storage = 'localStorage';
           this.storageKey = 'aurelia_authentication';
           this.providers = {
+            facebook: {
+              name: 'facebook',
+              url: '/auth/facebook',
+              authorizationEndpoint: 'https://www.facebook.com/v2.5/dialog/oauth',
+              redirectUri: PLATFORM.location.origin + '/',
+              requiredUrlParams: ['display', 'scope'],
+              scope: ['email'],
+              scopeDelimiter: ',',
+              display: 'popup',
+              oauthType: '2.0',
+              popupOptions: { width: 580, height: 400 }
+            },
             google: {
               name: 'google',
               url: '/auth/google',
               authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
-              redirectUri: encodeURI(window.location.origin || window.location.protocol + '//' + window.location.host),
+              redirectUri: PLATFORM.location.origin,
+              requiredUrlParams: ['scope'],
+              optionalUrlParams: ['display', 'state'],
               scope: ['profile', 'email'],
               scopePrefix: 'openid',
               scopeDelimiter: ' ',
-              requiredUrlParams: ['scope'],
-              optionalUrlParams: ['display'],
               display: 'popup',
-              type: '2.0',
-              popupOptions: {
-                width: 452,
-                height: 633
-              }
-            },
-            facebook: {
-              name: 'facebook',
-              url: '/auth/facebook',
-              authorizationEndpoint: 'https://www.facebook.com/v2.3/dialog/oauth',
-              redirectUri: encodeURI(window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/'),
-              scope: ['email'],
-              scopeDelimiter: ',',
-              nonce: function nonce() {
-                return Math.random();
-              },
-              requiredUrlParams: ['nonce', 'display', 'scope'],
-              display: 'popup',
-              type: '2.0',
-              popupOptions: {
-                width: 580,
-                height: 400
-              }
-            },
-            linkedin: {
-              name: 'linkedin',
-              url: '/auth/linkedin',
-              authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
-              redirectUri: encodeURI(window.location.origin || window.location.protocol + '//' + window.location.host),
-              requiredUrlParams: ['state'],
-              scope: ['r_emailaddress'],
-              scopeDelimiter: ' ',
-              state: 'STATE',
-              type: '2.0',
-              popupOptions: {
-                width: 527,
-                height: 582
+              oauthType: '2.0',
+              popupOptions: { width: 452, height: 633 },
+              state: function state() {
+                var rand = Math.random().toString(36).substr(2);
+                return encodeURIComponent(rand);
               }
             },
             github: {
               name: 'github',
               url: '/auth/github',
               authorizationEndpoint: 'https://github.com/login/oauth/authorize',
-              redirectUri: encodeURI(window.location.origin || window.location.protocol + '//' + window.location.host),
+              redirectUri: PLATFORM.location.origin,
               optionalUrlParams: ['scope'],
               scope: ['user:email'],
               scopeDelimiter: ' ',
-              type: '2.0',
-              popupOptions: {
-                width: 1020,
-                height: 618
-              }
-            },
-            yahoo: {
-              name: 'yahoo',
-              url: '/auth/yahoo',
-              authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
-              redirectUri: encodeURI(window.location.origin || window.location.protocol + '//' + window.location.host),
-              scope: [],
-              scopeDelimiter: ',',
-              type: '2.0',
-              popupOptions: {
-                width: 559,
-                height: 519
-              }
-            },
-            twitter: {
-              name: 'twitter',
-              url: '/auth/twitter',
-              authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
-              type: '1.0',
-              popupOptions: {
-                width: 495,
-                height: 645
-              }
-            },
-            live: {
-              name: 'live',
-              url: '/auth/live',
-              authorizationEndpoint: 'https://login.live.com/oauth20_authorize.srf',
-              redirectUri: encodeURI(window.location.origin || window.location.protocol + '//' + window.location.host),
-              scope: ['wl.emails'],
-              scopeDelimiter: ' ',
-              requiredUrlParams: ['display', 'scope'],
-              display: 'popup',
-              type: '2.0',
-              popupOptions: {
-                width: 500,
-                height: 560
-              }
+              oauthType: '2.0',
+              popupOptions: { width: 1020, height: 618 }
             },
             instagram: {
               name: 'instagram',
               url: '/auth/instagram',
               authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
-              redirectUri: encodeURI(window.location.origin || window.location.protocol + '//' + window.location.host),
+              redirectUri: PLATFORM.location.origin,
               requiredUrlParams: ['scope'],
               scope: ['basic'],
               scopeDelimiter: '+',
+              oauthType: '2.0'
+            },
+            linkedin: {
+              name: 'linkedin',
+              url: '/auth/linkedin',
+              authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
+              redirectUri: PLATFORM.location.origin,
+              requiredUrlParams: ['state'],
+              scope: ['r_emailaddress'],
+              scopeDelimiter: ' ',
+              state: 'STATE',
+              oauthType: '2.0',
+              popupOptions: { width: 527, height: 582 }
+            },
+            twitter: {
+              name: 'twitter',
+              url: '/auth/twitter',
+              authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
+              redirectUri: PLATFORM.location.origin,
+              oauthType: '1.0',
+              popupOptions: { width: 495, height: 645 }
+            },
+            twitch: {
+              name: 'twitch',
+              url: '/auth/twitch',
+              authorizationEndpoint: 'https://api.twitch.tv/kraken/oauth2/authorize',
+              redirectUri: PLATFORM.location.origin,
+              requiredUrlParams: ['scope'],
+              scope: ['user_read'],
+              scopeDelimiter: ' ',
               display: 'popup',
-              type: '2.0',
-              popupOptions: {
-                width: 550,
-                height: 369
+              oauthType: '2.0',
+              popupOptions: { width: 500, height: 560 }
+            },
+            live: {
+              name: 'live',
+              url: '/auth/live',
+              authorizationEndpoint: 'https://login.live.com/oauth20_authorize.srf',
+              redirectUri: PLATFORM.location.origin,
+              requiredUrlParams: ['display', 'scope'],
+              scope: ['wl.emails'],
+              scopeDelimiter: ' ',
+              display: 'popup',
+              oauthType: '2.0',
+              popupOptions: { width: 500, height: 560 }
+            },
+            yahoo: {
+              name: 'yahoo',
+              url: '/auth/yahoo',
+              authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
+              redirectUri: PLATFORM.location.origin,
+              scope: [],
+              scopeDelimiter: ',',
+              oauthType: '2.0',
+              popupOptions: { width: 559, height: 519 }
+            },
+            bitbucket: {
+              name: 'bitbucket',
+              url: '/auth/bitbucket',
+              authorizationEndpoint: 'https://bitbucket.org/site/oauth2/authorize',
+              redirectUri: PLATFORM.location.origin + '/',
+              requiredUrlParams: ['scope'],
+              scope: ['email'],
+              scopeDelimiter: ' ',
+              oauthType: '2.0',
+              popupOptions: { width: 1028, height: 529 }
+            },
+            auth0: {
+              name: 'auth0',
+              oauthType: 'auth0-lock',
+              clientId: 'your_client_id',
+              clientDomain: 'your_domain_url',
+              display: 'popup',
+              lockOptions: {
+                popup: true
+              },
+              responseType: 'token',
+              state: function state() {
+                return Math.random().toString(36).substr(2);
               }
             }
           };
@@ -411,7 +437,7 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
           this._tokenPrefix = 'aurelia';
         }
 
-        BaseConfig.prototype.withBase = function withBase(url) {
+        BaseConfig.prototype.joinBase = function joinBase(url) {
           return join(this.baseUrl, url);
         };
 
@@ -503,20 +529,20 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         }
 
         Storage.prototype.get = function get(key) {
-          if (window[this.config.storage]) {
-            return window[this.config.storage].getItem(key);
+          if (PLATFORM.global[this.config.storage]) {
+            return PLATFORM.global[this.config.storage].getItem(key);
           }
         };
 
         Storage.prototype.set = function set(key, value) {
-          if (window[this.config.storage]) {
-            return window[this.config.storage].setItem(key, value);
+          if (PLATFORM.global[this.config.storage]) {
+            PLATFORM.global[this.config.storage].setItem(key, value);
           }
         };
 
         Storage.prototype.remove = function remove(key) {
-          if (window[this.config.storage]) {
-            return window[this.config.storage].removeItem(key);
+          if (PLATFORM.global[this.config.storage]) {
+            PLATFORM.global[this.config.storage].removeItem(key);
           }
         };
 
@@ -525,7 +551,79 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
 
       _export('Storage', Storage);
 
-      _export('OAuth1', OAuth1 = (_dec2 = inject(Storage, Popup, BaseConfig), _dec2(_class3 = function () {
+      _export('Auth0Lock', Auth0Lock = (_dec2 = inject(Storage, BaseConfig), _dec2(_class3 = function () {
+        function Auth0Lock(storage, config) {
+          _classCallCheck(this, Auth0Lock);
+
+          this.storage = storage;
+          this.config = config;
+          this.defaults = {
+            name: null,
+            state: null,
+            scope: null,
+            scopeDelimiter: null,
+            redirectUri: null,
+            clientId: null,
+            clientDomain: null,
+            display: 'popup',
+            lockOptions: {
+              popup: true
+            },
+            popupOptions: null,
+            responseType: 'token'
+          };
+        }
+
+        Auth0Lock.prototype.open = function open(options, userData) {
+          if (typeof PLATFORM.global.Auth0Lock !== 'function') {
+            throw new Error('Auth0Lock was not found in global scope. Please load it before using this provider.');
+          }
+          var provider = extend(true, {}, this.defaults, options);
+          var stateName = provider.name + '_state';
+
+          if (typeof provider.state === 'function') {
+            this.storage.set(stateName, provider.state());
+          } else if (typeof provider.state === 'string') {
+            this.storage.set(stateName, provider.state);
+          }
+
+          this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain);
+
+          var openPopup = new Promise(function (resolve, reject) {
+            var opts = provider.lockOptions;
+            opts.popupOptions = provider.popupOptions;
+            opts.responseType = provider.responseType;
+            opts.callbackURL = provider.redirectUri;
+            opts.authParams = opts.authParams || {};
+            if (provider.scope) opts.authParams.scope = provider.scope;
+            if (provider.state) opts.authParams.state = this.storage.get(provider.name + '_state');
+
+            this.lock.show(provider.lockOptions, function (err, profile, tokenOrCode) {
+              if (err) {
+                reject(err);
+              } else {
+                resolve({
+                  access_token: tokenOrCode
+                });
+              }
+            });
+          }.bind(this));
+
+          return openPopup.then(function (lockResponse) {
+            if (provider.responseType === 'token' || provider.responseType === 'id_token%20token' || provider.responseType === 'token%20id_token') {
+              return lockResponse;
+            }
+
+            throw new Error('Only `token` responseType is supported');
+          });
+        };
+
+        return Auth0Lock;
+      }()) || _class3));
+
+      _export('Auth0Lock', Auth0Lock);
+
+      _export('OAuth1', OAuth1 = (_dec3 = inject(Storage, Popup, BaseConfig), _dec3(_class4 = function () {
         function OAuth1(storage, popup, config) {
           _classCallCheck(this, OAuth1);
 
@@ -545,17 +643,17 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
           var _this3 = this;
 
           var provider = extend(true, {}, this.defaults, options);
-          var serverUrl = this.config.withBase(provider.url);
+          var serverUrl = this.config.joinBase(provider.url);
 
           if (this.config.platform !== 'mobile') {
-            this.popup = this.popup.open('', provider.name, provider.popupOptions, provider.redirectUri);
+            this.popup = this.popup.open('', provider.name, provider.popupOptions);
           }
 
           return this.config.client.post(serverUrl).then(function (response) {
             var url = provider.authorizationEndpoint + '?' + buildQueryString(response);
 
             if (_this3.config.platform === 'mobile') {
-              _this3.popup = _this3.popup.open(url, provider.name, provider.popupOptions, provider.redirectUri);
+              _this3.popup = _this3.popup.open(url, provider.name, provider.popupOptions);
             } else {
               _this3.popup.popupWindow.location = url;
             }
@@ -570,18 +668,18 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
 
         OAuth1.prototype.exchangeForToken = function exchangeForToken(oauthData, userData, provider) {
           var data = extend(true, {}, userData, oauthData);
-          var serverUrl = this.config.withBase(provider.url);
+          var serverUrl = this.config.joinBase(provider.url);
           var credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
           return this.config.client.post(serverUrl, data, { credentials: credentials });
         };
 
         return OAuth1;
-      }()) || _class3));
+      }()) || _class4));
 
       _export('OAuth1', OAuth1);
 
-      _export('OAuth2', OAuth2 = (_dec3 = inject(Storage, Popup, BaseConfig), _dec3(_class4 = function () {
+      _export('OAuth2', OAuth2 = (_dec4 = inject(Storage, Popup, BaseConfig), _dec4(_class5 = function () {
         function OAuth2(storage, popup, config) {
           _classCallCheck(this, OAuth2);
 
@@ -618,7 +716,7 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
           }
 
           var url = provider.authorizationEndpoint + '?' + buildQueryString(this.buildQuery(provider));
-          var popup = this.popup.open(url, provider.name, provider.popupOptions, provider.redirectUri);
+          var popup = this.popup.open(url, provider.name, provider.popupOptions);
           var openPopup = this.config.platform === 'mobile' ? popup.eventListener(provider.redirectUri) : popup.pollPopup();
 
           return openPopup.then(function (oauthData) {
@@ -638,7 +736,7 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
             redirectUri: provider.redirectUri
           }, oauthData);
 
-          var serverUrl = this.config.withBase(provider.url);
+          var serverUrl = this.config.joinBase(provider.url);
           var credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
           return this.config.client.post(serverUrl, data, { credentials: credentials });
@@ -674,7 +772,7 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         };
 
         return OAuth2;
-      }()) || _class4));
+      }()) || _class5));
 
       _export('OAuth2', OAuth2);
 
@@ -684,31 +782,21 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         });
       };
 
-      _export('Authentication', Authentication = (_dec4 = inject(Storage, BaseConfig, OAuth1, OAuth2), _dec5 = deprecated({ message: 'Use baseConfig.loginRoute instead.' }), _dec6 = deprecated({ message: 'Use baseConfig.loginRedirect instead.' }), _dec7 = deprecated({ message: 'Use baseConfig.withBase(baseConfig.loginUrl) instead.' }), _dec8 = deprecated({ message: 'Use baseConfig.withBase(baseConfig.signupUrl) instead.' }), _dec9 = deprecated({ message: 'Use baseConfig.withBase(baseConfig.profileUrl) instead.' }), _dec10 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec4(_class5 = (_class6 = function () {
-        function Authentication(storage, config, oAuth1, oAuth2) {
+      _export('Authentication', Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2, Auth0Lock), _dec6 = deprecated({ message: 'Use baseConfig.loginRoute instead.' }), _dec7 = deprecated({ message: 'Use baseConfig.loginRedirect instead.' }), _dec8 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.loginUrl) instead.' }), _dec9 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.signupUrl) instead.' }), _dec10 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.profileUrl) instead.' }), _dec11 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec5(_class6 = (_class7 = function () {
+        function Authentication(storage, config, oAuth1, oAuth2, auth0Lock) {
           _classCallCheck(this, Authentication);
 
           this.storage = storage;
           this.config = config;
           this.oAuth1 = oAuth1;
           this.oAuth2 = oAuth2;
+          this.auth0Lock = auth0Lock;
           this.updateTokenCallstack = [];
           this.accessToken = null;
           this.refreshToken = null;
           this.payload = null;
           this.exp = null;
           this.hasDataStored = false;
-
-          var oldStorageKey = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : this.tokenName;
-          var oldToken = storage.get(oldStorageKey);
-
-          if (oldToken) {
-            LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
-            var fakeOldResponse = {};
-            fakeOldResponse[config.accessTokenProp] = oldToken;
-            this.responseObject = fakeOldResponse;
-            storage.remove(oldStorageKey);
-          }
         }
 
         Authentication.prototype.getLoginRoute = function getLoginRoute() {
@@ -720,38 +808,58 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         };
 
         Authentication.prototype.getLoginUrl = function getLoginUrl() {
-          return this.config.withBase(this.config.loginUrl);
+          return this.Config.joinBase(this.config.loginUrl);
         };
 
         Authentication.prototype.getSignupUrl = function getSignupUrl() {
-          return this.config.withBase(this.config.signupUrl);
+          return this.Config.joinBase(this.config.signupUrl);
         };
 
         Authentication.prototype.getProfileUrl = function getProfileUrl() {
-          return this.config.withBase(this.config.profileUrl);
+          return this.Config.joinBase(this.config.profileUrl);
         };
 
         Authentication.prototype.getToken = function getToken() {
           return this.getAccessToken();
         };
 
+        Authentication.prototype.getResponseObject = function getResponseObject() {
+          return JSON.parse(this.storage.get(this.config.storageKey));
+        };
+
+        Authentication.prototype.setResponseObject = function setResponseObject(response) {
+          if (response) {
+            this.getDataFromResponse(response);
+            this.storage.set(this.config.storageKey, JSON.stringify(response));
+            return;
+          }
+          this.accessToken = null;
+          this.refreshToken = null;
+          this.payload = null;
+          this.exp = null;
+
+          this.hasDataStored = false;
+
+          this.storage.remove(this.config.storageKey);
+        };
+
         Authentication.prototype.getAccessToken = function getAccessToken() {
-          if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+          if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
           return this.accessToken;
         };
 
         Authentication.prototype.getRefreshToken = function getRefreshToken() {
-          if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+          if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
           return this.refreshToken;
         };
 
         Authentication.prototype.getPayload = function getPayload() {
-          if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+          if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
           return this.payload;
         };
 
         Authentication.prototype.getExp = function getExp() {
-          if (!this.hasDataStored) this.getDataFromResponse(this.responseObject);
+          if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
           return this.exp;
         };
 
@@ -785,19 +893,15 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
             }
           }
 
-          var payload = null;
+          this.payload = null;
 
-          if (this.accessToken && this.accessToken.split('.').length === 3) {
-            try {
-              var base64 = this.accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-              payload = JSON.parse(decodeURIComponent(escape(window.atob(base64))));
-            } catch (e) {
-              payload = null;
-            }
+          try {
+            this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
+          } catch (_) {
+            _;
           }
 
-          this.payload = payload;
-          this.exp = payload ? parseInt(payload.exp, 10) : NaN;
+          this.exp = this.payload ? parseInt(this.payload.exp, 10) : NaN;
 
           this.hasDataStored = true;
 
@@ -809,19 +913,12 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
           };
         };
 
-        Authentication.prototype.deleteData = function deleteData() {
-          this.accessToken = null;
-          this.refreshToken = null;
-          this.payload = null;
-          this.exp = null;
-
-          this.hasDataStored = false;
-        };
-
         Authentication.prototype.getTokenFromResponse = function getTokenFromResponse(response, tokenProp, tokenName, tokenRoot) {
           if (!response) return undefined;
 
-          var responseTokenProp = response[tokenProp];
+          var responseTokenProp = tokenProp.split('.').reduce(function (o, x) {
+            return o[x];
+          }, response);
 
           if (typeof responseTokenProp === 'string') {
             return responseTokenProp;
@@ -831,7 +928,11 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
             var tokenRootData = tokenRoot && tokenRoot.split('.').reduce(function (o, x) {
               return o[x];
             }, responseTokenProp);
-            return tokenRootData ? tokenRootData[tokenName] : responseTokenProp[tokenName];
+            var _token = tokenRootData ? tokenRootData[tokenName] : responseTokenProp[tokenName];
+
+            if (!_token) throw new Error('Token not found in response');
+
+            return _token;
           }
 
           var token = response[tokenName] === undefined ? null : response[tokenName];
@@ -859,9 +960,22 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         Authentication.prototype.authenticate = function authenticate(name) {
           var userData = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-          var provider = this.config.providers[name].type === '1.0' ? this.oAuth1 : this.oAuth2;
+          var oauthType = this.config.providers[name].type;
 
-          return provider.open(this.config.providers[name], userData);
+          if (oauthType) {
+            LogManager.getLogger('authentication').warn('DEPRECATED: Setting provider.type is deprecated and replaced by provider.oauthType');
+          } else {
+            oauthType = this.config.providers[name].oauthType;
+          }
+
+          var providerLogin = void 0;
+          if (oauthType === 'auth0-lock') {
+            providerLogin = this.auth0Lock;
+          } else {
+            providerLogin = oauthType === '1.0' ? this.oAuth1 : this.oAuth2;
+          }
+
+          return providerLogin.open(this.config.providers[name], userData);
         };
 
         Authentication.prototype.redirect = function redirect(redirectUrl, defaultRedirectUrl) {
@@ -878,83 +992,116 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
             return;
           }
           if (typeof redirectUrl === 'string') {
-            window.location.href = window.encodeURI(redirectUrl);
+            PLATFORM.location.href = encodeURI(redirectUrl);
           } else if (defaultRedirectUrl) {
-            window.location.href = defaultRedirectUrl;
+            PLATFORM.location.href = defaultRedirectUrl;
           }
         };
 
         _createClass(Authentication, [{
           key: 'responseObject',
           get: function get() {
-            return JSON.parse(this.storage.get(this.config.storageKey));
+            LogManager.getLogger('authentication').warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
+            return this.getResponseObject();
           },
           set: function set(response) {
-            if (response) {
-              this.getDataFromResponse(response);
-              return this.storage.set(this.config.storageKey, JSON.stringify(response));
-            }
-            this.deleteData();
-            return this.storage.remove(this.config.storageKey);
+            LogManager.getLogger('authentication').warn('Setter Authentication.responseObject is deprecated. Use AuthServive.setResponseObject(response) instead.');
+            this.setResponseObject(response);
           }
         }]);
 
         return Authentication;
-      }(), (_applyDecoratedDescriptor(_class6.prototype, 'getLoginRoute', [_dec5], Object.getOwnPropertyDescriptor(_class6.prototype, 'getLoginRoute'), _class6.prototype), _applyDecoratedDescriptor(_class6.prototype, 'getLoginRedirect', [_dec6], Object.getOwnPropertyDescriptor(_class6.prototype, 'getLoginRedirect'), _class6.prototype), _applyDecoratedDescriptor(_class6.prototype, 'getLoginUrl', [_dec7], Object.getOwnPropertyDescriptor(_class6.prototype, 'getLoginUrl'), _class6.prototype), _applyDecoratedDescriptor(_class6.prototype, 'getSignupUrl', [_dec8], Object.getOwnPropertyDescriptor(_class6.prototype, 'getSignupUrl'), _class6.prototype), _applyDecoratedDescriptor(_class6.prototype, 'getProfileUrl', [_dec9], Object.getOwnPropertyDescriptor(_class6.prototype, 'getProfileUrl'), _class6.prototype), _applyDecoratedDescriptor(_class6.prototype, 'getToken', [_dec10], Object.getOwnPropertyDescriptor(_class6.prototype, 'getToken'), _class6.prototype)), _class6)) || _class5));
+      }(), (_applyDecoratedDescriptor(_class7.prototype, 'getLoginRoute', [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRoute'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginRedirect', [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRedirect'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginUrl', [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getSignupUrl', [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, 'getSignupUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getProfileUrl', [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, 'getProfileUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getToken', [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, 'getToken'), _class7.prototype)), _class7)) || _class6));
 
       _export('Authentication', Authentication);
 
-      _export('AuthorizeStep', _export('AuthorizeStep', AuthorizeStep = (_dec11 = inject(Authentication), _dec11(_class7 = function () {
-        function AuthorizeStep(authentication) {
-          _classCallCheck(this, AuthorizeStep);
-
-          this.authentication = authentication;
-        }
-
-        AuthorizeStep.prototype.run = function run(routingContext, next) {
-          var isLoggedIn = this.authentication.isAuthenticated();
-          var loginRoute = this.authentication.config.loginRoute;
-
-          if (routingContext.getAllInstructions().some(function (i) {
-            return i.config.auth;
-          })) {
-            if (!isLoggedIn) {
-              return next.cancel(new Redirect(loginRoute));
-            }
-          } else if (isLoggedIn && routingContext.getAllInstructions().some(function (i) {
-            return i.fragment === loginRoute;
-          })) {
-            return next.cancel(new Redirect(this.authentication.config.loginRedirect));
-          }
-
-          return next();
-        };
-
-        return AuthorizeStep;
-      }()) || _class7)));
-
-      _export('AuthorizeStep', AuthorizeStep);
-
       _export('AuthService', _export('AuthService', AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec12(_class8 = (_class9 = function () {
         function AuthService(authentication, config) {
+          var _this7 = this;
+
           _classCallCheck(this, AuthService);
+
+          this.authenticated = false;
+
+          this.timeout = function () {
+            _this7.clearTimeout();
+
+            if (_this7.config.autoUpdateToken && _this7.authentication.getAccessToken() && _this7.authentication.getRefreshToken()) {
+              _this7.updateToken();
+            } else {
+              _this7.authenticated = false;
+            }
+          };
 
           this.authentication = authentication;
           this.config = config;
+
+          var oldStorageKey = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : config.tokenName;
+          var oldToken = authentication.storage.get(oldStorageKey);
+
+          if (oldToken) {
+            LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
+            var fakeOldResponse = {};
+            fakeOldResponse[config.accessTokenProp] = oldToken;
+            this.setResponseObject(fakeOldResponse);
+            authentication.storage.remove(oldStorageKey);
+          }
         }
+
+        AuthService.prototype.setTimeout = function (_setTimeout) {
+          function setTimeout(_x2) {
+            return _setTimeout.apply(this, arguments);
+          }
+
+          setTimeout.toString = function () {
+            return _setTimeout.toString();
+          };
+
+          return setTimeout;
+        }(function (ttl) {
+          setTimeout(this.timeout, ttl);
+        });
+
+        AuthService.prototype.clearTimeout = function (_clearTimeout) {
+          function clearTimeout() {
+            return _clearTimeout.apply(this, arguments);
+          }
+
+          clearTimeout.toString = function () {
+            return _clearTimeout.toString();
+          };
+
+          return clearTimeout;
+        }(function () {
+          clearTimeout(this.timeout);
+        });
+
+        AuthService.prototype.setResponseObject = function setResponseObject(response) {
+          this.clearTimeout();
+
+          this.authentication.setResponseObject(response);
+
+          this.authenticated = this.authentication.isAuthenticated();
+          if (this.authenticated && !Number.isNaN(this.authentication.exp)) {
+            this.setTimeout(this.getTtl() * 1000);
+          }
+        };
 
         AuthService.prototype.getMe = function getMe(criteria) {
           if (typeof criteria === 'string' || typeof criteria === 'number') {
             criteria = { id: criteria };
           }
-          return this.client.find(this.config.withBase(this.config.profileUrl), criteria);
+          return this.client.find(this.config.joinBase(this.config.profileUrl), criteria);
         };
 
         AuthService.prototype.updateMe = function updateMe(body, criteria) {
           if (typeof criteria === 'string' || typeof criteria === 'number') {
             criteria = { id: criteria };
           }
-          return this.client.update(this.config.withBase(this.config.profileUrl), criteria, body);
+          if (this.config.profileMethod === 'put') {
+            return this.client.update(this.config.joinBase(this.config.profileUrl), criteria, body);
+          }
+          return this.client.patch(this.config.joinBase(this.config.profileUrl), criteria, body);
         };
 
         AuthService.prototype.getAccessToken = function getAccessToken() {
@@ -980,6 +1127,10 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
           return authenticated;
         };
 
+        AuthService.prototype.getExp = function getExp() {
+          return this.authentication.getExp();
+        };
+
         AuthService.prototype.getTtl = function getTtl() {
           return this.authentication.getTtl();
         };
@@ -993,7 +1144,7 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         };
 
         AuthService.prototype.updateToken = function updateToken() {
-          var _this7 = this;
+          var _this8 = this;
 
           if (!this.authentication.getRefreshToken()) {
             return Promise.reject(new Error('refreshToken not set'));
@@ -1006,12 +1157,12 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
               client_id: this.config.clientId ? this.config.clientId : undefined
             };
 
-            this.client.post(this.config.withBase(this.config.loginUrl), content).then(function (response) {
-              _this7.authentication.responseObject = response;
-              _this7.authentication.resolveUpdateTokenCallstack(_this7.authentication.isAuthenticated());
+            this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(function (response) {
+              _this8.setResponseObject(response);
+              _this8.authentication.resolveUpdateTokenCallstack(_this8.isAuthenticated());
             }).catch(function (err) {
-              _this7.authentication.responseObject = null;
-              _this7.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
+              _this8.setResponseObject(null);
+              _this8.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
             });
           }
 
@@ -1019,7 +1170,7 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         };
 
         AuthService.prototype.signup = function signup(displayName, email, password, options, redirectUri) {
-          var _this8 = this;
+          var _this9 = this;
 
           var content = void 0;
 
@@ -1034,18 +1185,18 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
               'password': password
             };
           }
-          return this.client.post(this.config.withBase(this.config.signupUrl), content, options).then(function (response) {
-            if (_this8.config.loginOnSignup) {
-              _this8.authentication.responseObject = response;
+          return this.client.post(this.config.joinBase(this.config.signupUrl), content, options).then(function (response) {
+            if (_this9.config.loginOnSignup) {
+              _this9.setResponseObject(response);
             }
-            _this8.authentication.redirect(redirectUri, _this8.config.signupRedirect);
+            _this9.authentication.redirect(redirectUri, _this9.config.signupRedirect);
 
             return response;
           });
         };
 
         AuthService.prototype.login = function login(email, password, options, redirectUri) {
-          var _this9 = this;
+          var _this10 = this;
 
           var content = void 0;
 
@@ -1062,50 +1213,55 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
           }
 
           if (this.config.clientId) {
-            data.client_id = this.config.clientId;
+            content.client_id = this.config.clientId;
           }
 
-          return this.client.post(this.config.withBase(this.config.loginUrl), content, options).then(function (response) {
-            _this9.authentication.responseObject = response;
+          return this.client.post(this.config.joinBase(this.config.loginUrl), content, options).then(function (response) {
+            _this10.setResponseObject(response);
 
-            _this9.authentication.redirect(redirectUri, _this9.config.loginRedirect);
+            _this10.authentication.redirect(redirectUri, _this10.config.loginRedirect);
 
             return response;
           });
         };
 
         AuthService.prototype.logout = function logout(redirectUri) {
-          var _this10 = this;
+          var _this11 = this;
 
-          return new Promise(function (resolve) {
-            _this10.authentication.responseObject = null;
+          var localLogout = function localLogout(response) {
+            return new Promise(function (resolve) {
+              _this11.setResponseObject(null);
+              clearTimeout(_this11.timeout);
 
-            _this10.authentication.redirect(redirectUri, _this10.config.logoutRedirect);
+              _this11.authentication.redirect(redirectUri, _this11.config.logoutRedirect);
 
-            resolve();
-          });
+              resolve(response);
+            });
+          };
+
+          return this.config.logoutUrl ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout) : localLogout();
         };
 
         AuthService.prototype.authenticate = function authenticate(name, redirectUri) {
-          var _this11 = this;
+          var _this12 = this;
 
           var userData = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
           return this.authentication.authenticate(name, userData).then(function (response) {
-            _this11.authentication.responseObject = response;
+            _this12.setResponseObject(response);
 
-            _this11.authentication.redirect(redirectUri, _this11.config.loginRedirect);
+            _this12.authentication.redirect(redirectUri, _this12.config.loginRedirect);
 
             return response;
           });
         };
 
         AuthService.prototype.unlink = function unlink(name, redirectUri) {
-          var _this12 = this;
+          var _this13 = this;
 
-          var unlinkUrl = this.config.withBase(this.config.unlinkUrl) + name;
+          var unlinkUrl = this.config.joinBase(this.config.unlinkUrl) + name;
           return this.client.request(this.config.unlinkMethod, unlinkUrl).then(function (response) {
-            _this12.authentication.redirect(redirectUri);
+            _this13.authentication.redirect(redirectUri);
 
             return response;
           });
@@ -1129,7 +1285,71 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
 
       _export('AuthService', AuthService);
 
-      _export('FetchConfig', _export('FetchConfig', FetchConfig = (_dec14 = inject(HttpClient, Config, AuthService, BaseConfig), _dec14(_class10 = function () {
+      _export('AuthenticateStep', _export('AuthenticateStep', AuthenticateStep = (_dec14 = inject(Authentication), _dec14(_class11 = function () {
+        function AuthenticateStep(authentication) {
+          _classCallCheck(this, AuthenticateStep);
+
+          this.authentication = authentication;
+        }
+
+        AuthenticateStep.prototype.run = function run(routingContext, next) {
+          var isLoggedIn = this.authentication.isAuthenticated();
+          var loginRoute = this.authentication.config.loginRoute;
+
+          if (routingContext.getAllInstructions().some(function (i) {
+            return i.config.settings.authenticate === true;
+          })) {
+            if (!isLoggedIn) {
+              return next.cancel(new Redirect(loginRoute));
+            }
+          } else if (isLoggedIn && routingContext.getAllInstructions().some(function (i) {
+            return i.fragment === loginRoute;
+          })) {
+            return next.cancel(new Redirect(this.authentication.config.loginRedirect));
+          }
+
+          return next();
+        };
+
+        return AuthenticateStep;
+      }()) || _class11)));
+
+      _export('AuthenticateStep', AuthenticateStep);
+
+      _export('AuthorizeStep', _export('AuthorizeStep', AuthorizeStep = (_dec15 = inject(AuthService), _dec15(_class12 = function () {
+        function AuthorizeStep(authService) {
+          _classCallCheck(this, AuthorizeStep);
+
+          LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead and add {settings: {authenticate: true}} to your router configuration.');
+
+          this.authService = authService;
+        }
+
+        AuthorizeStep.prototype.run = function run(routingContext, next) {
+          var isLoggedIn = this.authService.isAuthenticated();
+          var loginRoute = this.authService.config.loginRoute;
+
+          if (routingContext.getAllInstructions().some(function (i) {
+            return i.config.auth;
+          })) {
+            if (!isLoggedIn) {
+              return next.cancel(new Redirect(loginRoute));
+            }
+          } else if (isLoggedIn && routingContext.getAllInstructions().some(function (i) {
+            return i.fragment === loginRoute;
+          })) {
+            return next.cancel(new Redirect(this.authService.config.loginRedirect));
+          }
+
+          return next();
+        };
+
+        return AuthorizeStep;
+      }()) || _class12)));
+
+      _export('AuthorizeStep', AuthorizeStep);
+
+      _export('FetchConfig', _export('FetchConfig', FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseConfig), _dec16(_class13 = function () {
         function FetchConfig(httpClient, clientConfig, authService, config) {
           _classCallCheck(this, FetchConfig);
 
@@ -1140,13 +1360,13 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         }
 
         FetchConfig.prototype.configure = function configure(client) {
-          var _this13 = this;
+          var _this14 = this;
 
           if (Array.isArray(client)) {
             var _ret = function () {
               var configuredClients = [];
               client.forEach(function (toConfigure) {
-                configuredClients.push(_this13.configure(toConfigure));
+                configuredClients.push(_this14.configure(toConfigure));
               });
 
               return {
@@ -1177,20 +1397,20 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         _createClass(FetchConfig, [{
           key: 'interceptor',
           get: function get() {
-            var _this14 = this;
+            var _this15 = this;
 
             return {
               request: function request(_request) {
-                if (!_this14.config.httpInterceptor || !_this14.authService.isAuthenticated()) {
+                if (!_this15.config.httpInterceptor || !_this15.authService.isAuthenticated()) {
                   return _request;
                 }
-                var token = _this14.authService.getAccessToken();
+                var token = _this15.authService.getAccessToken();
 
-                if (_this14.config.authTokenType) {
-                  token = _this14.config.authTokenType + ' ' + token;
+                if (_this15.config.authTokenType) {
+                  token = _this15.config.authTokenType + ' ' + token;
                 }
 
-                _request.headers.set(_this14.config.authHeader, token);
+                _request.headers.set(_this15.config.authHeader, token);
 
                 return _request;
               },
@@ -1202,23 +1422,23 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
                   if (_response.status !== 401) {
                     return resolve(_response);
                   }
-                  if (!_this14.config.httpInterceptor || !_this14.authService.isTokenExpired()) {
+                  if (!_this15.config.httpInterceptor || !_this15.authService.isTokenExpired()) {
                     return resolve(_response);
                   }
-                  if (!_this14.config.useRefreshToken || !_this14.authService.getRefreshToken()) {
+                  if (!_this15.config.useRefreshToken || !_this15.authService.getRefreshToken()) {
                     return resolve(_response);
                   }
 
-                  _this14.authService.updateToken().then(function () {
-                    var token = _this14.authService.getAccessToken();
+                  _this15.authService.updateToken().then(function () {
+                    var token = _this15.authService.getAccessToken();
 
-                    if (_this14.config.authTokenType) {
-                      token = _this14.config.authTokenType + ' ' + token;
+                    if (_this15.config.authTokenType) {
+                      token = _this15.config.authTokenType + ' ' + token;
                     }
 
-                    request.headers.set(_this14.config.authHeader, token);
+                    request.headers.set(_this15.config.authHeader, token);
 
-                    return _this14.client.fetch(request).then(resolve);
+                    return _this15.client.fetch(request).then(resolve);
                   });
                 });
               }
@@ -1227,7 +1447,7 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
         }]);
 
         return FetchConfig;
-      }()) || _class10)));
+      }()) || _class13)));
 
       _export('FetchConfig', FetchConfig);
 
@@ -1238,6 +1458,8 @@ System.register(['extend', 'aurelia-logging', 'aurelia-path', 'aurelia-dependenc
       _export('AuthService', AuthService);
 
       _export('AuthorizeStep', AuthorizeStep);
+
+      _export('AuthenticateStep', AuthenticateStep);
     }
   };
 });

@@ -1,4 +1,36 @@
 <a name"3.0.0-rc2"></a>
+### 3.0.0-rc2 (2016-06-02)
+
+
+#### Bug Fixes
+
+* **aurelia-authentication:** add ie9 window.origin polyfill ([a06e66b0](https://github.com/spoonx/aurelia-authentication/commit/a06e66b0))
+* **auth0Lock:** add missing aurelia-pal dependency for webpack ([a8056dc3](https://github.com/spoonx/aurelia-authentication/commit/a8056dc3))
+* **authentication:** consistent throw if token not found ([41454e39](https://github.com/spoonx/aurelia-authentication/commit/41454e39))
+* **popup:** encodeURIComponent all query parameters ([82e023c2](https://github.com/spoonx/aurelia-authentication/commit/82e023c2))
+* **project:** restore missing props in package.json for jspm 0.17+ ([17f9e81d](https://github.com/spoonx/aurelia-authentication/commit/17f9e81d))
+
+
+#### Features
+
+* **BaseConfig:** copied over current sahat/satellizer settings ([70dfb814](https://github.com/spoonx/aurelia-authentication/commit/70dfb814))
+* **authService:**
+  * use authenticated and setTimeout for login status ([d57e1142](https://github.com/spoonx/aurelia-authentication/commit/d57e1142))
+  * add getExp() ([026d0d82](https://github.com/spoonx/aurelia-authentication/commit/026d0d82))
+  * add profileMethod config option ([218fffc1](https://github.com/spoonx/aurelia-authentication/commit/218fffc1))
+  * optional logout request ([d65ca7ba](https://github.com/spoonx/aurelia-authentication/commit/d65ca7ba))
+* **authentication:**
+  * use jwt-decode to decode token ([f5056ce9](https://github.com/spoonx/aurelia-authentication/commit/f5056ce9))
+  * add support for auth0 login using lock ([97e625e8](https://github.com/spoonx/aurelia-authentication/commit/97e625e8))
+  * allow dotted accessTokenProp ([27198f8f](https://github.com/spoonx/aurelia-authentication/commit/27198f8f))
+  * add deprecation warning for provider.type (replaced by provider.oauthType) ([bcdf06ba](https://github.com/spoonx/aurelia-authentication/commit/bcdf06ba))
+* **project:**
+  * use aurelia-pal for window and document ([fdbb9189](https://github.com/spoonx/aurelia-authentication/commit/fdbb9189))
+  * add AuthenticationStep and deprecate AuthorizeStep ([baeb35c4](https://github.com/spoonx/aurelia-authentication/commit/baeb35c4))
+* **refresh-token:** optional refreshTokenUrl ([234e1024](https://github.com/spoonx/aurelia-authentication/commit/234e1024))
+
+
+<a name"3.0.0-rc2"></a>
 ### 3.0.0-rc2 (2016-05-04)
 
 

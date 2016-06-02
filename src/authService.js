@@ -19,6 +19,12 @@ export class AuthService {
    */
   config;
 
+  /**
+   * The current login status
+   * @type {Boolean}
+   */
+  authenticated  = false;
+
   constructor(authentication, config) {
     this.authentication = authentication;
     this.config         = config;
@@ -53,10 +59,48 @@ export class AuthService {
   }
 
   /**
+   * sets the login timeout
+   * @type {Number} timeout time in ms
+   */
+  setTimeout(ttl) {
+    setTimeout(this.timeout, ttl);
+  }
+
+  /**
+   * clears the login timeout
+   */
+  clearTimeout() {
+    clearTimeout(this.timeout);
+  }
+
+  /**
+   * refresh or unset authenticated after timeout
+   */
+  timeout = () => {
+    this.clearTimeout();
+
+    if (this.config.autoUpdateToken
+      && this.authentication.getAccessToken()
+      && this.authentication.getRefreshToken()) {
+      this.updateToken();
+    } else {
+      this.authenticated = false;
+    }
+  };
+
+  /**
+   * Stores and analyses the servers responseObject. Sets loging status and timeout
    * @param {Object} response The servers response as GOJO
    */
   setResponseObject(response) {
+    this.clearTimeout();
+
     this.authentication.setResponseObject(response);
+
+    this.authenticated = this.authentication.isAuthenticated();
+    if (this.authenticated && !Number.isNaN(this.authentication.exp)) {
+      this.setTimeout(this.getTtl() * 1000);
+    }
   }
 
   /**
@@ -288,6 +332,8 @@ export class AuthService {
   logout(redirectUri) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
+      clearTimeout(this.timeout);
+
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
       resolve(response);

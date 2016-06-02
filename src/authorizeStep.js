@@ -1,7 +1,6 @@
 import {inject} from 'aurelia-dependency-injection';
 import {Redirect} from 'aurelia-router';
 import * as LogManager from 'aurelia-logging';
-
 import {AuthService} from './authService';
 
 @inject(AuthService)

@@ -2,7 +2,6 @@ import {PLATFORM} from 'aurelia-pal';
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import * as LogManager from 'aurelia-logging';
-
 import {Authentication} from './authentication';
 import {BaseConfig} from './baseConfig';
 

@@ -1,7 +1,6 @@
 import {PLATFORM} from 'aurelia-pal';
 import {inject} from 'aurelia-dependency-injection';
 import extend from 'extend';
-
 import {Storage} from './storage';
 import {BaseConfig} from './baseConfig';
 

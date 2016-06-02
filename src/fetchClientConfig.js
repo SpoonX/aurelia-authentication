@@ -1,7 +1,6 @@
 import {inject} from 'aurelia-dependency-injection';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Config, Rest} from 'aurelia-api';
-
 import {AuthService} from './authService';
 import {BaseConfig} from './baseConfig';
 

@@ -6,7 +6,10 @@ import {AuthorizeStep} from './authorizeStep';
 import {AuthenticateStep} from './authenticateStep';
 import {BaseConfig} from './baseConfig';
 import {FetchConfig} from './fetchClientConfig';
-import './authFilter';
+import * as LogManager from 'aurelia-logging';
+// import to ensure value-converters get bundled
+import './authFilterValueConverter';
+import './authenticatedValueConverter';
 
 /**
  * Configure the plugin.
@@ -20,8 +23,6 @@ function configure(aurelia, config) {
     PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
   }
 
-  aurelia.globalResources('./authFilter');
-
   const baseConfig = aurelia.container.get(BaseConfig);
 
   if (typeof config === 'function') {
@@ -29,7 +30,12 @@ function configure(aurelia, config) {
   } else if (typeof config === 'object') {
     baseConfig.configure(config);
   }
+
   // after baseConfig was configured
+  for (let converter of baseConfig.globalValueConverters) {
+    aurelia.globalResources(`./${converter}`);
+    LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${converter}`);
+  }
   const fetchConfig  = aurelia.container.get(FetchConfig);
   const clientConfig = aurelia.container.get(Config);
 

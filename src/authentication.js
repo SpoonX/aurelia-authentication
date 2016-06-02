@@ -3,7 +3,6 @@ import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import jwtDecode from 'jwt-decode';
 import * as LogManager from 'aurelia-logging';
-
 import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
 import {OAuth1} from './oAuth1';

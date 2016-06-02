@@ -1,7 +1,6 @@
 import {inject} from 'aurelia-dependency-injection';
 import {buildQueryString} from 'aurelia-path';
 import extend from 'extend';
-
 import {Storage} from './storage';
 import {Popup} from './popup';
 import {BaseConfig} from './baseConfig';

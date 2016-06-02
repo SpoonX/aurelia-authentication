@@ -1,7 +1,6 @@
+import {PLATFORM} from 'aurelia-pal';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Config, Rest} from 'aurelia-api';
-import {PLATFORM} from 'aurelia-pal';
-
 import {AuthService} from './authService';
 import {AuthorizeStep} from './authorizeStep';
 import {AuthenticateStep} from './authenticateStep';

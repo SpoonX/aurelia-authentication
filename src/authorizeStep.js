@@ -6,7 +6,7 @@ import {AuthService} from './authService';
 @inject(AuthService)
 export class AuthorizeStep {
   constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead and use {settings: {authenticate: true}} in your route configuration.');
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
 
     this.authService = authService;
   }

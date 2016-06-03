@@ -64,7 +64,7 @@ export class Popup {
 
   pollPopup() {
     return new Promise((resolve, reject) => {
-      this.polling = setInterval(() => {
+      this.polling = PLATFORM.global.setInterval(() => {
         let errorData;
 
         try {
@@ -79,20 +79,20 @@ export class Popup {
             }
 
             this.popupWindow.close();
-            clearInterval(this.polling);
+            PLATFORM.global.clearInterval(this.polling);
           }
         } catch (error) {
           errorData = error;
         }
 
         if (!this.popupWindow) {
-          clearInterval(this.polling);
+          PLATFORM.global.clearInterval(this.polling);
           reject({
             error: errorData,
             data: 'Provider Popup Blocked'
           });
         } else if (this.popupWindow.closed) {
-          clearInterval(this.polling);
+          PLATFORM.global.clearInterval(this.polling);
           reject({
             error: errorData,
             data: 'Problem poll popup'
@@ -291,10 +291,7 @@ export class BaseConfig {
       display: 'popup',
       oauthType: '2.0',
       popupOptions: { width: 452, height: 633 },
-      state: function() {
-        let rand = Math.random().toString(36).substr(2);
-        return encodeURIComponent(rand);
-      }
+      state: randomState
     },
     github: {
       name: 'github',
@@ -392,9 +389,7 @@ export class BaseConfig {
         popup: true
       },
       responseType: 'token',
-      state: function() {
-        return Math.random().toString(36).substr(2);
-      }
+      state: randomState
     }
   };
 
@@ -461,6 +456,11 @@ export class BaseConfig {
   }
 }
 
+function randomState() {
+  let rand = Math.random().toString(36).substr(2);
+  return encodeURIComponent(rand);
+}
+
 @inject(BaseConfig)
 export class Storage {
   constructor(config) {
@@ -468,21 +468,15 @@ export class Storage {
   }
 
   get(key) {
-    if (PLATFORM.global[this.config.storage]) {
-      return PLATFORM.global[this.config.storage].getItem(key);
-    }
+    return PLATFORM.global[this.config.storage].getItem(key);
   }
 
   set(key, value) {
-    if (PLATFORM.global[this.config.storage]) {
-      PLATFORM.global[this.config.storage].setItem(key, value);
-    }
+    PLATFORM.global[this.config.storage].setItem(key, value);
   }
 
   remove(key) {
-    if (PLATFORM.global[this.config.storage]) {
-      PLATFORM.global[this.config.storage].removeItem(key);
-    }
+    PLATFORM.global[this.config.storage].removeItem(key);
   }
 }
 
@@ -524,7 +518,7 @@ export class Auth0Lock {
 
     this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain);
 
-    const openPopup = new Promise(function(resolve, reject) {
+    const openPopup = new Promise((resolve, reject) => {
       let opts = provider.lockOptions;
       opts.popupOptions = provider.popupOptions;
       opts.responseType = provider.responseType;
@@ -543,7 +537,7 @@ export class Auth0Lock {
           });
         }
       });
-    }.bind(this));
+    });
 
     return openPopup
       .then(lockResponse => {
@@ -1014,14 +1008,14 @@ export class AuthService {
    * @type {Number} timeout time in ms
    */
   setTimeout(ttl) {
-    setTimeout(this.timeout, ttl);
+    PLATFORM.global.setTimeout(this.timeout, ttl);
   }
 
   /**
    * clears the login timeout
    */
   clearTimeout() {
-    clearTimeout(this.timeout);
+    PLATFORM.global.clearTimeout(this.timeout);
   }
 
   /**
@@ -1283,7 +1277,7 @@ export class AuthService {
   logout(redirectUri) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
-      clearTimeout(this.timeout);
+      this.clearTimeout();
 
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
@@ -1333,22 +1327,22 @@ export class AuthService {
   }
 }
 
-@inject(Authentication)
+@inject(AuthService)
 export class AuthenticateStep {
-  constructor(authentication) {
-    this.authentication = authentication;
+  constructor(authService) {
+    this.authService = authService;
   }
 
   run(routingContext, next) {
-    const isLoggedIn = this.authentication.isAuthenticated();
-    const loginRoute = this.authentication.config.loginRoute;
+    const isLoggedIn = this.authService.authenticated;
+    const loginRoute = this.authService.config.loginRoute;
 
-    if (routingContext.getAllInstructions().some(i => i.config.settings.authenticate === true)) {
+    if (routingContext.getAllInstructions().some(route => route.config.settings.authenticate === true)) {
       if (!isLoggedIn) {
         return next.cancel(new Redirect(loginRoute));
       }
-    } else if (isLoggedIn && routingContext.getAllInstructions().some(i => i.fragment === loginRoute)) {
-      return next.cancel(new Redirect( this.authentication.config.loginRedirect ));
+    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
+      return next.cancel(new Redirect( this.authService.config.loginRedirect ));
     }
 
     return next();
@@ -1358,7 +1352,7 @@ export class AuthenticateStep {
 @inject(AuthService)
 export class AuthorizeStep {
   constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead and add {settings: {authenticate: true}} to your router configuration.');
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead and use {settings: {authenticate: true}} in your route configuration.');
 
     this.authService = authService;
   }
@@ -1367,11 +1361,11 @@ export class AuthorizeStep {
     const isLoggedIn = this.authService.isAuthenticated();
     const loginRoute = this.authService.config.loginRoute;
 
-    if (routingContext.getAllInstructions().some(i => i.config.auth)) {
+    if (routingContext.getAllInstructions().some(route => route.config.auth)) {
       if (!isLoggedIn) {
         return next.cancel(new Redirect(loginRoute));
       }
-    } else if (isLoggedIn && routingContext.getAllInstructions().some(i => i.fragment === loginRoute)) {
+    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
       return next.cancel(new Redirect( this.authService.config.loginRedirect ));
     }
 

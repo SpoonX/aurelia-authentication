@@ -95,7 +95,7 @@ export let Popup = class Popup {
 
   pollPopup() {
     return new Promise((resolve, reject) => {
-      this.polling = setInterval(() => {
+      this.polling = PLATFORM.global.setInterval(() => {
         let errorData;
 
         try {
@@ -109,20 +109,20 @@ export let Popup = class Popup {
             }
 
             this.popupWindow.close();
-            clearInterval(this.polling);
+            PLATFORM.global.clearInterval(this.polling);
           }
         } catch (error) {
           errorData = error;
         }
 
         if (!this.popupWindow) {
-          clearInterval(this.polling);
+          PLATFORM.global.clearInterval(this.polling);
           reject({
             error: errorData,
             data: 'Provider Popup Blocked'
           });
         } else if (this.popupWindow.closed) {
-          clearInterval(this.polling);
+          PLATFORM.global.clearInterval(this.polling);
           reject({
             error: errorData,
             data: 'Problem poll popup'
@@ -216,10 +216,7 @@ export let BaseConfig = class BaseConfig {
         display: 'popup',
         oauthType: '2.0',
         popupOptions: { width: 452, height: 633 },
-        state: function () {
-          let rand = Math.random().toString(36).substr(2);
-          return encodeURIComponent(rand);
-        }
+        state: randomState
       },
       github: {
         name: 'github',
@@ -317,9 +314,7 @@ export let BaseConfig = class BaseConfig {
           popup: true
         },
         responseType: 'token',
-        state: function () {
-          return Math.random().toString(36).substr(2);
-        }
+        state: randomState
       }
     };
     this._authToken = 'Bearer';
@@ -401,27 +396,26 @@ export let BaseConfig = class BaseConfig {
   }
 };
 
+function randomState() {
+  let rand = Math.random().toString(36).substr(2);
+  return encodeURIComponent(rand);
+}
+
 export let Storage = (_dec = inject(BaseConfig), _dec(_class2 = class Storage {
   constructor(config) {
     this.config = config;
   }
 
   get(key) {
-    if (PLATFORM.global[this.config.storage]) {
-      return PLATFORM.global[this.config.storage].getItem(key);
-    }
+    return PLATFORM.global[this.config.storage].getItem(key);
   }
 
   set(key, value) {
-    if (PLATFORM.global[this.config.storage]) {
-      PLATFORM.global[this.config.storage].setItem(key, value);
-    }
+    PLATFORM.global[this.config.storage].setItem(key, value);
   }
 
   remove(key) {
-    if (PLATFORM.global[this.config.storage]) {
-      PLATFORM.global[this.config.storage].removeItem(key);
-    }
+    PLATFORM.global[this.config.storage].removeItem(key);
   }
 }) || _class2);
 
@@ -461,7 +455,7 @@ export let Auth0Lock = (_dec2 = inject(Storage, BaseConfig), _dec2(_class3 = cla
 
     this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain);
 
-    const openPopup = new Promise(function (resolve, reject) {
+    const openPopup = new Promise((resolve, reject) => {
       let opts = provider.lockOptions;
       opts.popupOptions = provider.popupOptions;
       opts.responseType = provider.responseType;
@@ -479,7 +473,7 @@ export let Auth0Lock = (_dec2 = inject(Storage, BaseConfig), _dec2(_class3 = cla
           });
         }
       });
-    }.bind(this));
+    });
 
     return openPopup.then(lockResponse => {
       if (provider.responseType === 'token' || provider.responseType === 'id_token%20token' || provider.responseType === 'token%20id_token') {
@@ -883,11 +877,11 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
   }
 
   setTimeout(ttl) {
-    setTimeout(this.timeout, ttl);
+    PLATFORM.global.setTimeout(this.timeout, ttl);
   }
 
   clearTimeout() {
-    clearTimeout(this.timeout);
+    PLATFORM.global.clearTimeout(this.timeout);
   }
 
   setResponseObject(response) {
@@ -1036,7 +1030,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
   logout(redirectUri) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
-      clearTimeout(this.timeout);
+      this.clearTimeout();
 
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
@@ -1066,21 +1060,21 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
   }
 }, (_applyDecoratedDescriptor(_class9.prototype, 'getCurrentToken', [_dec13], Object.getOwnPropertyDescriptor(_class9.prototype, 'getCurrentToken'), _class9.prototype)), _class9)) || _class8);
 
-export let AuthenticateStep = (_dec14 = inject(Authentication), _dec14(_class11 = class AuthenticateStep {
-  constructor(authentication) {
-    this.authentication = authentication;
+export let AuthenticateStep = (_dec14 = inject(AuthService), _dec14(_class11 = class AuthenticateStep {
+  constructor(authService) {
+    this.authService = authService;
   }
 
   run(routingContext, next) {
-    const isLoggedIn = this.authentication.isAuthenticated();
-    const loginRoute = this.authentication.config.loginRoute;
+    const isLoggedIn = this.authService.authenticated;
+    const loginRoute = this.authService.config.loginRoute;
 
-    if (routingContext.getAllInstructions().some(i => i.config.settings.authenticate === true)) {
+    if (routingContext.getAllInstructions().some(route => route.config.settings.authenticate === true)) {
       if (!isLoggedIn) {
         return next.cancel(new Redirect(loginRoute));
       }
-    } else if (isLoggedIn && routingContext.getAllInstructions().some(i => i.fragment === loginRoute)) {
-      return next.cancel(new Redirect(this.authentication.config.loginRedirect));
+    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
+      return next.cancel(new Redirect(this.authService.config.loginRedirect));
     }
 
     return next();
@@ -1089,7 +1083,7 @@ export let AuthenticateStep = (_dec14 = inject(Authentication), _dec14(_class11 
 
 export let AuthorizeStep = (_dec15 = inject(AuthService), _dec15(_class12 = class AuthorizeStep {
   constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead and add {settings: {authenticate: true}} to your router configuration.');
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead and use {settings: {authenticate: true}} in your route configuration.');
 
     this.authService = authService;
   }
@@ -1098,11 +1092,11 @@ export let AuthorizeStep = (_dec15 = inject(AuthService), _dec15(_class12 = clas
     const isLoggedIn = this.authService.isAuthenticated();
     const loginRoute = this.authService.config.loginRoute;
 
-    if (routingContext.getAllInstructions().some(i => i.config.auth)) {
+    if (routingContext.getAllInstructions().some(route => route.config.auth)) {
       if (!isLoggedIn) {
         return next.cancel(new Redirect(loginRoute));
       }
-    } else if (isLoggedIn && routingContext.getAllInstructions().some(i => i.fragment === loginRoute)) {
+    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
       return next.cancel(new Redirect(this.authService.config.loginRedirect));
     }
 

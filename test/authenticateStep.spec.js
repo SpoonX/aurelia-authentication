@@ -5,20 +5,20 @@ import {AuthenticateStep} from '../src/authenticateStep';
 
 const routes = {
   onLoginRoute : [
-    {name: 'parent', fragment: '/login', config: {settings: {}}},
-    {name: 'child', fragment: 'childUrl', config: {settings: {}}}
+    {name: 'parent', fragment: '/login', config: {}},
+    {name: 'child', fragment: 'childUrl', config: {}}
   ],
   authenticateNone : [
-    {name: 'parent', fragment: 'parentUrl', config: {settings: {}}},
-    {name: 'child', fragment: 'childUrl', config: {settings: {}}}
+    {name: 'parent', fragment: 'parentUrl', config: {}},
+    {name: 'child', fragment: 'childUrl', config: {}}
   ],
   authenticateChild : [
-    {name: 'parent', fragment: 'parentUrl', config: {settings: {}}},
-    {name: 'child', fragment: 'childUrl', config: {settings: {authenticate: true}}}
+    {name: 'parent', fragment: 'parentUrl', config: {}},
+    {name: 'child', fragment: 'childUrl', config: {auth: true}}
   ],
   authenticateParent : [
-    {name: 'parent', fragment: 'parentUrl', config: {settings: {authenticate: true}}},
-    {name: 'child', fragment: 'childUrl', config: {settings: {}}}
+    {name: 'parent', fragment: 'parentUrl', config: {auth: true}},
+    {name: 'child', fragment: 'childUrl', config: {}}
   ]};
 
 describe('AuthenticateStep', () => {

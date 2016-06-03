@@ -8,17 +8,23 @@ import {AuthService} from 'aurelia-authentication';
 
 ## Properties
 
+----------
+
 ### .client
 
 | Type | Description                                                                   |
 | ---- | ----------------------------------------------------------------------------- |
 | Rest | The configured aurelia-api Rest instance used for all authentication requests |
 
+----------
+
 ### .config
 
 | Type       | Description                                                     |
 | ---------- | --------------------------------------------------------------- |
 | BaseConfig | The BaseConfig instance with the current configuration settings |
+
+----------
 
 ### .authentication
 
@@ -28,7 +34,75 @@ import {AuthService} from 'aurelia-authentication';
 
 ----------
 
+### .authenticated
+
+| Type    | Description                                      |
+| ------- | ------------------------------------------------ |
+| Boolean | Authentication status as set by timeout function |
+
+----------
+
 ## Methods
+
+----------
+
+### .setTimeout(ttl)
+
+Sets the login timeout. CAUTION: .authenticated and isAuthenticated() might get different results when set manually.
+
+#### Parameters
+
+| Parameter | Type     | Description        |
+| --------- | ---------| ------------------ |
+| ttl       | {Number} | Timeout time in ms |
+
+#### Example
+
+```js
+this.authService.setTimeout(10000);
+```
+
+----------
+
+### .clearTimeout()
+
+Clears the login timeout. CAUTION: .authenticated and isAuthenticated() might get different results when called manually.
+
+#### Example
+
+```js
+this.authService.clearTimeout();
+```
+
+----------
+
+### .timeout()
+
+The timeout function used for setTimeout. Requests new access token if refresh tokens are used or set .authenticated = false
+
+#### Example
+
+```js
+this.authService.clearTimeout();
+```
+
+----------
+
+### .setResponseObject(response)
+
+Stores and analyses the servers response as Object. Sets login status and timeout
+
+#### Parameters
+
+| Parameter | Type     | Description                |
+| --------- | -------- | -------------------------- |
+| response  | {Object} | The servers login response |
+
+#### Example
+
+```js
+this.authService.setResponseObject({access_token: 'a_fake_token'});
+```
 
 ----------
 
@@ -59,7 +133,7 @@ this.authService.getMe()
 
 ### .updateMe(body[, criteria])
 
-Updates (PUT) the profile to the BaseConfig.profileUrl. Accepts criteria. If the criteria is a string or a number, {id: criteria} will be passed to the server.
+Updates the profile to the BaseConfig.profileUrl using BaseConfig.profileMethod (default PUT). Accepts criteria. If the criteria is a string or a number, {id: criteria} will be passed to the server.
 
 #### Parameters
 
@@ -117,7 +191,7 @@ let currentToken = this.authService.getRefreshToken();
 
 ### .isAuthenticated()
 
-Checks if there is a (valid) token in storage. If the token is isExpired and  BaseConfig.autoUpdateToken===true, it returns true and a new access token automatically requested using the refesh_token.
+Checks if there is a (valid) token in storage. If the token is isExpired and  BaseConfig.autoUpdateToken===true, it returns true and a new access token automatically requested using the refesh_token. Does not use a timeout as .authenticated does. Hence, when you cancel or manually set the timeout, .isAuthenticated and .authenticated could yield different results.
 
 #### Returns
 
@@ -127,6 +201,22 @@ Checks if there is a (valid) token in storage. If the token is isExpired and  Ba
 
 ```js
 let auth = this.authService.isAuthenticated();
+```
+
+----------
+
+### .getExp()
+
+Gets exp of the access token in milliseconds
+
+#### Returns
+
+A `Number` for JWT or `NaN` for other tokens.
+
+#### Example
+
+```js
+let exp = this.authService.getExp();
 ```
 
 ----------
@@ -142,7 +232,7 @@ A `Number` for JWT or `NaN` for other tokens.
 #### Example
 
 ```js
-let timeLeft = this.authService.getTimeLeft();
+let ttl = this.authService.getTtl();
 ```
 
 ----------

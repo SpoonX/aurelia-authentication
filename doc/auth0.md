@@ -2,18 +2,18 @@
 
 The Auth0 provider is different than the other providers you normally use with `aurelia-authentication`. It should be the only provider configured in your app, and you need to set at least the `clientId` and `clientDomain` config properties. The `oauthType` property must be set equal to *auth0-lock*.
 
-At the time of writing this, it relies by default on the [Auth0 Lock](https://auth0.com/lock) library, that handles both the UI and the logic for all the authentication tasks. You can load it by including a script tag directly in your index.html file, or alternatively with a loader of your choice. 
+At the time of writing this, it relies by default on the [Auth0 Lock](https://auth0.com/lock) library, that handles both the UI and the logic for all the authentication tasks. You can load it by including a script tag directly in your index.html file, or alternatively with a loader of your choice.
 
 You cannot use the `open` method with this provider, but you'll always call `authenticate` instead (see the code snippet at the end of this article). The `authenticate` method will return an object with an `access_token` property, but despite its name that property will contain an **ID Token** (in the form of a *JWT*) containing at least the user's `sub` id. The login flow is described better in this [article](https://auth0.com/docs/protocols#oauth-for-native-clients-and-javascript-in-the-browser).
 
 Other *Lock* properties should be set under the `lockOptions` config property, except for:
+
 - `popupOptions` should be set on the root of the provider config object, for consistency with other providers
 - `state` should be set on the root of the provider option, and its completely optional like with other providers
 
-### Sample login method snippet (ES6)
+## Sample login method snippet (ES6)
 
 ```js
-import jwtDecode from 'jwt-decode';
 import {Cookie} from 'aurelia-cookie';
 
 ...
@@ -24,7 +24,7 @@ import {Cookie} from 'aurelia-cookie';
         this.authenticated = this.authService.isAuthenticated();
 
         // you can set a cookie for cookie based authentication
-        let jwtExp = jwtDecode(response.access_token).exp;
+        let jwtExp = this.authService.getExp();
         let expiryDate = new Date(0);
         expiryDate.setUTCSeconds(jwtExp);
         Cookie.set('cookie-bearer', response.access_token, {

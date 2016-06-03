@@ -171,13 +171,13 @@ Menu items visibility can also be linked with the authFilter to the isAuthentica
 In the router config function, you can specify an auth property in the routing map indicating whether or not the user needs to be authenticated in order to access the route:
 
 ```js
-import {AuthorizeStep} from 'aurelia-authentication';
+import {AuthenticateStep} from 'aurelia-authentication';
 
 export class App {
     configureRouter(config, router) {
         config.title = 'Aurelia';
 
-        config.addPipelineStep('authorize', AuthorizeStep); // Add a route filter to the authorize extensibility point.
+        config.addPipelineStep('authorize', AuthenticateStep); // Add a route filter to the authorize extensibility point.
 
         config.map([
             { route: ['','welcome'],  moduleId: './welcome',  nav: true, title: 'Welcome' },

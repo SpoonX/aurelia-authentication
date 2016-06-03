@@ -77,7 +77,7 @@ export class AuthService {
   }
 
   /**
-   * refresh or unset authenticated after timeout
+   * clear timout and refresh token or logout
    */
   timeout = () => {
     this.clearTimeout();
@@ -87,7 +87,7 @@ export class AuthService {
       && this.authentication.getRefreshToken()) {
       this.updateToken();
     } else {
-      this.authenticated = false;
+      this.logout();
     }
   };
 
@@ -335,7 +335,6 @@ export class AuthService {
   logout(redirectUri) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
-      this.clearTimeout();
 
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 

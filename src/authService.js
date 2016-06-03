@@ -92,7 +92,7 @@ export class AuthService {
   };
 
   /**
-   * Stores and analyses the servers responseObject. Sets loging status and timeout
+   * Stores and analyses the servers responseObject. Sets login status and timeout
    * @param {Object} response The servers response as GOJO
    */
   setResponseObject(response) {
@@ -182,9 +182,9 @@ export class AuthService {
   }
 
   /**
-   * Gets ttl in seconds
+   * Gets exp in milliseconds
    *
-   * @returns {Number} ttl for JWT tokens, NaN for all other tokens
+   * @returns {Number} exp for JWT tokens, NaN for all other tokens
    */
   getExp() {
     return this.authentication.getExp();

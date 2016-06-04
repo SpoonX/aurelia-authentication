@@ -1,5 +1,5 @@
 import {inject} from 'aurelia-dependency-injection';
-import {AuthService} from './authService';
+import {AuthService} from './aurelia-authentication';
 
 @inject(AuthService)
 export class AuthenticatedValueConverter {

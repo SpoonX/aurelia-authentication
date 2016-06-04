@@ -109,33 +109,33 @@ export class AuthService {
   /**
    * Get current user profile from server
    *
-   * @param {[{}|number|string]}  [criteria object or a Number|String converted to {id:criteria}]
+   * @param {[{}|number|string]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
    *
    * @return {Promise<response>}
    */
-  getMe(criteria) {
-    if (typeof criteria === 'string' || typeof criteria === 'number') {
-      criteria = {id: criteria};
+  getMe(criteriaOrId) {
+    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+      criteriaOrId = {id: criteriaOrId};
     }
-    return this.client.find(this.config.joinBase(this.config.profileUrl), criteria);
+    return this.client.find(this.config.joinBase(this.config.profileUrl), criteriaOrId);
   }
 
   /**
    * Send current user profile update to server
-   *
+
    * @param {any}                 request body with data.
-   * @param {[{}|Number|String]}  [criteria object or a Number|String converted to {id:criteria}]
+   * @param {[{}|Number|String]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
    *
    * @return {Promise<response>}
    */
-  updateMe(body, criteria) {
-    if (typeof criteria === 'string' || typeof criteria === 'number') {
-      criteria = { id: criteria };
+  updateMe(body, criteriaOrId) {
+    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+      criteriaOrId = { id: criteriaOrId };
     }
     if (this.config.profileMethod === 'put') {
-      return this.client.update(this.config.joinBase(this.config.profileUrl), criteria, body);
+      return this.client.update(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
     }
-    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteria, body);
+    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
   }
 
   /**
@@ -261,7 +261,7 @@ export class AuthService {
    *
    * @return {Promise<response>}
    */
-  signup(displayName, email, password, options, redirectUri) {
+  signup(displayNameOrCredentials, emailOrOptions, passwordOrRedirectUri, options, redirectUri) {
     let content;
 
     if (typeof arguments[0] === 'object') {
@@ -270,9 +270,9 @@ export class AuthService {
       redirectUri = arguments[2];
     } else {
       content = {
-        'displayName': displayName,
-        'email': email,
-        'password': password
+        'displayName': displayNameOrCredentials,
+        'email': emailOrOptions,
+        'password': passwordOrRedirectUri
       };
     }
     return this.client.post(this.config.joinBase(this.config.signupUrl), content, options)
@@ -296,26 +296,26 @@ export class AuthService {
    *
    * @return {Promise<response>}
    */
-  login(email, password, options, redirectUri) {
+  login(emailOrCredentials, passwordOrOptions, optionsOrRedirectUri, redirectUri) {
     let content;
 
     if (typeof arguments[0] === 'object') {
-      content = arguments[0];
-      options = arguments[1];
-      redirectUri = arguments[2];
+      content             = arguments[0];
+      optionsOrRedirectUri = arguments[1];
+      redirectUri         = arguments[2];
     } else {
       content = {
-        'email': email,
-        'password': password
+        'email': emailOrCredentials,
+        'password': passwordOrOptions
       };
-      options = options;
+      optionsOrRedirectUri = optionsOrRedirectUri;
     }
 
     if (this.config.clientId) {
       content.client_id = this.config.clientId;
     }
 
-    return this.client.post(this.config.joinBase(this.config.loginUrl), content, options)
+    return this.client.post(this.config.joinBase(this.config.loginUrl), content, optionsOrRedirectUri)
       .then(response => {
         this.setResponseObject(response);
 

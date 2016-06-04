@@ -12,9 +12,9 @@ module.exports = {
   source: appRoot + '**/*.js',
   tsSource: [
     appRoot + '**/*.js',          // list files to parse for d.ts
-    '!' + appRoot + 'value-converters/*js'  // exclude entry file
+    '!' + appRoot + '*ValueConverter.js'  // exclude entry file
   ],
-  resources: 'value-converters/*js',  // relative to root, resources can not that easily be bundled into a single file (due to naming conventions)
+  resources: '*ValueConverter.js',  // relative to root, resources can not that easily be bundled into a single file (due to naming conventions)
   html: appRoot + '**/*.html',
   style: 'styles/**/*.css',
   output: 'dist/',

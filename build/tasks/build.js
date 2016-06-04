@@ -20,7 +20,7 @@ gulp.task('build-dts', function() {
   var importsToAdd = []; // stores extracted imports
 
   return gulp.src(paths.tsSource)
-    .pipe(tools.sortFiles())
+    //.pipe(tools.sortFiles()) can't sort with excluded files of the tsSource
     .pipe(through2.obj(function(file, enc, callback) {  // extract all imports to importsToAdd
       file.contents = new Buffer(tools.extractImports(file.contents.toString('utf8'), importsToAdd));
       this.push(file);

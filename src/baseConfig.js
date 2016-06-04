@@ -49,7 +49,7 @@ export class BaseConfig {
   // ===================
 
   // The SPA url to which the user is redirected after a successful login
-  loginRedirect = '#/customer';
+  loginRedirect = '#/';
   // The SPA url to which the user is redirected after a successful logout
   logoutRedirect = '#/';
   // The SPA route used when an unauthenticated user tries to access an SPA page that requires authentication

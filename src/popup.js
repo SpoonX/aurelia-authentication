@@ -61,7 +61,7 @@ export class Popup {
         let errorData;
 
         try {
-          if (this.popupWindow.location.host ===  DOM.location.host
+          if (this.popupWindow.location.host ===  PLATFORM.global.document.location.host
             && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
             const qs = parseUrl(this.popupWindow.location);
 

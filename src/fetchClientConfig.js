@@ -9,10 +9,10 @@ export class FetchConfig {
   /**
    * Construct the FetchConfig
    *
-   * @param {HttpClient} httpClient
-   * @param {Config} clientConfig
-   * @param {Authentication} authService
-   * @param {BaseConfig} config
+   * @type {HttpClient} httpClient
+   * @type {Config} clientConfig
+   * @type {Authentication} authService
+   * @type {BaseConfig} config
    */
   constructor(httpClient, clientConfig, authService, config) {
     this.httpClient   = httpClient;
@@ -76,7 +76,7 @@ export class FetchConfig {
   /**
    * Configure client(s) with authorization interceptor
    *
-   * @param {HttpClient|Rest|string[]} (array of) httpClient, rest client or api endpoint names
+   * @type {HttpClient|Rest|string[]} client HttpClient, rest client or api endpoint name, or an array thereof
    *
    * @return {HttpClient[]}
    */

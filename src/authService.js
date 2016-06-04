@@ -9,22 +9,31 @@ import {BaseConfig} from './baseConfig';
 export class AuthService {
   /**
    * The Authentication instance that handles the token
-   * @type {Authentication}
+   *
+   * @type  {Authentication}
    */
   authentication;
 
   /**
    * The Config instance that contains the current configuration setting
-   * @type {Config}
+   *
+   * @type  {Config}
    */
   config;
 
   /**
    * The current login status
-   * @type {Boolean}
+   *
+   * @type  {Boolean}
    */
   authenticated  = false;
 
+  /**
+   *  Create an AuthService instance
+   *
+   * @type  {Authentication} authentication The Authentication instance to be used
+   * @type  {Config}         config         The Config instance to be used
+   */
   constructor(authentication, config) {
     this.authentication = authentication;
     this.config         = config;
@@ -62,22 +71,23 @@ export class AuthService {
   }
 
   /**
-   * sets the login timeout
-   * @type {Number} timeout time in ms
+   * Sets the login timeout
+   *
+   * @type  {Number} ttl  Timeout time in ms
    */
   setTimeout(ttl) {
     PLATFORM.global.setTimeout(this.timeout, ttl);
   }
 
   /**
-   * clears the login timeout
+   * Clears the login timeout
    */
   clearTimeout() {
     PLATFORM.global.clearTimeout(this.timeout);
   }
 
   /**
-   * clear timout and refresh token or logout
+   * Clear timout and refresh token or logout
    */
   timeout = () => {
     this.clearTimeout();
@@ -93,7 +103,8 @@ export class AuthService {
 
   /**
    * Stores and analyses the servers responseObject. Sets login status and timeout
-   * @param {Object} response The servers response as GOJO
+   *
+   * @type {Object} response The servers response as GOJO
    */
   setResponseObject(response) {
     this.clearTimeout();
@@ -109,7 +120,7 @@ export class AuthService {
   /**
    * Get current user profile from server
    *
-   * @param {[{}|number|string]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
+   * @type {[{}|number|string]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
    *
    * @return {Promise<response>}
    */
@@ -123,8 +134,8 @@ export class AuthService {
   /**
    * Send current user profile update to server
 
-   * @param {any}                 request body with data.
-   * @param {[{}|Number|String]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
+   * @type {any}                 Request body with data.
+   * @type {[{}|Number|String]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
    *
    * @return {Promise<response>}
    */
@@ -141,7 +152,7 @@ export class AuthService {
   /**
    * Get accessToken from storage
    *
-   * @returns {String} current accessToken
+   * @returns {String} Current accessToken
    */
   getAccessToken() {
     return this.authentication.getAccessToken();
@@ -155,7 +166,7 @@ export class AuthService {
   /**
    * Get refreshToken from storage
    *
-   * @returns {String} current refreshToken
+   * @returns {String} Current refreshToken
    */
   getRefreshToken() {
     return this.authentication.getRefreshToken();
@@ -164,7 +175,7 @@ export class AuthService {
  /**
   * Gets authentication status
   *
-  * @returns {Boolean} true: for Non-JWT and unexpired JWT, false: else
+  * @returns {Boolean} For Non-JWT and unexpired JWT: true, else: false
   */
   isAuthenticated() {
     let authenticated = this.authentication.isAuthenticated();
@@ -184,7 +195,7 @@ export class AuthService {
   /**
    * Gets exp in milliseconds
    *
-   * @returns {Number} exp for JWT tokens, NaN for all other tokens
+   * @returns {Number} Exp for JWT tokens, NaN for all other tokens
    */
   getExp() {
     return this.authentication.getExp();
@@ -193,7 +204,7 @@ export class AuthService {
   /**
    * Gets ttl in seconds
    *
-   * @returns {Number} ttl for JWT tokens, NaN for all other tokens
+   * @returns {Number} Ttl for JWT tokens, NaN for all other tokens
    */
   getTtl() {
     return this.authentication.getTtl();
@@ -202,7 +213,7 @@ export class AuthService {
  /**
   * Gets exp from token payload and compares to current time
   *
-  * @returns {Boolean} returns (ttl > 0)? for JWT, undefined other tokens
+  * @returns {Boolean} Returns (ttl > 0)? for JWT, undefined other tokens
   */
   isTokenExpired() {
     return this.authentication.isTokenExpired();
@@ -211,7 +222,7 @@ export class AuthService {
   /**
   * Get payload from tokens
   *
-  * @returns {null | String} null: Non-JWT payload, String: JWT token payload
+  * @returns {null | String} Payload for JWT, else null
   */
   getTokenPayload() {
     return this.authentication.getPayload();
@@ -220,7 +231,7 @@ export class AuthService {
   /**
    * Request new accesss token
    *
-   * @returns {Promise<Response>} requests new token. can be called multiple times
+   * @returns {Promise<Response>} Requests new token. can be called multiple times
    */
   updateToken() {
     if (!this.authentication.getRefreshToken()) {
@@ -251,15 +262,15 @@ export class AuthService {
   }
 
   /**
-   * Signup locally
+   * Signup locally. Login and redirect depending on config
    *
-   * @param {String|{}}   displayName | object with signup data.
-   * @param {[String]|{}} [email | options for post request]
-   * @param {[String]}    [password | redirectUri overwrite]
-   * @param {[{}]}        [options]
-   * @param {[String]}    [redirectUri overwrite]
+   * @type {String|{}}   displayNameOrCredentials displayName | object with signup data.
+   * @type {[String]|{}} emailOrOptions           [email | options for post request]
+   * @type {[String]}    passwordOrRedirectUri    [password | optional redirectUri overwrite]
+   * @type {[{}]}        options                  [options]
+   * @type {[String]}    redirectUri              [optional redirectUri overwrite]
    *
-   * @return {Promise<response>}
+   * @return {Promise<Object>|Promise<Error>}     Server response as Object
    */
   signup(displayNameOrCredentials, emailOrOptions, passwordOrRedirectUri, options, redirectUri) {
     let content;
@@ -289,12 +300,12 @@ export class AuthService {
   /**
    * login locally. Redirect depending on config
    *
-   * @param {[String]|{}} email | object with signup data.
-   * @param {[String]}    [password | options for post request]
-   * @param {[{}]}        [options | redirectUri overwrite]]
-   * @param {[String]}    [redirectUri overwrite]
+   * @type {[String]|{}} emailOrCredentials      email | object with signup data.
+   * @type {[String]}    [passwordOrOptions]     [password | options for post request]
+   * @type {[{}]}        [optionsOrRedirectUri]  [options | redirectUri overwrite]]
+   * @type {[String]}    [redirectUri]           [optional redirectUri overwrite]
    *
-   * @return {Promise<response>}
+   * @return {Promise<Object>|Promise<Error>}    Server response as Object
    */
   login(emailOrCredentials, passwordOrOptions, optionsOrRedirectUri, redirectUri) {
     let content;
@@ -326,11 +337,11 @@ export class AuthService {
   }
 
   /**
-   * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first if set in config
+   * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
    *
-   * @param {[String]}  [redirectUri]
+   * @type {[String]}    [redirectUri]                      [optional redirectUri overwrite]
    *
-   * @return {Promise<>|Promise<response>}
+   * @return {Promise<>|Promise<Object>|Promise<Error>}     Server response as Object
    */
   logout(redirectUri) {
     let localLogout = response => new Promise(resolve => {
@@ -349,11 +360,11 @@ export class AuthService {
   /**
    * Authenticate with third-party and redirect to redirectUri (if set) or redirectUri of config
    *
-   * @param {String}    name of the provider
-   * @param {[String]}  [redirectUri]
-   * @param {[{}]}      [userData]
+   * @type {String}    name          Name of the provider
+   * @type {[String]}  [redirectUri] [optional redirectUri overwrite]
+   * @type {[{}]}      [userData]    [optional userData for the local authentication server]
    *
-   * @return {Promise<response>}
+   * @return {Promise<Object>|Promise<Error>}     Server response as Object
    */
   authenticate(name, redirectUri, userData = {}) {
     return this.authentication.authenticate(name, userData)
@@ -369,9 +380,9 @@ export class AuthService {
   /**
    * Unlink third-party
    *
-   * @param {String}  name of the provider
+   * @type {String}      name                  Name of the provider
    *
-   * @return {Promise<response>}
+   * @return {Promise<Object>|Promise<Error>}  Server response as Object
    */
   unlink(name, redirectUri) {
     const unlinkUrl = this.config.joinBase(this.config.unlinkUrl) + name;

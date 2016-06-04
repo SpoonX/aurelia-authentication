@@ -9,8 +9,8 @@ export class AuthenticatedFilterValueConverter {
 
   /**
    * route toView predictator on route.config.auth === (parameter || authService.isAuthenticated())
-   * @param  {RouteConfig}  routes            the routes array to convert
-   * @param  {[Boolean]}    [isAuthenticated] optional isAuthenticated value. default: this.authService.authenticated
+   * @type  {RouteConfig}  routes            the routes array to convert
+   * @type  {[Boolean]}    [isAuthenticated] optional isAuthenticated value. default: this.authService.authenticated
    * @return {Boolean}      show/hide element
    */
   toView(routes, isAuthenticated = this.authService.authenticated) {

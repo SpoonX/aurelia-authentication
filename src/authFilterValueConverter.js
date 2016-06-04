@@ -1,8 +1,8 @@
 export class AuthFilterValueConverter {
   /**
    * route toView predictator on route.config.auth === isAuthenticated
-   * @param  {RouteConfig}  routes            the routes array to convert
-   * @param  {Boolean}      isAuthenticated   authentication status
+   * @type  {RouteConfig}  routes            the routes array to convert
+   * @type  {Boolean}      isAuthenticated   authentication status
    * @return {Boolean}      show/hide element
    */
   toView(routes, isAuthenticated) {

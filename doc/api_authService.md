@@ -78,7 +78,7 @@ this.authService.clearTimeout();
 
 ### .timeout()
 
-The timeout function used for setTimeout. Requests new access token if refresh tokens are used or set .authenticated = false
+The timeout function used for setTimeout. Requests new access token if refresh tokens are used or calls .logout()
 
 #### Example
 

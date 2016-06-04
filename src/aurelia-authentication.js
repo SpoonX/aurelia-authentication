@@ -9,7 +9,6 @@ import {FetchConfig} from './fetchClientConfig';
 import * as LogManager from 'aurelia-logging';
 // import to ensure value-converters get bundled
 import './authFilterValueConverter';
-import './authenticatedValueConverter';
 
 /**
  * Configure the plugin.

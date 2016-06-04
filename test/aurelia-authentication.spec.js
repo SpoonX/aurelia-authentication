@@ -60,6 +60,7 @@ describe('aurelia-authentication', function() {
       }, noop);
 
       const expected = ['./authFilterValueConverter',
+                      './authenticatedFilterValueConverter',
                       './authenticatedValueConverter'];
 
       expect(globalResources.toString()).toEqual(expected.toString());

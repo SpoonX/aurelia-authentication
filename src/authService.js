@@ -42,6 +42,9 @@ export class AuthService {
       this.setResponseObject(fakeOldResponse);
       authentication.storage.remove(oldStorageKey);
     }
+
+    // initialize status by resetting if existing stored responseObject
+    this.setResponseObject(this.authentication.getResponseObject());
   }
 
   /**

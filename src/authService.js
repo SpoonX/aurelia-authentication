@@ -29,11 +29,11 @@ export class AuthService {
   authenticated  = false;
 
   /**
-   * The currently set timeout id
+   * The currently set timeoutID
    *
    * @param  {Number}
    */
-  timeout = 0;
+  timeoutID = 0;
 
   /**
    *  Create an AuthService instance
@@ -85,7 +85,7 @@ export class AuthService {
   setTimeout(ttl) {
     this.clearTimeout();
 
-    this.timeout = PLATFORM.global.setTimeout(() => {
+    this.timeoutID = PLATFORM.global.setTimeout(() => {
       if (this.config.autoUpdateToken
         && this.authentication.getAccessToken()
         && this.authentication.getRefreshToken()) {
@@ -100,10 +100,10 @@ export class AuthService {
    * Clears the login timeout
    */
   clearTimeout() {
-    if (this.timeout) {
-      PLATFORM.global.clearTimeout(this.timeout);
+    if (this.timeoutID) {
+      PLATFORM.global.clearTimeout(this.timeoutID);
     }
-    this.timeout = 0;
+    this.timeoutID = 0;
   }
 
   /**

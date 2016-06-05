@@ -354,6 +354,10 @@ export class AuthService {
 
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
+      if (typeof this.onLogout === 'function') {
+        this.onLogout(response);
+      }
+
       resolve(response);
     });
 

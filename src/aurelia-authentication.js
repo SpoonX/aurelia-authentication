@@ -13,8 +13,8 @@ import './authFilterValueConverter';
 /**
  * Configure the plugin.
  *
- * @type {{globalResources: Function, container: {Container}}} aurelia
- * @type {{}|Function}                                         config
+ * @param {{globalResources: Function, container: {Container}}} aurelia
+ * @param {{}|Function}                                         config
  */
 function configure(aurelia, config) {
   // ie9 polyfill

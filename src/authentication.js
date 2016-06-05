@@ -206,8 +206,8 @@ export class Authentication {
   /**
    * Authenticate with third-party
    *
-   * @type {String}    name of the provider
-   * @type {[{}]}      [userData]
+   * @param {String}    name of the provider
+   * @param {[{}]}      [userData]
    *
    * @return {Promise<response>}
    */

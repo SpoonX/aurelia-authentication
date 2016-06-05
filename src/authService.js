@@ -10,29 +10,29 @@ export class AuthService {
   /**
    * The Authentication instance that handles the token
    *
-   * @type  {Authentication}
+   * @param  {Authentication}
    */
   authentication;
 
   /**
    * The Config instance that contains the current configuration setting
    *
-   * @type  {Config}
+   * @param  {Config}
    */
   config;
 
   /**
    * The current login status
    *
-   * @type  {Boolean}
+   * @param  {Boolean}
    */
   authenticated  = false;
 
   /**
    *  Create an AuthService instance
    *
-   * @type  {Authentication} authentication The Authentication instance to be used
-   * @type  {Config}         config         The Config instance to be used
+   * @param  {Authentication} authentication The Authentication instance to be used
+   * @param  {Config}         config         The Config instance to be used
    */
   constructor(authentication, config) {
     this.authentication = authentication;
@@ -73,7 +73,7 @@ export class AuthService {
   /**
    * Sets the login timeout
    *
-   * @type  {Number} ttl  Timeout time in ms
+   * @param  {Number} ttl  Timeout time in ms
    */
   setTimeout(ttl) {
     PLATFORM.global.setTimeout(this.timeout, ttl);
@@ -104,7 +104,7 @@ export class AuthService {
   /**
    * Stores and analyses the servers responseObject. Sets login status and timeout
    *
-   * @type {Object} response The servers response as GOJO
+   * @param {Object} response The servers response as GOJO
    */
   setResponseObject(response) {
     this.clearTimeout();
@@ -120,7 +120,7 @@ export class AuthService {
   /**
    * Get current user profile from server
    *
-   * @type {[{}|number|string]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
+   * @param {[{}|number|string]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
    *
    * @return {Promise<response>}
    */
@@ -134,8 +134,8 @@ export class AuthService {
   /**
    * Send current user profile update to server
 
-   * @type {any}                 Request body with data.
-   * @type {[{}|Number|String]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
+   * @param {any}                 Request body with data.
+   * @param {[{}|Number|String]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
    *
    * @return {Promise<response>}
    */
@@ -264,11 +264,11 @@ export class AuthService {
   /**
    * Signup locally. Login and redirect depending on config
    *
-   * @type {String|{}}   displayNameOrCredentials displayName | object with signup data.
-   * @type {[String]|{}} emailOrOptions           [email | options for post request]
-   * @type {[String]}    passwordOrRedirectUri    [password | optional redirectUri overwrite]
-   * @type {[{}]}        options                  [options]
-   * @type {[String]}    redirectUri              [optional redirectUri overwrite]
+   * @param {String|{}}   displayNameOrCredentials displayName | object with signup data.
+   * @param {[String]|{}} emailOrOptions           [email | options for post request]
+   * @param {[String]}    passwordOrRedirectUri    [password | optional redirectUri overwrite]
+   * @param {[{}]}        options                  [options]
+   * @param {[String]}    redirectUri              [optional redirectUri overwrite]
    *
    * @return {Promise<Object>|Promise<Error>}     Server response as Object
    */
@@ -300,10 +300,10 @@ export class AuthService {
   /**
    * login locally. Redirect depending on config
    *
-   * @type {[String]|{}} emailOrCredentials      email | object with signup data.
-   * @type {[String]}    [passwordOrOptions]     [password | options for post request]
-   * @type {[{}]}        [optionsOrRedirectUri]  [options | redirectUri overwrite]]
-   * @type {[String]}    [redirectUri]           [optional redirectUri overwrite]
+   * @param {[String]|{}} emailOrCredentials      email | object with signup data.
+   * @param {[String]}    [passwordOrOptions]     [password | options for post request]
+   * @param {[{}]}        [optionsOrRedirectUri]  [options | redirectUri overwrite]]
+   * @param {[String]}    [redirectUri]           [optional redirectUri overwrite]
    *
    * @return {Promise<Object>|Promise<Error>}    Server response as Object
    */
@@ -339,7 +339,7 @@ export class AuthService {
   /**
    * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
    *
-   * @type {[String]}    [redirectUri]                      [optional redirectUri overwrite]
+   * @param {[String]}    [redirectUri]                      [optional redirectUri overwrite]
    *
    * @return {Promise<>|Promise<Object>|Promise<Error>}     Server response as Object
    */
@@ -360,9 +360,9 @@ export class AuthService {
   /**
    * Authenticate with third-party and redirect to redirectUri (if set) or redirectUri of config
    *
-   * @type {String}    name          Name of the provider
-   * @type {[String]}  [redirectUri] [optional redirectUri overwrite]
-   * @type {[{}]}      [userData]    [optional userData for the local authentication server]
+   * @param {String}    name          Name of the provider
+   * @param {[String]}  [redirectUri] [optional redirectUri overwrite]
+   * @param {[{}]}      [userData]    [optional userData for the local authentication server]
    *
    * @return {Promise<Object>|Promise<Error>}     Server response as Object
    */
@@ -380,7 +380,7 @@ export class AuthService {
   /**
    * Unlink third-party
    *
-   * @type {String}      name                  Name of the provider
+   * @param {String}      name                  Name of the provider
    *
    * @return {Promise<Object>|Promise<Error>}  Server response as Object
    */

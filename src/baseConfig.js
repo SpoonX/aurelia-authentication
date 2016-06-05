@@ -6,7 +6,7 @@ import * as LogManager from 'aurelia-logging';
 export class BaseConfig {
   /**
    * Prepends baseUrl to a given url
-   * @type  {String} url The relative url to append
+   * @param  {String} url The relative url to append
    * @return {String}     joined baseUrl and url
    */
   joinBase(url) {
@@ -15,7 +15,7 @@ export class BaseConfig {
 
   /**
    * Merge current settings with incomming settings
-   * @type  {Object} incomming Settings object to be merged into the current configuration
+   * @param  {Object} incomming Settings object to be merged into the current configuration
    * @return {Config}           this
    */
   configure(incomming) {

@@ -34,6 +34,14 @@ import {AuthService} from 'aurelia-authentication';
 
 ----------
 
+### .timeoutID
+
+| Type      | Description                              |
+| --------- | ---------------------------------------- |
+| timeoutID | Id of the currently set login timeout id |
+
+----------
+
 ### .authenticated
 
 | Type    | Description                                      |
@@ -67,18 +75,6 @@ this.authService.setTimeout(10000);
 ### .clearTimeout()
 
 Clears the login timeout. CAUTION: .authenticated and isAuthenticated() might get different results when called manually.
-
-#### Example
-
-```js
-this.authService.clearTimeout();
-```
-
-----------
-
-### .timeout()
-
-The timeout function used for setTimeout. Requests new access token if refresh tokens are used or calls .logout()
 
 #### Example
 

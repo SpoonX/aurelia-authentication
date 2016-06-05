@@ -6,7 +6,7 @@ Set your custom configuration. You can find all options and the default values i
 
 ```js
 /* authConfig.js */
-let baseConfig = {
+export default {
     endpoint: 'auth',             // use 'auth' endpoint for the auth server
     configureEndpoints: ['auth']  // add Authorization header to 'auth' endpoint
     facebook: {
@@ -29,8 +29,8 @@ aurelia.use
     config.registerEndpoint('auth');
   })
   /* configure aurelia-authentication */
-  .plugin('aurelia-authentication', baseConfig => {
-      baseConfig.configure(authConfig);
+  .plugin('aurelia-authentication', config => {
+      config.configure(authConfig);
   });
 ```
 
@@ -38,37 +38,38 @@ aurelia.use
 
 ```js
 import {AuthService} from 'aurelia-authentication';
-import {inject} from 'aurelia-framework';
+import {inject, computedFrom} from 'aurelia-framework';
 
 @inject(AuthService)
 export class Login {
     constructor(authService) {
         this.authService   = authService;
-        this.authenticated = false;
         this.providers     = [];
     };
 
+    // make a getter to get the authentication status.
+    // use computedFrom to avoid dirty checking
+    @computedFrom('authService.authenticated')
+    get authenticated() {
+      return this.authService.authenticated;
+    }
+
     // use authService.login(credentialsObject) to login to your auth server
-    login(credentialsObject) {
-      return this.authService.login(credentialsObject)
-        .then(response => {
-            this.authenticated = this.authService.isAuthenticated();
-        });
+    login(username, password) {
+      return this.authService.login({username, password});
     };
 
     // use authService.logout to delete stored tokens
+    // if you are using JWTs, authService.logout() will be called automatically,
+    // when the token expires
     logout() {
-      return this.authService.logout()
-        .then(() => {
-          this.authenticated = this.authService.isAuthenticated();
-        });
+      return this.authService.logout();
     }
 
     // use authenticate(providerName) to get third-party authentication
     authenticate(name) {
       return this.authService.authenticate(name)
         .then(response => {
-          this.authenticated  = this.authService.isAuthenticated();
           this.provider[name] = true;
         });
     }

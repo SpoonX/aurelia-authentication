@@ -28,7 +28,7 @@ Aurelia-authentication uses [aurelia-api](https://github.com/SpoonX/aurelia-api)
 Here is a sample of a close to minimal custom setting:
 
 ```js
-export default config = {
+export default {
     endpoint: 'auth',
     configureEndpoints: ['auth', 'protected-api']
     loginUrl: 'login',  
@@ -95,20 +95,28 @@ The login view model will speak directly with the aurelia-authentication service
 
 ```js
 import {AuthService} from 'aurelia-authentication';
-import {inject} from 'aurelia-framework';
+import {inject, computedFrom} from 'aurelia-framework';
 @inject(AuthService)
 
 export class Login {
-    constructor(auth) {
-        this.auth = auth;
+    constructor(authService) {
+        this.authService = authService;
     };
 
     heading = 'Login';
 
     email    = '';
     password = '';
+
+    // make a getter to get the authentication status.
+    // use computedFrom to avoid dirty checking
+    @computedFrom('authService.authenticated')
+    get authenticated() {
+      return this.authService.authenticated;
+    }
+
     login() {
-        return this.auth.login(this.email, this.password)
+        return this.authService.login(this.email, this.password)
         .then(response => {
             console.log("success logged " + response);
         })
@@ -118,7 +126,7 @@ export class Login {
     };
 
     authenticate(name) {
-        return this.auth.authenticate(name)
+        return this.authService.authenticate(name)
         .then(response => {
             console.log("auth response " + response);
         });
@@ -144,16 +152,16 @@ The logout and profile links are only shown when the user is authenticated, wher
 ```html
 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
     <ul class="nav navbar-nav">
-        <li repeat.for="row of router.navigation | authFilter: isAuthenticated" class="${row.isActive ? 'active' : ''}">
+        <li repeat.for="row of router.navigation | authFilter: authenticated" class="${row.isActive ? 'active' : ''}">
             <a data-toggle="collapse" data-target="#bs-example-navbar-collapse-1.in" href.bind="row.href">${row.title}</a>
         </li>
     </ul>
 
-    <ul if.bind="!isAuthenticated" class="nav navbar-nav navbar-right">
+    <ul if.bind="!authenticated" class="nav navbar-nav navbar-right">
         <li><a href="/#/login">Login</a></li>
         <li><a href="/#/signup">Sign up</a></li>
     </ul>
-    <ul if.bind="isAuthenticated" class="nav navbar-nav navbar-right">
+    <ul if.bind="authenticated" class="nav navbar-nav navbar-right">
         <li><a href="/#/profile">Profile</a></li>
         <li><a href="/#/logout">Logout</a></li>
     </ul>
@@ -166,9 +174,9 @@ The logout and profile links are only shown when the user is authenticated, wher
 </div>
 ```
 
-Menu items visibility can also be linked with the authFilter to the isAuthenticated value.
+Menu items visibility can also be linked with the authFilter to the `authenticated` value.
 
-In the router config function, you can specify an auth property in the routing map indicating whether or not the user needs to be authenticated in order to access the route:
+In the router config function, you can specify an `auth` property in the routing map indicating whether or not the user needs to be authenticated in order to access the route:
 
 ```js
 import {AuthenticateStep} from 'aurelia-authentication';
@@ -177,7 +185,7 @@ export class App {
     configureRouter(config, router) {
         config.title = 'Aurelia';
 
-        config.addPipelineStep('authorize', AuthenticateStep); // Add a route filter to the authorize extensibility point.
+        config.addPipelineStep('authenticate', AuthenticateStep); // Add a route filter to the authenticate extensibility point.
 
         config.map([
             { route: ['','welcome'],  moduleId: './welcome',  nav: true, title: 'Welcome' },

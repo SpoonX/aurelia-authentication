@@ -29,6 +29,13 @@ export class AuthService {
   authenticated  = false;
 
   /**
+   * The currently set timeout id
+   *
+   * @param  {Number}
+   */
+  timeout = 0;
+
+  /**
    *  Create an AuthService instance
    *
    * @param  {Authentication} authentication The Authentication instance to be used
@@ -76,30 +83,28 @@ export class AuthService {
    * @param  {Number} ttl  Timeout time in ms
    */
   setTimeout(ttl) {
-    PLATFORM.global.setTimeout(this.timeout, ttl);
+    this.clearTimeout();
+
+    this.timeout = PLATFORM.global.setTimeout(() => {
+      if (this.config.autoUpdateToken
+        && this.authentication.getAccessToken()
+        && this.authentication.getRefreshToken()) {
+        this.updateToken();
+      } else {
+        this.logout();
+      }
+    }, ttl);
   }
 
   /**
    * Clears the login timeout
    */
   clearTimeout() {
-    PLATFORM.global.clearTimeout(this.timeout);
-  }
-
-  /**
-   * Clear timout and refresh token or logout
-   */
-  timeout = () => {
-    this.clearTimeout();
-
-    if (this.config.autoUpdateToken
-      && this.authentication.getAccessToken()
-      && this.authentication.getRefreshToken()) {
-      this.updateToken();
-    } else {
-      this.logout();
+    if (this.timeout) {
+      PLATFORM.global.clearTimeout(this.timeout);
     }
-  };
+    this.timeout = 0;
+  }
 
   /**
    * Stores and analyses the servers responseObject. Sets login status and timeout

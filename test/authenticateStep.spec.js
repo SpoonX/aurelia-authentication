@@ -26,6 +26,13 @@ describe('AuthenticateStep', () => {
     const authenticateStep = new Container().get(AuthenticateStep);
     let loginRoute = authenticateStep.authService.config.loginRoute;
 
+    beforeEach(() => {
+      authenticateStep.authService.authenticated = false;
+    });
+    afterEach(() => {
+      authenticateStep.authService.authenticated = false;
+    });
+
     it('should not redirect when not authenticated and no route requires it', () => {
       let routingContext = {
         getAllInstructions: () => routes.authenticateNone

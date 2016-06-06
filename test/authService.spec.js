@@ -3,7 +3,6 @@ import {Config, Rest} from 'aurelia-api';
 
 import {configure} from '../src/aurelia-authentication';
 import {AuthService} from '../src/aurelia-authentication';
-import {BaseConfig} from '../src/baseConfig';
 import {Authentication} from '../src/authentication';
 
 const tokenFuture = {
@@ -223,7 +222,7 @@ describe('AuthService', () => {
     let authService = container.get(AuthService);
 
     it('Should set instant timeout', done => {
-      let timeoutID = authService.timeoutID
+      let timeoutID = authService.timeoutID;
       authService.setTimeout(0);
 
       expect(authService.timeoutID).not.toBe(timeoutID);
@@ -236,7 +235,7 @@ describe('AuthService', () => {
     });
 
     it('Should set longer timeout', done => {
-      let timeoutID = authService.timeoutID
+      let timeoutID = authService.timeoutID;
       authService.setTimeout(10000);
 
       expect(authService.timeoutID).not.toBe(timeoutID);
@@ -271,7 +270,7 @@ describe('AuthService', () => {
     });
 
     it('Should set with jwt and not timeout', done => {
-      spyOn(authService,'getTtl').and.returnValue(1)
+      spyOn(authService, 'getTtl').and.returnValue(1);
       authService.setResponseObject({access_token: tokenFuture.jwt});
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);
@@ -286,7 +285,7 @@ describe('AuthService', () => {
     });
 
     it('Should set with jwt and timeout', done => {
-      spyOn(authService,'getTtl').and.returnValue(0)
+      spyOn(authService, 'getTtl').and.returnValue(0);
       authService.setResponseObject({access_token: tokenFuture.jwt});
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);

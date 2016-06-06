@@ -222,24 +222,43 @@ describe('AuthService', () => {
     const container = new Container();
     let authService = container.get(AuthService);
 
-    it('Should queue timeout', done => {
-      authService.authenticated = true;
+    it('Should set instant timeout', done => {
+      let timeoutID = authService.timeoutID
       authService.setTimeout(0);
 
-      expect(authService.authenticated).toBe(true);
+      expect(authService.timeoutID).not.toBe(timeoutID);
 
-      setTimeout(done, 0);
+      setTimeout(done, 1);
     });
 
     it('Should have timed out', () => {
-      expect(authService.authenticated).toBe(false);
+      expect(authService.timeoutID).toBe(0);
+    });
+
+    it('Should set longer timeout', done => {
+      let timeoutID = authService.timeoutID
+      authService.setTimeout(10000);
+
+      expect(authService.timeoutID).not.toBe(timeoutID);
+
+      setTimeout(done, 10);
+    });
+
+    it('Should not have timeeout', () => {
+      expect(authService.timeoutID).not.toBe(0);
+    });
+
+    it('Should clear timeout', () => {
+      authService.clearTimeout();
+      expect(authService.timeoutID).toBe(0);
     });
   });
 
 
   describe('.setResponseObject()', () => {
-    const container    = new Container();
-    let authService    = container.get(AuthService);
+    const container = new Container();
+    let authService = container.get(AuthService);
+
     authService.getTtl = () => 0;
 
     it('Should set with object', () => {
@@ -251,7 +270,23 @@ describe('AuthService', () => {
       authService.setResponseObject(null);
     });
 
+    it('Should set with jwt and not timeout', done => {
+      spyOn(authService,'getTtl').and.returnValue(1)
+      authService.setResponseObject({access_token: tokenFuture.jwt});
+
+      expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);
+      expect(authService.authenticated).toBe(true);
+
+      setTimeout(done, 1);
+    });
+
+    it('Should have timed out', done => {
+      expect(authService.authenticated).toBe(true);
+      authService.logout().then(done);
+    });
+
     it('Should set with jwt and timeout', done => {
+      spyOn(authService,'getTtl').and.returnValue(0)
       authService.setResponseObject({access_token: tokenFuture.jwt});
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);

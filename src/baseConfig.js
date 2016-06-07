@@ -336,6 +336,22 @@ export class BaseConfig {
   get tokenPrefix() {
     return this._tokenPrefix || 'aurelia';
   }
+
+  get current() {
+    LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
+    return this;
+  }
+  set current(_) {
+    throw new Error('Setter BaseConfig.current is obsolete. Use BaseConfig directly instead.');
+  }
+
+  get _current() {
+    LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
+    return this;
+  }
+  set _current(_) {
+    throw new Error('Setter BaseConfig._current is obsolete. Use BaseConfig directly instead.');
+  }
 }
 
 function randomState() {

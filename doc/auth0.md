@@ -21,8 +21,6 @@ import {Cookie} from 'aurelia-cookie';
   login() {
     return this.authService.authenticate('auth0')
       .then(response => {
-        this.authenticated = this.authService.isAuthenticated();
-
         // you can set a cookie for cookie based authentication
         let jwtExp = this.authService.getExp();
         let expiryDate = new Date(0);
@@ -33,4 +31,11 @@ import {Cookie} from 'aurelia-cookie';
         });
       });
   };
+
+  logout() {
+    return this.authService.logout()
+      .then(() => {
+        Cookie.delete('cookie-bearer');
+      });
+  }
 ```

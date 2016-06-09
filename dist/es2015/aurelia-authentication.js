@@ -99,7 +99,7 @@ export let Popup = class Popup {
         let errorData;
 
         try {
-          if (this.popupWindow.location.host === DOM.location.host && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
+          if (this.popupWindow.location.host === PLATFORM.global.document.location.host && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
             const qs = parseUrl(this.popupWindow.location);
 
             if (qs.error) {
@@ -159,11 +159,12 @@ export let BaseConfig = class BaseConfig {
     this.client = null;
     this.endpoint = null;
     this.configureEndpoints = null;
-    this.loginRedirect = '#/customer';
+    this.loginRedirect = '#/';
     this.logoutRedirect = '#/';
     this.loginRoute = '/login';
     this.loginOnSignup = true;
     this.signupRedirect = '#/login';
+    this.expiredRedirect = 0;
     this.baseUrl = '';
     this.loginUrl = '/auth/login';
     this.logoutUrl = null;
@@ -190,6 +191,7 @@ export let BaseConfig = class BaseConfig {
     this.platform = 'browser';
     this.storage = 'localStorage';
     this.storageKey = 'aurelia_authentication';
+    this.globalValueConverters = ['authFilterValueConverter', 'authenticatedFilterValueConverter', 'authenticatedValueConverter'];
     this.providers = {
       facebook: {
         name: 'facebook',
@@ -393,6 +395,22 @@ export let BaseConfig = class BaseConfig {
   }
   get tokenPrefix() {
     return this._tokenPrefix || 'aurelia';
+  }
+
+  get current() {
+    LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
+    return this;
+  }
+  set current(_) {
+    throw new Error('Setter BaseConfig.current is obsolete. Use BaseConfig directly instead.');
+  }
+
+  get _current() {
+    LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
+    return this;
+  }
+  set _current(_) {
+    throw new Error('Setter BaseConfig._current is obsolete. Use BaseConfig directly instead.');
   }
 };
 
@@ -838,19 +856,9 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
 }, (_applyDecoratedDescriptor(_class7.prototype, 'getLoginRoute', [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRoute'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginRedirect', [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRedirect'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginUrl', [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getSignupUrl', [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, 'getSignupUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getProfileUrl', [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, 'getProfileUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getToken', [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, 'getToken'), _class7.prototype)), _class7)) || _class6);
 
 export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec12(_class8 = (_class9 = class AuthService {
-
   constructor(authentication, config) {
     this.authenticated = false;
-
-    this.timeout = () => {
-      this.clearTimeout();
-
-      if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-        this.updateToken();
-      } else {
-        this.authenticated = false;
-      }
-    };
+    this.timeoutID = 0;
 
     this.authentication = authentication;
     this.config = config;
@@ -865,6 +873,8 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
       this.setResponseObject(fakeOldResponse);
       authentication.storage.remove(oldStorageKey);
     }
+
+    this.setResponseObject(this.authentication.getResponseObject());
   }
 
   get client() {
@@ -877,11 +887,22 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
   }
 
   setTimeout(ttl) {
-    PLATFORM.global.setTimeout(this.timeout, ttl);
+    this.clearTimeout();
+
+    this.timeoutID = PLATFORM.global.setTimeout(() => {
+      if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+        this.updateToken();
+      } else {
+        this.logout(this.config.expiredRedirect);
+      }
+    }, ttl);
   }
 
   clearTimeout() {
-    PLATFORM.global.clearTimeout(this.timeout);
+    if (this.timeoutID) {
+      PLATFORM.global.clearTimeout(this.timeoutID);
+    }
+    this.timeoutID = 0;
   }
 
   setResponseObject(response) {
@@ -895,21 +916,21 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
     }
   }
 
-  getMe(criteria) {
-    if (typeof criteria === 'string' || typeof criteria === 'number') {
-      criteria = { id: criteria };
+  getMe(criteriaOrId) {
+    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+      criteriaOrId = { id: criteriaOrId };
     }
-    return this.client.find(this.config.joinBase(this.config.profileUrl), criteria);
+    return this.client.find(this.config.joinBase(this.config.profileUrl), criteriaOrId);
   }
 
-  updateMe(body, criteria) {
-    if (typeof criteria === 'string' || typeof criteria === 'number') {
-      criteria = { id: criteria };
+  updateMe(body, criteriaOrId) {
+    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+      criteriaOrId = { id: criteriaOrId };
     }
     if (this.config.profileMethod === 'put') {
-      return this.client.update(this.config.joinBase(this.config.profileUrl), criteria, body);
+      return this.client.update(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
     }
-    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteria, body);
+    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
   }
 
   getAccessToken() {
@@ -975,7 +996,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
     return this.authentication.toUpdateTokenCallstack();
   }
 
-  signup(displayName, email, password, options, redirectUri) {
+  signup(displayNameOrCredentials, emailOrOptions, passwordOrRedirectUri, options, redirectUri) {
     let content;
 
     if (typeof arguments[0] === 'object') {
@@ -984,9 +1005,9 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
       redirectUri = arguments[2];
     } else {
       content = {
-        'displayName': displayName,
-        'email': email,
-        'password': password
+        'displayName': displayNameOrCredentials,
+        'email': emailOrOptions,
+        'password': passwordOrRedirectUri
       };
     }
     return this.client.post(this.config.joinBase(this.config.signupUrl), content, options).then(response => {
@@ -999,26 +1020,26 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
     });
   }
 
-  login(email, password, options, redirectUri) {
+  login(emailOrCredentials, passwordOrOptions, optionsOrRedirectUri, redirectUri) {
     let content;
 
     if (typeof arguments[0] === 'object') {
       content = arguments[0];
-      options = arguments[1];
+      optionsOrRedirectUri = arguments[1];
       redirectUri = arguments[2];
     } else {
       content = {
-        'email': email,
-        'password': password
+        'email': emailOrCredentials,
+        'password': passwordOrOptions
       };
-      options = options;
+      optionsOrRedirectUri = optionsOrRedirectUri;
     }
 
     if (this.config.clientId) {
       content.client_id = this.config.clientId;
     }
 
-    return this.client.post(this.config.joinBase(this.config.loginUrl), content, options).then(response => {
+    return this.client.post(this.config.joinBase(this.config.loginUrl), content, optionsOrRedirectUri).then(response => {
       this.setResponseObject(response);
 
       this.authentication.redirect(redirectUri, this.config.loginRedirect);
@@ -1030,9 +1051,12 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = 
   logout(redirectUri) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
-      this.clearTimeout();
 
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
+
+      if (typeof this.onLogout === 'function') {
+        this.onLogout(response);
+      }
 
       resolve(response);
     });
@@ -1069,7 +1093,7 @@ export let AuthenticateStep = (_dec14 = inject(AuthService), _dec14(_class11 = c
     const isLoggedIn = this.authService.authenticated;
     const loginRoute = this.authService.config.loginRoute;
 
-    if (routingContext.getAllInstructions().some(route => route.config.settings.authenticate === true)) {
+    if (routingContext.getAllInstructions().some(route => route.config.auth === true)) {
       if (!isLoggedIn) {
         return next.cancel(new Redirect(loginRoute));
       }
@@ -1083,7 +1107,7 @@ export let AuthenticateStep = (_dec14 = inject(AuthService), _dec14(_class11 = c
 
 export let AuthorizeStep = (_dec15 = inject(AuthService), _dec15(_class12 = class AuthorizeStep {
   constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead and use {settings: {authenticate: true}} in your route configuration.');
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
 
     this.authService = authService;
   }
@@ -1187,14 +1211,12 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
   }
 }) || _class13);
 
-import './authFilter';
+import './authFilterValueConverter';
 
 function configure(aurelia, config) {
   if (!PLATFORM.location.origin) {
     PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
   }
-
-  aurelia.globalResources('./authFilter');
 
   const baseConfig = aurelia.container.get(BaseConfig);
 
@@ -1204,6 +1226,10 @@ function configure(aurelia, config) {
     baseConfig.configure(config);
   }
 
+  for (let converter of baseConfig.globalValueConverters) {
+    aurelia.globalResources(`./${ converter }`);
+    LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${ converter }`);
+  }
   const fetchConfig = aurelia.container.get(FetchConfig);
   const clientConfig = aurelia.container.get(Config);
 

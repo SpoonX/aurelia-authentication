@@ -68,7 +68,7 @@ export class Popup {
         let errorData;
 
         try {
-          if (this.popupWindow.location.host ===  DOM.location.host
+          if (this.popupWindow.location.host ===  PLATFORM.global.document.location.host
             && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
             const qs = parseUrl(this.popupWindow.location);
 
@@ -170,7 +170,7 @@ export class BaseConfig {
   // ===================
 
   // The SPA url to which the user is redirected after a successful login
-  loginRedirect = '#/customer';
+  loginRedirect = '#/';
   // The SPA url to which the user is redirected after a successful logout
   logoutRedirect = '#/';
   // The SPA route used when an unauthenticated user tries to access an SPA page that requires authentication
@@ -179,6 +179,8 @@ export class BaseConfig {
   loginOnSignup = true;
   // If loginOnSignup == false: The SPA url to which the user is redirected after a successful signup (else loginRedirect is used)
   signupRedirect = '#/login';
+  // redirect  when token expires. 0 = don't redirect (default), 1 = use logoutRedirect, string = redirect there
+  expiredRedirect = 0;
 
 
   // API related options
@@ -263,7 +265,10 @@ export class BaseConfig {
   // The key used for storing the authentication response locally
   storageKey = 'aurelia_authentication';
 
-  //OAuth provider specific related configuration
+  // List of value-converters to make global
+  globalValueConverters = ['authFilterValueConverter', 'authenticatedFilterValueConverter', 'authenticatedValueConverter'];
+
+//OAuth provider specific related configuration
   // ============================================
   providers = {
     facebook: {
@@ -453,6 +458,22 @@ export class BaseConfig {
   }
   get tokenPrefix() {
     return this._tokenPrefix || 'aurelia';
+  }
+
+  get current() {
+    LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
+    return this;
+  }
+  set current(_) {
+    throw new Error('Setter BaseConfig.current is obsolete. Use BaseConfig directly instead.');
+  }
+
+  get _current() {
+    LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
+    return this;
+  }
+  set _current(_) {
+    throw new Error('Setter BaseConfig._current is obsolete. Use BaseConfig directly instead.');
   }
 }
 
@@ -954,22 +975,38 @@ export class Authentication {
 export class AuthService {
   /**
    * The Authentication instance that handles the token
-   * @type {Authentication}
+   *
+   * @param  {Authentication}
    */
   authentication;
 
   /**
    * The Config instance that contains the current configuration setting
-   * @type {Config}
+   *
+   * @param  {Config}
    */
   config;
 
   /**
    * The current login status
-   * @type {Boolean}
+   *
+   * @param  {Boolean}
    */
   authenticated  = false;
 
+  /**
+   * The currently set timeoutID
+   *
+   * @param  {Number}
+   */
+  timeoutID = 0;
+
+  /**
+   *  Create an AuthService instance
+   *
+   * @param  {Authentication} authentication The Authentication instance to be used
+   * @param  {Config}         config         The Config instance to be used
+   */
   constructor(authentication, config) {
     this.authentication = authentication;
     this.config         = config;
@@ -987,6 +1024,9 @@ export class AuthService {
       this.setResponseObject(fakeOldResponse);
       authentication.storage.remove(oldStorageKey);
     }
+
+    // initialize status by resetting if existing stored responseObject
+    this.setResponseObject(this.authentication.getResponseObject());
   }
 
   /**
@@ -1004,37 +1044,37 @@ export class AuthService {
   }
 
   /**
-   * sets the login timeout
-   * @type {Number} timeout time in ms
+   * Sets the login timeout
+   *
+   * @param  {Number} ttl  Timeout time in ms
    */
   setTimeout(ttl) {
-    PLATFORM.global.setTimeout(this.timeout, ttl);
-  }
-
-  /**
-   * clears the login timeout
-   */
-  clearTimeout() {
-    PLATFORM.global.clearTimeout(this.timeout);
-  }
-
-  /**
-   * refresh or unset authenticated after timeout
-   */
-  timeout = () => {
     this.clearTimeout();
 
-    if (this.config.autoUpdateToken
-      && this.authentication.getAccessToken()
-      && this.authentication.getRefreshToken()) {
-      this.updateToken();
-    } else {
-      this.authenticated = false;
-    }
-  };
+    this.timeoutID = PLATFORM.global.setTimeout(() => {
+      if (this.config.autoUpdateToken
+        && this.authentication.getAccessToken()
+        && this.authentication.getRefreshToken()) {
+        this.updateToken();
+      } else {
+        this.logout(this.config.expiredRedirect);
+      }
+    }, ttl);
+  }
 
   /**
-   * Stores and analyses the servers responseObject. Sets loging status and timeout
+   * Clears the login timeout
+   */
+  clearTimeout() {
+    if (this.timeoutID) {
+      PLATFORM.global.clearTimeout(this.timeoutID);
+    }
+    this.timeoutID = 0;
+  }
+
+  /**
+   * Stores and analyses the servers responseObject. Sets login status and timeout
+   *
    * @param {Object} response The servers response as GOJO
    */
   setResponseObject(response) {
@@ -1051,39 +1091,39 @@ export class AuthService {
   /**
    * Get current user profile from server
    *
-   * @param {[{}|number|string]}  [criteria object or a Number|String converted to {id:criteria}]
+   * @param {[{}|number|string]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
    *
    * @return {Promise<response>}
    */
-  getMe(criteria) {
-    if (typeof criteria === 'string' || typeof criteria === 'number') {
-      criteria = {id: criteria};
+  getMe(criteriaOrId) {
+    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+      criteriaOrId = {id: criteriaOrId};
     }
-    return this.client.find(this.config.joinBase(this.config.profileUrl), criteria);
+    return this.client.find(this.config.joinBase(this.config.profileUrl), criteriaOrId);
   }
 
   /**
    * Send current user profile update to server
-   *
-   * @param {any}                 request body with data.
-   * @param {[{}|Number|String]}  [criteria object or a Number|String converted to {id:criteria}]
+
+   * @param {any}                 Request body with data.
+   * @param {[{}|Number|String]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
    *
    * @return {Promise<response>}
    */
-  updateMe(body, criteria) {
-    if (typeof criteria === 'string' || typeof criteria === 'number') {
-      criteria = { id: criteria };
+  updateMe(body, criteriaOrId) {
+    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+      criteriaOrId = { id: criteriaOrId };
     }
     if (this.config.profileMethod === 'put') {
-      return this.client.update(this.config.joinBase(this.config.profileUrl), criteria, body);
+      return this.client.update(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
     }
-    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteria, body);
+    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
   }
 
   /**
    * Get accessToken from storage
    *
-   * @returns {String} current accessToken
+   * @returns {String} Current accessToken
    */
   getAccessToken() {
     return this.authentication.getAccessToken();
@@ -1097,7 +1137,7 @@ export class AuthService {
   /**
    * Get refreshToken from storage
    *
-   * @returns {String} current refreshToken
+   * @returns {String} Current refreshToken
    */
   getRefreshToken() {
     return this.authentication.getRefreshToken();
@@ -1106,7 +1146,7 @@ export class AuthService {
  /**
   * Gets authentication status
   *
-  * @returns {Boolean} true: for Non-JWT and unexpired JWT, false: else
+  * @returns {Boolean} For Non-JWT and unexpired JWT: true, else: false
   */
   isAuthenticated() {
     let authenticated = this.authentication.isAuthenticated();
@@ -1124,9 +1164,9 @@ export class AuthService {
   }
 
   /**
-   * Gets ttl in seconds
+   * Gets exp in milliseconds
    *
-   * @returns {Number} ttl for JWT tokens, NaN for all other tokens
+   * @returns {Number} Exp for JWT tokens, NaN for all other tokens
    */
   getExp() {
     return this.authentication.getExp();
@@ -1135,7 +1175,7 @@ export class AuthService {
   /**
    * Gets ttl in seconds
    *
-   * @returns {Number} ttl for JWT tokens, NaN for all other tokens
+   * @returns {Number} Ttl for JWT tokens, NaN for all other tokens
    */
   getTtl() {
     return this.authentication.getTtl();
@@ -1144,7 +1184,7 @@ export class AuthService {
  /**
   * Gets exp from token payload and compares to current time
   *
-  * @returns {Boolean} returns (ttl > 0)? for JWT, undefined other tokens
+  * @returns {Boolean} Returns (ttl > 0)? for JWT, undefined other tokens
   */
   isTokenExpired() {
     return this.authentication.isTokenExpired();
@@ -1153,7 +1193,7 @@ export class AuthService {
   /**
   * Get payload from tokens
   *
-  * @returns {null | String} null: Non-JWT payload, String: JWT token payload
+  * @returns {null | String} Payload for JWT, else null
   */
   getTokenPayload() {
     return this.authentication.getPayload();
@@ -1162,7 +1202,7 @@ export class AuthService {
   /**
    * Request new accesss token
    *
-   * @returns {Promise<Response>} requests new token. can be called multiple times
+   * @returns {Promise<Response>} Requests new token. can be called multiple times
    */
   updateToken() {
     if (!this.authentication.getRefreshToken()) {
@@ -1193,17 +1233,17 @@ export class AuthService {
   }
 
   /**
-   * Signup locally
+   * Signup locally. Login and redirect depending on config
    *
-   * @param {String|{}}   displayName | object with signup data.
-   * @param {[String]|{}} [email | options for post request]
-   * @param {[String]}    [password | redirectUri overwrite]
-   * @param {[{}]}        [options]
-   * @param {[String]}    [redirectUri overwrite]
+   * @param {String|{}}   displayNameOrCredentials displayName | object with signup data.
+   * @param {[String]|{}} emailOrOptions           [email | options for post request]
+   * @param {[String]}    passwordOrRedirectUri    [password | optional redirectUri overwrite]
+   * @param {[{}]}        options                  [options]
+   * @param {[String]}    redirectUri              [optional redirectUri overwrite]
    *
-   * @return {Promise<response>}
+   * @return {Promise<Object>|Promise<Error>}     Server response as Object
    */
-  signup(displayName, email, password, options, redirectUri) {
+  signup(displayNameOrCredentials, emailOrOptions, passwordOrRedirectUri, options, redirectUri) {
     let content;
 
     if (typeof arguments[0] === 'object') {
@@ -1212,9 +1252,9 @@ export class AuthService {
       redirectUri = arguments[2];
     } else {
       content = {
-        'displayName': displayName,
-        'email': email,
-        'password': password
+        'displayName': displayNameOrCredentials,
+        'email': emailOrOptions,
+        'password': passwordOrRedirectUri
       };
     }
     return this.client.post(this.config.joinBase(this.config.signupUrl), content, options)
@@ -1231,33 +1271,33 @@ export class AuthService {
   /**
    * login locally. Redirect depending on config
    *
-   * @param {[String]|{}} email | object with signup data.
-   * @param {[String]}    [password | options for post request]
-   * @param {[{}]}        [options | redirectUri overwrite]]
-   * @param {[String]}    [redirectUri overwrite]
+   * @param {[String]|{}} emailOrCredentials      email | object with signup data.
+   * @param {[String]}    [passwordOrOptions]     [password | options for post request]
+   * @param {[{}]}        [optionsOrRedirectUri]  [options | redirectUri overwrite]]
+   * @param {[String]}    [redirectUri]           [optional redirectUri overwrite]
    *
-   * @return {Promise<response>}
+   * @return {Promise<Object>|Promise<Error>}    Server response as Object
    */
-  login(email, password, options, redirectUri) {
+  login(emailOrCredentials, passwordOrOptions, optionsOrRedirectUri, redirectUri) {
     let content;
 
     if (typeof arguments[0] === 'object') {
-      content = arguments[0];
-      options = arguments[1];
-      redirectUri = arguments[2];
+      content             = arguments[0];
+      optionsOrRedirectUri = arguments[1];
+      redirectUri         = arguments[2];
     } else {
       content = {
-        'email': email,
-        'password': password
+        'email': emailOrCredentials,
+        'password': passwordOrOptions
       };
-      options = options;
+      optionsOrRedirectUri = optionsOrRedirectUri;
     }
 
     if (this.config.clientId) {
       content.client_id = this.config.clientId;
     }
 
-    return this.client.post(this.config.joinBase(this.config.loginUrl), content, options)
+    return this.client.post(this.config.joinBase(this.config.loginUrl), content, optionsOrRedirectUri)
       .then(response => {
         this.setResponseObject(response);
 
@@ -1268,18 +1308,21 @@ export class AuthService {
   }
 
   /**
-   * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first if set in config
+   * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
    *
-   * @param {[String]}  [redirectUri]
+   * @param {[String]}    [redirectUri]                      [optional redirectUri overwrite]
    *
-   * @return {Promise<>|Promise<response>}
+   * @return {Promise<>|Promise<Object>|Promise<Error>}     Server response as Object
    */
   logout(redirectUri) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
-      this.clearTimeout();
 
       this.authentication.redirect(redirectUri, this.config.logoutRedirect);
+
+      if (typeof this.onLogout === 'function') {
+        this.onLogout(response);
+      }
 
       resolve(response);
     });
@@ -1292,11 +1335,11 @@ export class AuthService {
   /**
    * Authenticate with third-party and redirect to redirectUri (if set) or redirectUri of config
    *
-   * @param {String}    name of the provider
-   * @param {[String]}  [redirectUri]
-   * @param {[{}]}      [userData]
+   * @param {String}    name          Name of the provider
+   * @param {[String]}  [redirectUri] [optional redirectUri overwrite]
+   * @param {[{}]}      [userData]    [optional userData for the local authentication server]
    *
-   * @return {Promise<response>}
+   * @return {Promise<Object>|Promise<Error>}     Server response as Object
    */
   authenticate(name, redirectUri, userData = {}) {
     return this.authentication.authenticate(name, userData)
@@ -1312,9 +1355,9 @@ export class AuthService {
   /**
    * Unlink third-party
    *
-   * @param {String}  name of the provider
+   * @param {String}      name                  Name of the provider
    *
-   * @return {Promise<response>}
+   * @return {Promise<Object>|Promise<Error>}  Server response as Object
    */
   unlink(name, redirectUri) {
     const unlinkUrl = this.config.joinBase(this.config.unlinkUrl) + name;
@@ -1337,7 +1380,7 @@ export class AuthenticateStep {
     const isLoggedIn = this.authService.authenticated;
     const loginRoute = this.authService.config.loginRoute;
 
-    if (routingContext.getAllInstructions().some(route => route.config.settings.authenticate === true)) {
+    if (routingContext.getAllInstructions().some(route => route.config.auth === true)) {
       if (!isLoggedIn) {
         return next.cancel(new Redirect(loginRoute));
       }
@@ -1352,7 +1395,7 @@ export class AuthenticateStep {
 @inject(AuthService)
 export class AuthorizeStep {
   constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead and use {settings: {authenticate: true}} in your route configuration.');
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
 
     this.authService = authService;
   }
@@ -1445,7 +1488,7 @@ export class FetchConfig {
   /**
    * Configure client(s) with authorization interceptor
    *
-   * @param {HttpClient|Rest|string[]} (array of) httpClient, rest client or api endpoint names
+   * @param {HttpClient|Rest|string[]} client HttpClient, rest client or api endpoint name, or an array thereof
    *
    * @return {HttpClient[]}
    */
@@ -1477,7 +1520,8 @@ export class FetchConfig {
   }
 }
 
-import './authFilter';
+// import to ensure value-converters get bundled
+import './authFilterValueConverter';
 
 /**
  * Configure the plugin.
@@ -1491,8 +1535,6 @@ function configure(aurelia, config) {
     PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
   }
 
-  aurelia.globalResources('./authFilter');
-
   const baseConfig = aurelia.container.get(BaseConfig);
 
   if (typeof config === 'function') {
@@ -1500,7 +1542,12 @@ function configure(aurelia, config) {
   } else if (typeof config === 'object') {
     baseConfig.configure(config);
   }
+
   // after baseConfig was configured
+  for (let converter of baseConfig.globalValueConverters) {
+    aurelia.globalResources(`./${converter}`);
+    LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${converter}`);
+  }
   const fetchConfig  = aurelia.container.get(FetchConfig);
   const clientConfig = aurelia.container.get(Config);
 

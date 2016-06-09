@@ -1,5 +1,5 @@
-define(["exports"], function (exports) {
-  "use strict";
+define(['exports'], function (exports) {
+  'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
@@ -17,8 +17,8 @@ define(["exports"], function (exports) {
     }
 
     AuthFilterValueConverter.prototype.toView = function toView(routes, isAuthenticated) {
-      return routes.filter(function (r) {
-        return r.config.auth === undefined || r.config.auth === isAuthenticated;
+      return routes.filter(function (route) {
+        return typeof route.config.auth !== 'boolean' || route.config.auth === isAuthenticated;
       });
     };
 

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -12,8 +12,8 @@ var AuthFilterValueConverter = exports.AuthFilterValueConverter = function () {
   }
 
   AuthFilterValueConverter.prototype.toView = function toView(routes, isAuthenticated) {
-    return routes.filter(function (r) {
-      return r.config.auth === undefined || r.config.auth === isAuthenticated;
+    return routes.filter(function (route) {
+      return typeof route.config.auth !== 'boolean' || route.config.auth === isAuthenticated;
     });
   };
 

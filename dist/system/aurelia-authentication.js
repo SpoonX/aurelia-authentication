@@ -1,6 +1,6 @@
 'use strict';
 
-System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia-dependency-injection', 'aurelia-metadata', 'aurelia-router', 'aurelia-fetch-client', 'aurelia-api', './authFilter'], function (_export, _context) {
+System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia-dependency-injection', 'aurelia-metadata', 'aurelia-router', 'aurelia-fetch-client', 'aurelia-api', './authFilterValueConverter'], function (_export, _context) {
   var extend, LogManager, jwtDecode, PLATFORM, DOM, parseQueryString, join, buildQueryString, inject, deprecated, Redirect, HttpClient, Config, Rest, _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _class5, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _class6, _desc, _value, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class11, _dec15, _class12, _dec16, _class13, _typeof, _createClass, Popup, buildPopupWindowOptions, parseUrl, BaseConfig, Storage, Auth0Lock, OAuth1, OAuth2, camelCase, Authentication, AuthService, AuthenticateStep, AuthorizeStep, FetchConfig;
 
   function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
@@ -48,8 +48,6 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
       PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
     }
 
-    aurelia.globalResources('./authFilter');
-
     var baseConfig = aurelia.container.get(BaseConfig);
 
     if (typeof config === 'function') {
@@ -58,6 +56,23 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
       baseConfig.configure(config);
     }
 
+    for (var _iterator = baseConfig.globalValueConverters, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+      var _ref;
+
+      if (_isArray) {
+        if (_i >= _iterator.length) break;
+        _ref = _iterator[_i++];
+      } else {
+        _i = _iterator.next();
+        if (_i.done) break;
+        _ref = _i.value;
+      }
+
+      var converter = _ref;
+
+      aurelia.globalResources('./' + converter);
+      LogManager.getLogger('authentication').info('Add globalResources value-converter: ' + converter);
+    }
     var fetchConfig = aurelia.container.get(FetchConfig);
     var clientConfig = aurelia.container.get(Config);
 
@@ -113,7 +128,7 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
     }, function (_aureliaApi) {
       Config = _aureliaApi.Config;
       Rest = _aureliaApi.Rest;
-    }, function (_authFilter) {}],
+    }, function (_authFilterValueConverter) {}],
     execute: function () {
       _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
         return typeof obj;
@@ -204,7 +219,7 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
               var errorData = void 0;
 
               try {
-                if (_this2.popupWindow.location.host === DOM.location.host && (_this2.popupWindow.location.search || _this2.popupWindow.location.hash)) {
+                if (_this2.popupWindow.location.host === PLATFORM.global.document.location.host && (_this2.popupWindow.location.search || _this2.popupWindow.location.hash)) {
                   var qs = parseUrl(_this2.popupWindow.location);
 
                   if (qs.error) {
@@ -272,11 +287,12 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
           this.client = null;
           this.endpoint = null;
           this.configureEndpoints = null;
-          this.loginRedirect = '#/customer';
+          this.loginRedirect = '#/';
           this.logoutRedirect = '#/';
           this.loginRoute = '/login';
           this.loginOnSignup = true;
           this.signupRedirect = '#/login';
+          this.expiredRedirect = 0;
           this.baseUrl = '';
           this.loginUrl = '/auth/login';
           this.logoutUrl = null;
@@ -303,6 +319,7 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
           this.platform = 'browser';
           this.storage = 'localStorage';
           this.storageKey = 'aurelia_authentication';
+          this.globalValueConverters = ['authFilterValueConverter', 'authenticatedFilterValueConverter', 'authenticatedValueConverter'];
           this.providers = {
             facebook: {
               name: 'facebook',
@@ -457,8 +474,11 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
         _createClass(BaseConfig, [{
           key: 'current',
           get: function get() {
-            LogManager.getLogger('authentication').warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
+            LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
             return this;
+          },
+          set: function set(_) {
+            throw new Error('Setter BaseConfig.current is obsolete. Use BaseConfig directly instead.');
           }
         }, {
           key: 'authToken',
@@ -513,6 +533,15 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
           },
           get: function get() {
             return this._tokenPrefix || 'aurelia';
+          }
+        }, {
+          key: '_current',
+          get: function get() {
+            LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
+            return this;
+          },
+          set: function set(_) {
+            throw new Error('Setter BaseConfig._current is obsolete. Use BaseConfig directly instead.');
           }
         }]);
 
@@ -1013,21 +1042,10 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
 
       _export('AuthService', _export('AuthService', AuthService = (_dec12 = inject(Authentication, BaseConfig), _dec13 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec12(_class8 = (_class9 = function () {
         function AuthService(authentication, config) {
-          var _this8 = this;
-
           _classCallCheck(this, AuthService);
 
           this.authenticated = false;
-
-          this.timeout = function () {
-            _this8.clearTimeout();
-
-            if (_this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
-              _this8.updateToken();
-            } else {
-              _this8.authenticated = false;
-            }
-          };
+          this.timeoutID = 0;
 
           this.authentication = authentication;
           this.config = config;
@@ -1042,14 +1060,29 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
             this.setResponseObject(fakeOldResponse);
             authentication.storage.remove(oldStorageKey);
           }
+
+          this.setResponseObject(this.authentication.getResponseObject());
         }
 
         AuthService.prototype.setTimeout = function setTimeout(ttl) {
-          PLATFORM.global.setTimeout(this.timeout, ttl);
+          var _this8 = this;
+
+          this.clearTimeout();
+
+          this.timeoutID = PLATFORM.global.setTimeout(function () {
+            if (_this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
+              _this8.updateToken();
+            } else {
+              _this8.logout(_this8.config.expiredRedirect);
+            }
+          }, ttl);
         };
 
         AuthService.prototype.clearTimeout = function clearTimeout() {
-          PLATFORM.global.clearTimeout(this.timeout);
+          if (this.timeoutID) {
+            PLATFORM.global.clearTimeout(this.timeoutID);
+          }
+          this.timeoutID = 0;
         };
 
         AuthService.prototype.setResponseObject = function setResponseObject(response) {
@@ -1063,21 +1096,21 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
           }
         };
 
-        AuthService.prototype.getMe = function getMe(criteria) {
-          if (typeof criteria === 'string' || typeof criteria === 'number') {
-            criteria = { id: criteria };
+        AuthService.prototype.getMe = function getMe(criteriaOrId) {
+          if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+            criteriaOrId = { id: criteriaOrId };
           }
-          return this.client.find(this.config.joinBase(this.config.profileUrl), criteria);
+          return this.client.find(this.config.joinBase(this.config.profileUrl), criteriaOrId);
         };
 
-        AuthService.prototype.updateMe = function updateMe(body, criteria) {
-          if (typeof criteria === 'string' || typeof criteria === 'number') {
-            criteria = { id: criteria };
+        AuthService.prototype.updateMe = function updateMe(body, criteriaOrId) {
+          if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+            criteriaOrId = { id: criteriaOrId };
           }
           if (this.config.profileMethod === 'put') {
-            return this.client.update(this.config.joinBase(this.config.profileUrl), criteria, body);
+            return this.client.update(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
           }
-          return this.client.patch(this.config.joinBase(this.config.profileUrl), criteria, body);
+          return this.client.patch(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
         };
 
         AuthService.prototype.getAccessToken = function getAccessToken() {
@@ -1145,7 +1178,7 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
           return this.authentication.toUpdateTokenCallstack();
         };
 
-        AuthService.prototype.signup = function signup(displayName, email, password, options, redirectUri) {
+        AuthService.prototype.signup = function signup(displayNameOrCredentials, emailOrOptions, passwordOrRedirectUri, options, redirectUri) {
           var _this10 = this;
 
           var content = void 0;
@@ -1156,9 +1189,9 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
             redirectUri = arguments[2];
           } else {
             content = {
-              'displayName': displayName,
-              'email': email,
-              'password': password
+              'displayName': displayNameOrCredentials,
+              'email': emailOrOptions,
+              'password': passwordOrRedirectUri
             };
           }
           return this.client.post(this.config.joinBase(this.config.signupUrl), content, options).then(function (response) {
@@ -1171,28 +1204,28 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
           });
         };
 
-        AuthService.prototype.login = function login(email, password, options, redirectUri) {
+        AuthService.prototype.login = function login(emailOrCredentials, passwordOrOptions, optionsOrRedirectUri, redirectUri) {
           var _this11 = this;
 
           var content = void 0;
 
           if (_typeof(arguments[0]) === 'object') {
             content = arguments[0];
-            options = arguments[1];
+            optionsOrRedirectUri = arguments[1];
             redirectUri = arguments[2];
           } else {
             content = {
-              'email': email,
-              'password': password
+              'email': emailOrCredentials,
+              'password': passwordOrOptions
             };
-            options = options;
+            optionsOrRedirectUri = optionsOrRedirectUri;
           }
 
           if (this.config.clientId) {
             content.client_id = this.config.clientId;
           }
 
-          return this.client.post(this.config.joinBase(this.config.loginUrl), content, options).then(function (response) {
+          return this.client.post(this.config.joinBase(this.config.loginUrl), content, optionsOrRedirectUri).then(function (response) {
             _this11.setResponseObject(response);
 
             _this11.authentication.redirect(redirectUri, _this11.config.loginRedirect);
@@ -1207,9 +1240,12 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
           var localLogout = function localLogout(response) {
             return new Promise(function (resolve) {
               _this12.setResponseObject(null);
-              _this12.clearTimeout();
 
               _this12.authentication.redirect(redirectUri, _this12.config.logoutRedirect);
+
+              if (typeof _this12.onLogout === 'function') {
+                _this12.onLogout(response);
+              }
 
               resolve(response);
             });
@@ -1273,7 +1309,7 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
           var loginRoute = this.authService.config.loginRoute;
 
           if (routingContext.getAllInstructions().some(function (route) {
-            return route.config.settings.authenticate === true;
+            return route.config.auth === true;
           })) {
             if (!isLoggedIn) {
               return next.cancel(new Redirect(loginRoute));
@@ -1296,7 +1332,7 @@ System.register(['extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aure
         function AuthorizeStep(authService) {
           _classCallCheck(this, AuthorizeStep);
 
-          LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead and use {settings: {authenticate: true}} in your route configuration.');
+          LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
 
           this.authService = authService;
         }

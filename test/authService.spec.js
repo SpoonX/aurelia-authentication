@@ -271,31 +271,50 @@ describe('AuthService', () => {
 
     it('Should set with jwt and not timeout', done => {
       spyOn(authService, 'getTtl').and.returnValue(1);
+      spyOn(authService.authentication, 'redirect').and.callThrough();
+
       authService.setResponseObject({access_token: tokenFuture.jwt});
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);
       expect(authService.authenticated).toBe(true);
 
-      setTimeout(done, 1);
-    });
-
-    it('Should have timed out', done => {
-      expect(authService.authenticated).toBe(true);
-      authService.logout().then(done);
+      setTimeout(() => {
+        expect(authService.authenticated).toBe(true);
+        authService.logout().then(done);
+      }, 1);
     });
 
     it('Should set with jwt and timeout', done => {
       spyOn(authService, 'getTtl').and.returnValue(0);
+      spyOn(authService.authentication, 'redirect').and.callFake((overwriteUri, defaultUri) => {
+        expect(overwriteUri).toBe(0);
+        expect(defaultUri).toBe(authService.config.logoutRedirect);
+
+        expect(authService.authenticated).toBe(false);
+        done();
+      });
+
       authService.setResponseObject({access_token: tokenFuture.jwt});
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);
       expect(authService.authenticated).toBe(true);
-
-      setTimeout(done, 0);
     });
 
-    it('Should have timed out', () => {
-      expect(authService.authenticated).toBe(false);
+    it('Should set with jwt,  timeout and redirect', done => {
+      spyOn(authService, 'getTtl').and.returnValue(0);
+      spyOn(authService.authentication, 'redirect').and.callFake((overwriteUri, defaultUri) => {
+        expect(overwriteUri).toBe(1);
+        expect(defaultUri).toBe(authService.config.logoutRedirect);
+
+        expect(authService.authenticated).toBe(false);
+        done();
+      });
+
+      authService.setResponseObject({access_token: tokenFuture.jwt});
+      authService.config.expiredRedirect = 1;
+
+      expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);
+      expect(authService.authenticated).toBe(true);
     });
 
     it('Should delete', () => {

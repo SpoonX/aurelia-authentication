@@ -91,7 +91,7 @@ export class AuthService {
         && this.authentication.getRefreshToken()) {
         this.updateToken();
       } else {
-        this.logout();
+        this.logout(this.config.expiredRedirect);
       }
     }, ttl);
   }

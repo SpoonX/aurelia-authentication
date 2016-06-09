@@ -1,3 +1,49 @@
+<a name"3.0.0-rc4"></a>
+### 3.0.0-rc4 (2016-06-09)
+
+
+#### Bug Fixes
+
+* **ValueConverter:** fix ValueConverter build ([c0b71009](https://github.com/spoonx/aurelia-authentication/commit/c0b71009))
+* **ValueConverters:** bring back old authFilter version since new one can't be auto bundled ([a66394dc](https://github.com/spoonx/aurelia-authentication/commit/a66394dc))
+* **aurelia-authentication:** add ie9 window.origin polyfill ([a06e66b0](https://github.com/spoonx/aurelia-authentication/commit/a06e66b0))
+* **auth0Lock:** add missing aurelia-pal dependency for webpack ([a8056dc3](https://github.com/spoonx/aurelia-authentication/commit/a8056dc3))
+* **authService:**
+  * actually clear timeout ([1a887abf](https://github.com/spoonx/aurelia-authentication/commit/1a887abf))
+  * initialize with stored responseObject ([d50f9257](https://github.com/spoonx/aurelia-authentication/commit/d50f9257))
+* **authentication:** consistent throw if token not found ([41454e39](https://github.com/spoonx/aurelia-authentication/commit/41454e39))
+* **popup:**
+  * use PLATFOTM.global.document.location ([fa0e8a30](https://github.com/spoonx/aurelia-authentication/commit/fa0e8a30))
+  * encodeURIComponent all query parameters ([82e023c2](https://github.com/spoonx/aurelia-authentication/commit/82e023c2))
+* **project:**
+  * use auth:true for authenticationStep and isAuth ([caf4a3be](https://github.com/spoonx/aurelia-authentication/commit/caf4a3be))
+  * restore missing props in package.json for jspm 0.17+ ([17f9e81d](https://github.com/spoonx/aurelia-authentication/commit/17f9e81d))
+
+
+#### Features
+
+* **BaseConfig:** copied over current sahat/satellizer settings ([70dfb814](https://github.com/spoonx/aurelia-authentication/commit/70dfb814))
+* **authService:**
+  * redirection when token expired optional ([b6ed192f](https://github.com/spoonx/aurelia-authentication/commit/b6ed192f))
+  * add onLogout. something is needed to eg clear cookies after authomatic logout ([8ade299d](https://github.com/spoonx/aurelia-authentication/commit/8ade299d))
+  * actually logout on timeout ([f15b37ab](https://github.com/spoonx/aurelia-authentication/commit/f15b37ab))
+  * use authenticated and setTimeout for login status ([d57e1142](https://github.com/spoonx/aurelia-authentication/commit/d57e1142))
+  * add getExp() ([026d0d82](https://github.com/spoonx/aurelia-authentication/commit/026d0d82))
+  * add profileMethod config option ([218fffc1](https://github.com/spoonx/aurelia-authentication/commit/218fffc1))
+  * optional logout request ([d65ca7ba](https://github.com/spoonx/aurelia-authentication/commit/d65ca7ba))
+* **authenticateStep:** use authService.authenticate ([5b9306fe](https://github.com/spoonx/aurelia-authentication/commit/5b9306fe))
+* **authentication:**
+  * use jwt-decode to decode token ([f5056ce9](https://github.com/spoonx/aurelia-authentication/commit/f5056ce9))
+  * add support for auth0 login using lock ([97e625e8](https://github.com/spoonx/aurelia-authentication/commit/97e625e8))
+  * allow dotted accessTokenProp ([27198f8f](https://github.com/spoonx/aurelia-authentication/commit/27198f8f))
+  * add deprecation warning for provider.type (replaced by provider.oauthType) ([bcdf06ba](https://github.com/spoonx/aurelia-authentication/commit/bcdf06ba))
+* **project:**
+  * use aurelia-pal for window and document ([fdbb9189](https://github.com/spoonx/aurelia-authentication/commit/fdbb9189))
+  * add AuthenticationStep and deprecate AuthorizeStep ([baeb35c4](https://github.com/spoonx/aurelia-authentication/commit/baeb35c4))
+* **refresh-token:** optional refreshTokenUrl ([234e1024](https://github.com/spoonx/aurelia-authentication/commit/234e1024))
+* **value-converters:** move/rename/add valueConverters ([4d2ee936](https://github.com/spoonx/aurelia-authentication/commit/4d2ee936))
+
+
 <a name"3.0.0-rc3"></a>
 ### 3.0.0-rc3 (2016-06-02)
 

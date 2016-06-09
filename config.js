@@ -7,7 +7,7 @@ System.config({
   },
 
   map: {
-    "aurelia-api": "npm:aurelia-api@3.0.0-rc3",
+    "aurelia-api": "npm:aurelia-api@3.0.0-rc4",
     "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.3",
     "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.2.5",
     "aurelia-logging": "npm:aurelia-logging@1.0.0-beta.1.2.1",
@@ -44,7 +44,7 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2",
       "util": "npm:util@0.10.3"
     },
-    "npm:aurelia-api@3.0.0-rc3": {
+    "npm:aurelia-api@3.0.0-rc4": {
       "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.2.3",
       "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.2.5",
       "extend": "npm:extend@3.0.0",

@@ -184,7 +184,7 @@ export class App {
     configureRouter(config, router) {
         config.title = 'Aurelia';
 
-        config.addPipelineStep('authenticate', AuthenticateStep); // Add a route filter to the authenticate extensibility point.
+        config.addPipelineStep('authorize', AuthenticateStep); // Add a route filter so only authenticated uses are authorized to access some routes
 
         config.map([
             { route: ['','welcome'],  moduleId: './welcome',  nav: true, title: 'Welcome' },

@@ -61,7 +61,8 @@ export class Login {
 
     // use authService.logout to delete stored tokens
     // if you are using JWTs, authService.logout() will be called automatically,
-    // when the token expires
+    // when the token expires. The expiredRedirect setting in your authConfig
+    // will determine the redirection option
     logout() {
       return this.authService.logout();
     }

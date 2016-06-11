@@ -36,6 +36,7 @@ export default {
     profileUrl: 'me',
     unlinkUrl: 'me/unlink',
     loginOnSignup: false,
+    expiredRedirect: 1, // redirect to logoutRedirect after token expiration
     providers: {
         google: {
           url: 'google',
@@ -48,8 +49,6 @@ export default {
     }
 };
 ```
-
-The above configuration file can cope with a development and production version (not mandatory of course). The strategy is that when your run on localhost, the development configuration file is used, otherwise the production configuration file is taken.
 
 ### Register the plugin
 

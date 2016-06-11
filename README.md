@@ -99,18 +99,21 @@ export class Login {
     };
 
     // use authService.login(credentialsObject) to login to your auth server
+    // authService.authenticated holds the current status
+    // authService.getPayload() gives you the current payload object
     login(credentialsObject) {
       return this.authService.login(credentialsObject)
         .then(() => {
-            this.authenticated = this.authService.isAuthenticated();
+            this.authenticated = this.authService.authenticated;
         });
     };
 
     // use authService.logout to delete stored data
+    // set expiredRedirect in your settings to automatically redirect
     logout() {
       return this.authService.logout()
         .then(() => {
-          this.authenticated = this.authService.isAuthenticated();
+          this.authenticated = this.authService.authenticated;
         });
     }
 
@@ -118,7 +121,7 @@ export class Login {
     authenticateFacebook() {
       return this.authService.authenticate('facebook')
         .then(() => {
-          this.authenticated  = this.authService.isAuthenticated();
+          this.authenticated  = this.authService.authenticated;
         });
     }
 }
@@ -130,10 +133,12 @@ export class Login {
 authService
   // the Rest instance of aurelia-api used for requests. '.client.client' is the used httpClient instance (from aurelia-fetch-client)
   .client
+  // the current authentication status
+  .authenticated
   // signup into server with credentials and optionally logs in
-  .signup(credentials: Object)): Promise<Response>
+  .signup(credentials: Object[, RequestObtions: Object[, redirectUri: string]]): Promise<Response>
    // log into server with credentials. Stores response if successful
-  .login(credentials: Object): Promise<Response>
+  .login(credentials: Object[, RequestObtions: Object[, redirectUri: string]]): Promise<Response>
   // deletes stored response. Sends optionally a logout request
   .logout([redirectUri: string]): Promise<>|Promise<Response>
   // manually refresh authentication. Needs refreshToken options to be configured
@@ -149,13 +154,13 @@ authService
   // check if token is available and, if applicable, not expired
   .isAuthenticated(): boolean
   // get token payload if available
-  .getTokenPayload(): string
+  .getTokenPayload(): Object
   // get the token ttl if available
   .getTtl(): Number
   // get the token exp if available
   .getExp(): Number
 ```
 
-Additionally, you can use `AuthFilterValueConverter` and `AuthorizeStep` for UI feedback.
+Additionally, you can use `AuthFilterValueConverter` and `AuthenticatedStep` for UI feedback.
 
 You can find more information in the [aurelia-authentication-docs](http://aurelia-authentication.spoonx.org/).

@@ -227,7 +227,7 @@ export class AuthService {
   /**
   * Get payload from tokens
   *
-  * @returns {null | String} Payload for JWT, else null
+  * @returns {Object} Payload for JWT, else null
   */
   getTokenPayload() {
     return this.authentication.getPayload();

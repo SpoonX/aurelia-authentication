@@ -302,3 +302,5 @@ else {
 
 export default config;
 ```
+
+The above configuration file can cope with a development and production version (not mandatory of course). The strategy is that when your run on localhost, the development configuration file is used, otherwise the production configuration file is taken.

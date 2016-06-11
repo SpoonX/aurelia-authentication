@@ -19,6 +19,12 @@ import {Cookie} from 'aurelia-cookie';
 ...
 
   login() {
+    // AuthService.onLogout() will be called, when the token expires
+    // or AuthService.logout() is called manually
+    this.authService.onLogout = () => {
+      Cookie.delete('cookie-bearer');
+    }
+
     return this.authService.authenticate('auth0')
       .then(response => {
         // you can set a cookie for cookie based authentication
@@ -31,11 +37,4 @@ import {Cookie} from 'aurelia-cookie';
         });
       });
   };
-
-  logout() {
-    return this.authService.logout()
-      .then(() => {
-        Cookie.delete('cookie-bearer');
-      });
-  }
 ```

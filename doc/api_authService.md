@@ -1,6 +1,6 @@
 # AuthService class
 
-```javascript
+```js
 import {AuthService} from 'aurelia-authentication';
 ```
 

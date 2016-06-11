@@ -285,11 +285,6 @@ export class BaseConfig {
   _tokenPrefix = 'aurelia';
 
   /* deprecated methods and parameteres */
-  get current() {
-    LogManager.getLogger('authentication').warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
-    return this;
-  }
-
   set authToken(authToken) {
     LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
     this._authTokenType = authToken;

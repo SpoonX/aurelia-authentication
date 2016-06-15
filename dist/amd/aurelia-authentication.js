@@ -259,7 +259,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
       this.platform = 'browser';
       this.storage = 'localStorage';
       this.storageKey = 'aurelia_authentication';
-      this.globalValueConverters = ['authFilterValueConverter', 'authenticatedFilterValueConverter', 'authenticatedValueConverter'];
+      this.globalValueConverters = ['authFilterValueConverter'];
       this.providers = {
         facebook: {
           name: 'facebook',
@@ -412,15 +412,6 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
     };
 
     _createClass(BaseConfig, [{
-      key: 'current',
-      get: function get() {
-        LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
-        return this;
-      },
-      set: function set(_) {
-        throw new Error('Setter BaseConfig.current is obsolete. Use BaseConfig directly instead.');
-      }
-    }, {
       key: 'authToken',
       set: function set(authToken) {
         LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
@@ -473,6 +464,15 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
       },
       get: function get() {
         return this._tokenPrefix || 'aurelia';
+      }
+    }, {
+      key: 'current',
+      get: function get() {
+        LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
+        return this;
+      },
+      set: function set(_) {
+        throw new Error('Setter BaseConfig.current is obsolete. Use BaseConfig directly instead.');
       }
     }, {
       key: '_current',

@@ -3,6 +3,74 @@ declare module 'aurelia-authentication' {
     constructor(storage?: any, config?: any);
     open(options?: any, userData?: any): any;
   }
+  export class AuthenticatedFilterValueConverter {
+    constructor(authService?: any);
+    
+    /**
+       * route toView predictator on route.config.auth === (parameter || authService.isAuthenticated())
+       * @param  {RouteConfig}  routes            the routes array to convert
+       * @param  {[Boolean]}    [isAuthenticated] optional isAuthenticated value. default: this.authService.authenticated
+       * @return {Boolean}      show/hide element
+       */
+    toView(routes?: any, isAuthenticated?: any): any;
+  }
+  export class AuthenticatedValueConverter {
+    constructor(authService?: any);
+    
+    /**
+       * element toView predictator on authService.isAuthenticated()
+       * @return {Boolean}  show/hide element
+       */
+    toView(): any;
+  }
+  export class AuthenticateStep {
+    constructor(authService?: any);
+    run(routingContext?: any, next?: any): any;
+  }
+  export class Authentication {
+    constructor(storage?: any, config?: any, oAuth1?: any, oAuth2?: any, auth0Lock?: any);
+    
+    /* deprecated methods */
+    getLoginRoute(): any;
+    getLoginRedirect(): any;
+    getLoginUrl(): any;
+    getSignupUrl(): any;
+    getProfileUrl(): any;
+    getToken(): any;
+    responseObject: any;
+    
+    /* get/set responseObject */
+    getResponseObject(): any;
+    setResponseObject(response?: any): any;
+    
+    /* get data, update if needed first */
+    getAccessToken(): any;
+    getRefreshToken(): any;
+    getPayload(): any;
+    getExp(): any;
+    
+    /* get status from data */
+    getTtl(): any;
+    isTokenExpired(): any;
+    isAuthenticated(): any;
+    
+    /* get and set from response */
+    getDataFromResponse(response?: any): any;
+    getTokenFromResponse(response?: any, tokenProp?: any, tokenName?: any, tokenRoot?: any): any;
+    toUpdateTokenCallstack(): any;
+    resolveUpdateTokenCallstack(response?: any): any;
+    
+    /**
+       * Authenticate with third-party
+       *
+       * @param {String}    name of the provider
+       * @param {[{}]}      [userData]
+       *
+       * @return {Promise<response>}
+       */
+    authenticate(name?: any, userData?: any): any;
+    redirect(redirectUrl?: any, defaultRedirectUrl?: any): any;
+  }
   export class AuthFilterValueConverter {
     
     /**
@@ -12,6 +80,10 @@ declare module 'aurelia-authentication' {
        * @return {Boolean}      show/hide element
        */
     toView(routes?: any, isAuthenticated?: any): any;
+  }
+  export class AuthorizeStep {
+    constructor(authService?: any);
+    run(routingContext?: any, next?: any): any;
   }
   export class AuthService {
     
@@ -143,7 +215,7 @@ declare module 'aurelia-authentication' {
     /**
       * Get payload from tokens
       *
-      * @returns {null | String} Payload for JWT, else null
+      * @returns {Object} Payload for JWT, else null
       */
     getTokenPayload(): any;
     
@@ -207,78 +279,6 @@ declare module 'aurelia-authentication' {
        * @return {Promise<Object>|Promise<Error>}  Server response as Object
        */
     unlink(name?: any, redirectUri?: any): any;
-  }
-  export class AuthenticateStep {
-    constructor(authService?: any);
-    run(routingContext?: any, next?: any): any;
-  }
-  export class AuthenticatedFilterValueConverter {
-    constructor(authService?: any);
-    
-    /**
-       * route toView predictator on route.config.auth === (parameter || authService.isAuthenticated())
-       * @param  {RouteConfig}  routes            the routes array to convert
-       * @param  {[Boolean]}    [isAuthenticated] optional isAuthenticated value. default: this.authService.authenticated
-       * @return {Boolean}      show/hide element
-       */
-    toView(routes?: any, isAuthenticated?: any): any;
-  }
-  export class AuthenticatedValueConverter {
-    constructor(authService?: any);
-    
-    /**
-       * element toView predictator on authService.isAuthenticated()
-       * @return {Boolean}  show/hide element
-       */
-    toView(): any;
-  }
-  export class Authentication {
-    constructor(storage?: any, config?: any, oAuth1?: any, oAuth2?: any, auth0Lock?: any);
-    
-    /* deprecated methods */
-    getLoginRoute(): any;
-    getLoginRedirect(): any;
-    getLoginUrl(): any;
-    getSignupUrl(): any;
-    getProfileUrl(): any;
-    getToken(): any;
-    responseObject: any;
-    
-    /* get/set responseObject */
-    getResponseObject(): any;
-    setResponseObject(response?: any): any;
-    
-    /* get data, update if needed first */
-    getAccessToken(): any;
-    getRefreshToken(): any;
-    getPayload(): any;
-    getExp(): any;
-    
-    /* get status from data */
-    getTtl(): any;
-    isTokenExpired(): any;
-    isAuthenticated(): any;
-    
-    /* get and set from response */
-    getDataFromResponse(response?: any): any;
-    getTokenFromResponse(response?: any, tokenProp?: any, tokenName?: any, tokenRoot?: any): any;
-    toUpdateTokenCallstack(): any;
-    resolveUpdateTokenCallstack(response?: any): any;
-    
-    /**
-       * Authenticate with third-party
-       *
-       * @param {String}    name of the provider
-       * @param {[{}]}      [userData]
-       *
-       * @return {Promise<response>}
-       */
-    authenticate(name?: any, userData?: any): any;
-    redirect(redirectUrl?: any, defaultRedirectUrl?: any): any;
-  }
-  export class AuthorizeStep {
-    constructor(authService?: any);
-    run(routingContext?: any, next?: any): any;
   }
   export class BaseConfig {
     
@@ -433,9 +433,6 @@ declare module 'aurelia-authentication' {
     _tokenName: any;
     _tokenRoot: any;
     _tokenPrefix: any;
-    
-    /* deprecated methods and parameteres */
-    current: any;
     authToken: any;
     responseTokenProp: any;
     tokenRoot: any;

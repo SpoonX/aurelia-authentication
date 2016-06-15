@@ -266,7 +266,7 @@ export class BaseConfig {
   storageKey = 'aurelia_authentication';
 
   // List of value-converters to make global
-  globalValueConverters = ['authFilterValueConverter', 'authenticatedFilterValueConverter', 'authenticatedValueConverter'];
+  globalValueConverters = ['authFilterValueConverter'];
 
 //OAuth provider specific related configuration
   // ============================================
@@ -406,11 +406,6 @@ export class BaseConfig {
   _tokenPrefix = 'aurelia';
 
   /* deprecated methods and parameteres */
-  get current() {
-    LogManager.getLogger('authentication').warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
-    return this;
-  }
-
   set authToken(authToken) {
     LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
     this._authTokenType = authToken;
@@ -1193,7 +1188,7 @@ export class AuthService {
   /**
   * Get payload from tokens
   *
-  * @returns {null | String} Payload for JWT, else null
+  * @returns {Object} Payload for JWT, else null
   */
   getTokenPayload() {
     return this.authentication.getPayload();

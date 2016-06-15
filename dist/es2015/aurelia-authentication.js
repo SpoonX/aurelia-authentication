@@ -191,7 +191,7 @@ export let BaseConfig = class BaseConfig {
     this.platform = 'browser';
     this.storage = 'localStorage';
     this.storageKey = 'aurelia_authentication';
-    this.globalValueConverters = ['authFilterValueConverter', 'authenticatedFilterValueConverter', 'authenticatedValueConverter'];
+    this.globalValueConverters = ['authFilterValueConverter'];
     this.providers = {
       facebook: {
         name: 'facebook',
@@ -341,11 +341,6 @@ export let BaseConfig = class BaseConfig {
         }
       }
     }
-  }
-
-  get current() {
-    LogManager.getLogger('authentication').warn('BaseConfig.current() is deprecated. Use BaseConfig directly instead.');
-    return this;
   }
 
   set authToken(authToken) {

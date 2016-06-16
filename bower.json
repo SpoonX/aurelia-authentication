@@ -1,0 +1,33 @@
+{
+  "name": "aurelia-authentication",
+  "version": "3.0.0-rc5",
+  "description": "Plugin for social media authentication and local authentication together with other authentication utilities.",
+  "keywords": [
+    "aurelia",
+    "oauth",
+    "authentication"
+  ],
+  "homepage": "http://aurelia-authentication.spoonx.org/",
+  "main": "dist/commonjs/aurelia-authentication..js",
+  "moduleType": "node",
+  "license": "MIT",
+  "authors": [
+    "RWOverdijk <wesley@spoonx.nl> (http://spoonx.nl/)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SpoonX/aurelia-authentication"
+  },
+  "dependencies": {
+      "aurelia-api": "^3.0.0-rc4",
+      "aurelia-dependency-injection": "^1.0.0-beta.1.2.3",
+      "aurelia-fetch-client": "^1.0.0-beta.1.2.5",
+      "aurelia-logging": "^1.0.0-beta.1.2.1",
+      "aurelia-metadata": "^1.0.0-beta.1.2.1",
+      "aurelia-pal": "^1.0.0-beta.1.2.2",
+      "aurelia-path": "^1.0.0-beta.1.2.2",
+      "aurelia-router": "^1.0.0-beta.1.2.4",
+      "extend": "^3.0.0",
+      "jwt-decode": "^2.0.1"
+  }
+}

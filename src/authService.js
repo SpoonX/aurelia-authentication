@@ -1,11 +1,12 @@
 import {PLATFORM} from 'aurelia-pal';
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
+import {BindingSignaler} from 'aurelia-templating-resources';
 import * as LogManager from 'aurelia-logging';
 import {Authentication} from './authentication';
 import {BaseConfig} from './baseConfig';
 
-@inject(Authentication, BaseConfig)
+@inject(Authentication, BaseConfig, BindingSignaler)
 export class AuthService {
   /**
    * The Authentication instance that handles the token
@@ -41,9 +42,10 @@ export class AuthService {
    * @param  {Authentication} authentication The Authentication instance to be used
    * @param  {Config}         config         The Config instance to be used
    */
-  constructor(authentication, config) {
-    this.authentication = authentication;
-    this.config         = config;
+  constructor(authentication, config, bindingSignaler) {
+    this.authentication  = authentication;
+    this.config          = config;
+    this.bindingSignaler = bindingSignaler;
 
     // get token stored in previous format over
     const oldStorageKey = config.tokenPrefix
@@ -86,6 +88,8 @@ export class AuthService {
     this.clearTimeout();
 
     this.timeoutID = PLATFORM.global.setTimeout(() => {
+      this.bindingSignaler.signal('auth-token-expired');
+
       if (this.config.autoUpdateToken
         && this.authentication.getAccessToken()
         && this.authentication.getRefreshToken()) {

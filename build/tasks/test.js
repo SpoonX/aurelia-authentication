@@ -23,7 +23,7 @@ gulp.task('test', ['lint'], function(done) {
 });
 
 /**
- * Run live test
+ * Watch for file changes and re-run tests on each change
  */
 gulp.task('tdd',  function(done) {
   server.start(function() {
@@ -42,3 +42,24 @@ gulp.task('tdd',  function(done) {
     karmaServer.start();
   });
 });
+
+/**
+ * Run ie test once and exit
+ */
+ gulp.task('test-ie', function(done) {
+   server.start(function() {
+     var karmaServer = new KarmaServer({
+       configFile: __dirname + '/../../karma.conf.js',
+       singleRun: true,
+       browsers: ['IE']
+     }, function(exitCode) {
+       server.stop(function() {
+         done();
+
+         process.exit(exitCode);
+       });
+     });
+
+     karmaServer.start();
+   });
+ });

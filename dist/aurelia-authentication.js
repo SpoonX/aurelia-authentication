@@ -1,499 +1,74 @@
-import extend from 'extend';
 import * as LogManager from 'aurelia-logging';
+import extend from 'extend';
 import jwtDecode from 'jwt-decode';
 import {PLATFORM,DOM} from 'aurelia-pal';
-import {parseQueryString,join,buildQueryString} from 'aurelia-path';
-import {inject} from 'aurelia-dependency-injection';
-import {deprecated} from 'aurelia-metadata';
-import {Redirect} from 'aurelia-router';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Config,Rest} from 'aurelia-api';
+import {inject} from 'aurelia-dependency-injection';
+import {Redirect} from 'aurelia-router';
+import {deprecated} from 'aurelia-metadata';
+import {join,buildQueryString,parseQueryString} from 'aurelia-path';
 
-export class Popup {
-  constructor() {
-    this.popupWindow = null;
-    this.polling     = null;
-    this.url         = '';
+// import to ensure value-converters get bundled
+import './authFilterValueConverter';
+
+/**
+ * Configure the plugin.
+ *
+ * @param {{globalResources: Function, container: {Container}}} aurelia
+ * @param {{}|Function}                                         config
+ */
+export function configure(aurelia, config) {
+  // ie9 polyfill
+  if (!PLATFORM.location.origin) {
+    PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
   }
 
-  open(url, windowName, options) {
-    this.url = url;
-    const optionsString = buildPopupWindowOptions(options || {});
+  const baseConfig = aurelia.container.get(BaseConfig);
 
-    this.popupWindow = PLATFORM.global.open(url, windowName, optionsString);
-
-    if (this.popupWindow && this.popupWindow.focus) {
-      this.popupWindow.focus();
-    }
-
-    return this;
+  if (typeof config === 'function') {
+    config(baseConfig);
+  } else if (typeof config === 'object') {
+    baseConfig.configure(config);
   }
 
-  eventListener(redirectUri) {
-    return new Promise((resolve, reject) => {
-      this.popupWindow.addEventListener('loadstart', event => {
-        if (event.url.indexOf(redirectUri) !== 0) {
-          return;
-        }
+  // after baseConfig was configured
+  for (let converter of baseConfig.globalValueConverters) {
+    aurelia.globalResources(`./${converter}`);
+    LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${converter}`);
+  }
+  const fetchConfig  = aurelia.container.get(FetchConfig);
+  const clientConfig = aurelia.container.get(Config);
 
-        const parser  = DOM.createElement('a');
-        parser.href = event.url;
-
-        if (parser.search || parser.hash) {
-          const qs = parseUrl(parser);
-
-          if (qs.error) {
-            reject({error: qs.error});
-          } else {
-            resolve(qs);
-          }
-
-          this.popupWindow.close();
-        }
-      });
-
-      this.popupWindow.addEventListener('exit', () => {
-        reject({data: 'Provider Popup was closed'});
-      });
-
-      this.popupWindow.addEventListener('loaderror', () => {
-        reject({data: 'Authorization Failed'});
-      });
+  // Array? Configure the provided endpoints.
+  if (Array.isArray(baseConfig.configureEndpoints)) {
+    baseConfig.configureEndpoints.forEach(endpointToPatch => {
+      fetchConfig.configure(endpointToPatch);
     });
   }
 
-  pollPopup() {
-    return new Promise((resolve, reject) => {
-      this.polling = PLATFORM.global.setInterval(() => {
-        let errorData;
+  let client;
 
-        try {
-          if (this.popupWindow.location.host ===  PLATFORM.global.document.location.host
-            && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
-            const qs = parseUrl(this.popupWindow.location);
-
-            if (qs.error) {
-              reject({error: qs.error});
-            } else {
-              resolve(qs);
-            }
-
-            this.popupWindow.close();
-            PLATFORM.global.clearInterval(this.polling);
-          }
-        } catch (error) {
-          errorData = error;
-        }
-
-        if (!this.popupWindow) {
-          PLATFORM.global.clearInterval(this.polling);
-          reject({
-            error: errorData,
-            data: 'Provider Popup Blocked'
-          });
-        } else if (this.popupWindow.closed) {
-          PLATFORM.global.clearInterval(this.polling);
-          reject({
-            error: errorData,
-            data: 'Problem poll popup'
-          });
-        }
-      }, 35);
-    });
-  }
-}
-
-const buildPopupWindowOptions = options => {
-  const width  = options.width || 500;
-  const height = options.height || 500;
-
-  const extended = extend({
-    width: width,
-    height: height,
-    left: PLATFORM.global.screenX + ((PLATFORM.global.outerWidth - width) / 2),
-    top: PLATFORM.global.screenY + ((PLATFORM.global.outerHeight - height) / 2.5)
-  }, options);
-
-  let parts = [];
-  Object.keys(extended).map(key => parts.push(key + '=' + extended[key]));
-
-  return parts.join(',');
-};
-
-const parseUrl = url => {
-  return extend(true, {}, parseQueryString(url.search), parseQueryString(url.hash));
-};
-
-export class BaseConfig {
-  /**
-   * Prepends baseUrl to a given url
-   * @param  {String} url The relative url to append
-   * @return {String}     joined baseUrl and url
-   */
-  joinBase(url) {
-    return join(this.baseUrl, url);
-  }
-
-  /**
-   * Merge current settings with incomming settings
-   * @param  {Object} incomming Settings object to be merged into the current configuration
-   * @return {Config}           this
-   */
-  configure(incomming) {
-    for (let key in incomming) {
-      const value = incomming[key];
-      if (value !== undefined) {
-        if (Array.isArray(value) || typeof value !== 'object' || value === null) {
-          this[key] = value;
-        } else {
-          extend(true, this[key], value);
-        }
+  // Let's see if there's a configured named or default endpoint or a HttpClient.
+  if (baseConfig.endpoint !== null) {
+    if (typeof baseConfig.endpoint === 'string') {
+      const endpoint = clientConfig.getEndpoint(baseConfig.endpoint);
+      if (!endpoint) {
+        throw new Error(`There is no '${baseConfig.endpoint || 'default'}' endpoint registered.`);
       }
+      client = endpoint;
+    } else if (baseConfig.endpoint instanceof HttpClient) {
+      client = new Rest(baseConfig.endpoint);
     }
   }
 
-  /* ----------- default  config ----------- */
-
-  // Used internally. The used Rest instance; set during configuration (see index.js)
-  client = null;
-
-  // If using aurelia-api:
-  // =====================
-
-  // This is the name of the endpoint used for any requests made in relation to authentication (login, logout, etc.). An empty string selects the default endpoint of aurelia-api.
-  endpoint = null;
-  // When authenticated, these endpoints will have the token added to the header of any requests (for authorization). Accepts an array of endpoint names. An empty string selects the default endpoint of aurelia-api.
-  configureEndpoints = null;
-
-
-  // SPA related options
-  // ===================
-
-  // The SPA url to which the user is redirected after a successful login
-  loginRedirect = '#/';
-  // The SPA url to which the user is redirected after a successful logout
-  logoutRedirect = '#/';
-  // The SPA route used when an unauthenticated user tries to access an SPA page that requires authentication
-  loginRoute = '/login';
-  // Whether or not an authentication token is provided in the response to a successful signup
-  loginOnSignup = true;
-  // If loginOnSignup == false: The SPA url to which the user is redirected after a successful signup (else loginRedirect is used)
-  signupRedirect = '#/login';
-  // redirect  when token expires. 0 = don't redirect (default), 1 = use logoutRedirect, string = redirect there
-  expiredRedirect = 0;
-
-
-  // API related options
-  // ===================
-
-  // The base url used for all authentication related requests, including provider.url below.
-  // This appends to the httpClient/endpoint base url, it does not override it.
-  baseUrl = '';
-  // The API endpoint to which login requests are sent
-  loginUrl = '/auth/login';
-  // The API endpoint to which logout requests are sent (not needed for jwt)
-  logoutUrl = null;
-  // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
-  logoutMethod = 'get';
-  // The API endpoint to which signup requests are sent
-  signupUrl = '/auth/signup';
-  // The API endpoint used in profile requests (inc. `find/get` and `update`)
-  profileUrl = '/auth/me';
-  // The method used to update the profile ('put' or 'patch')
-  profileMethod = 'put';
-  // The API endpoint used with oAuth to unlink authentication
-  unlinkUrl = '/auth/unlink/';
-  // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
-  unlinkMethod = 'get';
-  // The API endpoint to which refreshToken requests are sent. null = loginUrl
-  refreshTokenUrl = null;
-
-
-  // Token Options
-  // =============
-
-  // The header property used to contain the authToken in the header of API requests that require authentication
-  authHeader = 'Authorization';
-  // The token name used in the header of API requests that require authentication
-  authTokenType = 'Bearer';
-  // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
-  accessTokenProp = 'access_token';
-
-
-  // If the property defined by `accessTokenProp` is an object:
-  // ------------------------------------------------------------
-
-  //This is the property from which to get the token `{ "accessTokenProp": { "accessTokenName" : '...' } }`
-  accessTokenName = 'token';
-  // This allows the token to be a further object deeper `{ "accessTokenProp": { "accessTokenRoot" : { "accessTokenName" : '...' } } }`
-  accessTokenRoot = false;
-
-
-  // Refresh Token Options
-  // =====================
-
-  // Option to turn refresh tokens On/Off
-  useRefreshToken = false;
-  // The option to enable/disable the automatic refresh of Auth tokens using Refresh Tokens
-  autoUpdateToken = true;
-  // Oauth Client Id
-  clientId = false;
-  // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
-  refreshTokenProp = 'refresh_token';
-
-  // If the property defined by `refreshTokenProp` is an object:
-  // -----------------------------------------------------------
-
-  // This is the property from which to get the token `{ "refreshTokenProp": { "refreshTokenName" : '...' } }`
-  refreshTokenName = 'token';
-  // This allows the refresh token to be a further object deeper `{ "refreshTokenProp": { "refreshTokenRoot" : { "refreshTokenName" : '...' } } }`
-  refreshTokenRoot = false;
-
-
-  // Miscellaneous Options
-  // =====================
-
-  // Whether to enable the fetch interceptor which automatically adds the authentication headers
-  // (or not... e.g. if using a session based API or you want to override the default behaviour)
-  httpInterceptor = true;
-  // For OAuth only: Tell the API whether or not to include token cookies in the response (for session based APIs)
-  withCredentials = true;
-  // Controls how the popup is shown for different devices (Options: 'browser' or 'mobile')
-  platform = 'browser';
-  // Determines the `PLATFORM` property name upon which aurelia-authentication data is stored (Default: `PLATFORM.localStorage`)
-  storage = 'localStorage';
-  // The key used for storing the authentication response locally
-  storageKey = 'aurelia_authentication';
-
-  // List of value-converters to make global
-  globalValueConverters = ['authFilterValueConverter'];
-
-//OAuth provider specific related configuration
-  // ============================================
-  providers = {
-    facebook: {
-      name: 'facebook',
-      url: '/auth/facebook',
-      authorizationEndpoint: 'https://www.facebook.com/v2.5/dialog/oauth',
-      redirectUri: PLATFORM.location.origin + '/',
-      requiredUrlParams: ['display', 'scope'],
-      scope: ['email'],
-      scopeDelimiter: ',',
-      display: 'popup',
-      oauthType: '2.0',
-      popupOptions: { width: 580, height: 400 }
-    },
-    google: {
-      name: 'google',
-      url: '/auth/google',
-      authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
-      redirectUri: PLATFORM.location.origin,
-      requiredUrlParams: ['scope'],
-      optionalUrlParams: ['display', 'state'],
-      scope: ['profile', 'email'],
-      scopePrefix: 'openid',
-      scopeDelimiter: ' ',
-      display: 'popup',
-      oauthType: '2.0',
-      popupOptions: { width: 452, height: 633 },
-      state: randomState
-    },
-    github: {
-      name: 'github',
-      url: '/auth/github',
-      authorizationEndpoint: 'https://github.com/login/oauth/authorize',
-      redirectUri: PLATFORM.location.origin,
-      optionalUrlParams: ['scope'],
-      scope: ['user:email'],
-      scopeDelimiter: ' ',
-      oauthType: '2.0',
-      popupOptions: { width: 1020, height: 618 }
-    },
-    instagram: {
-      name: 'instagram',
-      url: '/auth/instagram',
-      authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
-      redirectUri: PLATFORM.location.origin,
-      requiredUrlParams: ['scope'],
-      scope: ['basic'],
-      scopeDelimiter: '+',
-      oauthType: '2.0'
-    },
-    linkedin: {
-      name: 'linkedin',
-      url: '/auth/linkedin',
-      authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
-      redirectUri: PLATFORM.location.origin,
-      requiredUrlParams: ['state'],
-      scope: ['r_emailaddress'],
-      scopeDelimiter: ' ',
-      state: 'STATE',
-      oauthType: '2.0',
-      popupOptions: { width: 527, height: 582 }
-    },
-    twitter: {
-      name: 'twitter',
-      url: '/auth/twitter',
-      authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
-      redirectUri: PLATFORM.location.origin,
-      oauthType: '1.0',
-      popupOptions: { width: 495, height: 645 }
-    },
-    twitch: {
-      name: 'twitch',
-      url: '/auth/twitch',
-      authorizationEndpoint: 'https://api.twitch.tv/kraken/oauth2/authorize',
-      redirectUri: PLATFORM.location.origin,
-      requiredUrlParams: ['scope'],
-      scope: ['user_read'],
-      scopeDelimiter: ' ',
-      display: 'popup',
-      oauthType: '2.0',
-      popupOptions: { width: 500, height: 560 }
-    },
-    live: {
-      name: 'live',
-      url: '/auth/live',
-      authorizationEndpoint: 'https://login.live.com/oauth20_authorize.srf',
-      redirectUri: PLATFORM.location.origin,
-      requiredUrlParams: ['display', 'scope'],
-      scope: ['wl.emails'],
-      scopeDelimiter: ' ',
-      display: 'popup',
-      oauthType: '2.0',
-      popupOptions: { width: 500, height: 560 }
-    },
-    yahoo: {
-      name: 'yahoo',
-      url: '/auth/yahoo',
-      authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
-      redirectUri: PLATFORM.location.origin,
-      scope: [],
-      scopeDelimiter: ',',
-      oauthType: '2.0',
-      popupOptions: { width: 559, height: 519 }
-    },
-    bitbucket: {
-      name: 'bitbucket',
-      url: '/auth/bitbucket',
-      authorizationEndpoint: 'https://bitbucket.org/site/oauth2/authorize',
-      redirectUri: PLATFORM.location.origin + '/',
-      requiredUrlParams: ['scope'],
-      scope: ['email'],
-      scopeDelimiter: ' ',
-      oauthType: '2.0',
-      popupOptions: { width: 1028, height: 529 }
-    },
-    auth0: {
-      name: 'auth0',
-      oauthType: 'auth0-lock',
-      clientId: 'your_client_id',
-      clientDomain: 'your_domain_url',
-      display: 'popup',
-      lockOptions: {
-        popup: true
-      },
-      responseType: 'token',
-      state: randomState
-    }
-  };
-
-  /* deprecated defaults */
-  _authToken = 'Bearer';
-  _responseTokenProp = 'access_token';
-  _tokenName = 'token';
-  _tokenRoot = false;
-  _tokenPrefix = 'aurelia';
-
-  /* deprecated methods and parameteres */
-  set authToken(authToken) {
-    LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
-    this._authTokenType = authToken;
-    this.authTokenType = authToken;
-    return authToken;
-  }
-  get authToken() {
-    return this._authTokenType;
+  // No? Fine. Default to HttpClient. BC all the way.
+  if (!(client instanceof Rest)) {
+    client = new Rest(aurelia.container.get(HttpClient));
   }
 
-  set responseTokenProp(responseTokenProp) {
-    LogManager.getLogger('authentication').warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
-    this._responseTokenProp = responseTokenProp;
-    this.accessTokenProp = responseTokenProp;
-    return responseTokenProp;
-  }
-  get responseTokenProp() {
-    return this._responseTokenProp;
-  }
-
-  set tokenRoot(tokenRoot) {
-    LogManager.getLogger('authentication').warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
-    this._tokenRoot = tokenRoot;
-    this.accessTokenRoot = tokenRoot;
-    return tokenRoot;
-  }
-  get tokenRoot() {
-    return this._tokenRoot;
-  }
-
-  set tokenName(tokenName) {
-    LogManager.getLogger('authentication').warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
-    this._tokenName = tokenName;
-    this.accessTokenName = tokenName;
-    return tokenName;
-  }
-  get tokenName() {
-    return this._tokenName;
-  }
-
-  set tokenPrefix(tokenPrefix) {
-    LogManager.getLogger('authentication').warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
-    this._tokenPrefix = tokenPrefix;
-    return tokenPrefix;
-  }
-  get tokenPrefix() {
-    return this._tokenPrefix || 'aurelia';
-  }
-
-  get current() {
-    LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
-    return this;
-  }
-  set current(_) {
-    throw new Error('Setter BaseConfig.current is obsolete. Use BaseConfig directly instead.');
-  }
-
-  get _current() {
-    LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
-    return this;
-  }
-  set _current(_) {
-    throw new Error('Setter BaseConfig._current is obsolete. Use BaseConfig directly instead.');
-  }
-}
-
-function randomState() {
-  let rand = Math.random().toString(36).substr(2);
-  return encodeURIComponent(rand);
-}
-
-@inject(BaseConfig)
-export class Storage {
-  constructor(config) {
-    this.config = config;
-  }
-
-  get(key) {
-    return PLATFORM.global[this.config.storage].getItem(key);
-  }
-
-  set(key, value) {
-    PLATFORM.global[this.config.storage].setItem(key, value);
-  }
-
-  remove(key) {
-    PLATFORM.global[this.config.storage].removeItem(key);
-  }
+  // Set the client on the config, for use throughout the plugin.
+  baseConfig.client = client;
 }
 
 @inject(Storage, BaseConfig)
@@ -570,158 +145,27 @@ export class Auth0Lock {
   }
 }
 
-@inject(Storage, Popup, BaseConfig)
-export class OAuth1 {
-  constructor(storage, popup, config) {
-    this.storage  = storage;
-    this.config   = config;
-    this.popup    = popup;
-    this.defaults = {
-      url: null,
-      name: null,
-      popupOptions: null,
-      redirectUri: null,
-      authorizationEndpoint: null
-    };
+@inject(AuthService)
+export class AuthenticateStep {
+  constructor(authService) {
+    this.authService = authService;
   }
 
-  open(options, userData) {
-    const provider  = extend(true, {}, this.defaults, options);
-    const serverUrl = this.config.joinBase(provider.url);
+  run(routingContext, next) {
+    const isLoggedIn = this.authService.authenticated;
+    const loginRoute = this.authService.config.loginRoute;
 
-    if (this.config.platform !== 'mobile') {
-      this.popup = this.popup.open('', provider.name, provider.popupOptions);
+    if (routingContext.getAllInstructions().some(route => route.config.auth === true)) {
+      if (!isLoggedIn) {
+        return next.cancel(new Redirect(loginRoute));
+      }
+    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
+      return next.cancel(new Redirect( this.authService.config.loginRedirect ));
     }
 
-    return this.config.client.post(serverUrl)
-      .then(response => {
-        const url = provider.authorizationEndpoint + '?' + buildQueryString(response);
-
-        if (this.config.platform === 'mobile') {
-          this.popup = this.popup.open(url, provider.name, provider.popupOptions);
-        } else {
-          this.popup.popupWindow.location = url;
-        }
-
-        const popupListener = this.config.platform === 'mobile'
-                            ? this.popup.eventListener(provider.redirectUri)
-                            : this.popup.pollPopup();
-
-        return popupListener.then(result => this.exchangeForToken(result, userData, provider));
-      });
-  }
-
-  exchangeForToken(oauthData, userData, provider) {
-    const data        = extend(true, {}, userData, oauthData);
-    const serverUrl   = this.config.joinBase(provider.url);
-    const credentials = this.config.withCredentials ? 'include' : 'same-origin';
-
-    return this.config.client.post(serverUrl, data, {credentials: credentials});
+    return next();
   }
 }
-
-@inject(Storage, Popup, BaseConfig)
-export class OAuth2 {
-  constructor(storage, popup, config) {
-    this.storage      = storage;
-    this.config       = config;
-    this.popup        = popup;
-    this.defaults     = {
-      url: null,
-      name: null,
-      state: null,
-      scope: null,
-      scopeDelimiter: null,
-      redirectUri: null,
-      popupOptions: null,
-      authorizationEndpoint: null,
-      responseParams: null,
-      requiredUrlParams: null,
-      optionalUrlParams: null,
-      defaultUrlParams: ['response_type', 'client_id', 'redirect_uri'],
-      responseType: 'code'
-    };
-  }
-
-  open(options, userData) {
-    const provider  = extend(true, {}, this.defaults, options);
-    const stateName = provider.name + '_state';
-
-    if (typeof provider.state === 'function') {
-      this.storage.set(stateName, provider.state());
-    } else if (typeof provider.state === 'string') {
-      this.storage.set(stateName, provider.state);
-    }
-
-    const url       = provider.authorizationEndpoint
-                    + '?' + buildQueryString(this.buildQuery(provider));
-    const popup     = this.popup.open(url, provider.name, provider.popupOptions);
-    const openPopup = (this.config.platform === 'mobile')
-                    ? popup.eventListener(provider.redirectUri)
-                    : popup.pollPopup();
-
-    return openPopup
-      .then(oauthData => {
-        if (provider.responseType === 'token' ||
-            provider.responseType === 'id_token%20token' ||
-            provider.responseType === 'token%20id_token'
-        ) {
-          return oauthData;
-        }
-        if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
-          return Promise.reject('OAuth 2.0 state parameter mismatch.');
-        }
-        return this.exchangeForToken(oauthData, userData, provider);
-      });
-  }
-
-  exchangeForToken(oauthData, userData, provider) {
-    const data = extend(true, {}, userData, {
-      clientId: provider.clientId,
-      redirectUri: provider.redirectUri
-    }, oauthData);
-
-    const serverUrl   = this.config.joinBase(provider.url);
-    const credentials = this.config.withCredentials ? 'include' : 'same-origin';
-
-    return this.config.client.post(serverUrl, data, {credentials: credentials});
-  }
-
-  buildQuery(provider) {
-    let query = {};
-    const urlParams   = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
-
-    urlParams.forEach( params => {
-      (provider[params] || []).forEach( paramName => {
-        const camelizedName = camelCase(paramName);
-        let paramValue      = (typeof provider[paramName] === 'function')
-                              ? provider[paramName]()
-                              : provider[camelizedName];
-
-        if (paramName === 'state') {
-          paramValue = encodeURIComponent(this.storage.get(provider.name + '_state'));
-        }
-
-        if (paramName === 'scope' && Array.isArray(paramValue)) {
-          paramValue = paramValue.join(provider.scopeDelimiter);
-
-          if (provider.scopePrefix) {
-            paramValue = provider.scopePrefix + provider.scopeDelimiter + paramValue;
-          }
-        }
-
-        query[paramName] = paramValue;
-      });
-    });
-    return query;
-  }
-}
-
-const camelCase = function(name) {
-  return name.replace(/([\:\-\_]+(.))/g, function(_, separator, letter, offset) {
-    return offset ? letter.toUpperCase() : letter;
-  });
-};
 
 @inject(Storage, BaseConfig, OAuth1, OAuth2, Auth0Lock)
 export class Authentication {
@@ -963,6 +407,30 @@ export class Authentication {
     } else if (defaultRedirectUrl) {
       PLATFORM.location.href = defaultRedirectUrl;
     }
+  }
+}
+
+@inject(AuthService)
+export class AuthorizeStep {
+  constructor(authService) {
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
+
+    this.authService = authService;
+  }
+
+  run(routingContext, next) {
+    const isLoggedIn = this.authService.isAuthenticated();
+    const loginRoute = this.authService.config.loginRoute;
+
+    if (routingContext.getAllInstructions().some(route => route.config.auth)) {
+      if (!isLoggedIn) {
+        return next.cancel(new Redirect(loginRoute));
+      }
+    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
+      return next.cancel(new Redirect( this.authService.config.loginRedirect ));
+    }
+
+    return next();
   }
 }
 
@@ -1365,50 +833,357 @@ export class AuthService {
   }
 }
 
-@inject(AuthService)
-export class AuthenticateStep {
-  constructor(authService) {
-    this.authService = authService;
+export class BaseConfig {
+  /**
+   * Prepends baseUrl to a given url
+   * @param  {String} url The relative url to append
+   * @return {String}     joined baseUrl and url
+   */
+  joinBase(url) {
+    return join(this.baseUrl, url);
   }
 
-  run(routingContext, next) {
-    const isLoggedIn = this.authService.authenticated;
-    const loginRoute = this.authService.config.loginRoute;
-
-    if (routingContext.getAllInstructions().some(route => route.config.auth === true)) {
-      if (!isLoggedIn) {
-        return next.cancel(new Redirect(loginRoute));
+  /**
+   * Merge current settings with incomming settings
+   * @param  {Object} incomming Settings object to be merged into the current configuration
+   * @return {Config}           this
+   */
+  configure(incomming) {
+    for (let key in incomming) {
+      const value = incomming[key];
+      if (value !== undefined) {
+        if (Array.isArray(value) || typeof value !== 'object' || value === null) {
+          this[key] = value;
+        } else {
+          extend(true, this[key], value);
+        }
       }
-    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
-      return next.cancel(new Redirect( this.authService.config.loginRedirect ));
     }
+  }
 
-    return next();
+  /* ----------- default  config ----------- */
+
+  // Used internally. The used Rest instance; set during configuration (see index.js)
+  client = null;
+
+  // If using aurelia-api:
+  // =====================
+
+  // This is the name of the endpoint used for any requests made in relation to authentication (login, logout, etc.). An empty string selects the default endpoint of aurelia-api.
+  endpoint = null;
+  // When authenticated, these endpoints will have the token added to the header of any requests (for authorization). Accepts an array of endpoint names. An empty string selects the default endpoint of aurelia-api.
+  configureEndpoints = null;
+
+
+  // SPA related options
+  // ===================
+
+  // The SPA url to which the user is redirected after a successful login
+  loginRedirect = '#/';
+  // The SPA url to which the user is redirected after a successful logout
+  logoutRedirect = '#/';
+  // The SPA route used when an unauthenticated user tries to access an SPA page that requires authentication
+  loginRoute = '/login';
+  // Whether or not an authentication token is provided in the response to a successful signup
+  loginOnSignup = true;
+  // If loginOnSignup == false: The SPA url to which the user is redirected after a successful signup (else loginRedirect is used)
+  signupRedirect = '#/login';
+  // redirect  when token expires. 0 = don't redirect (default), 1 = use logoutRedirect, string = redirect there
+  expiredRedirect = 0;
+
+
+  // API related options
+  // ===================
+
+  // The base url used for all authentication related requests, including provider.url below.
+  // This appends to the httpClient/endpoint base url, it does not override it.
+  baseUrl = '';
+  // The API endpoint to which login requests are sent
+  loginUrl = '/auth/login';
+  // The API endpoint to which logout requests are sent (not needed for jwt)
+  logoutUrl = null;
+  // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
+  logoutMethod = 'get';
+  // The API endpoint to which signup requests are sent
+  signupUrl = '/auth/signup';
+  // The API endpoint used in profile requests (inc. `find/get` and `update`)
+  profileUrl = '/auth/me';
+  // The method used to update the profile ('put' or 'patch')
+  profileMethod = 'put';
+  // The API endpoint used with oAuth to unlink authentication
+  unlinkUrl = '/auth/unlink/';
+  // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
+  unlinkMethod = 'get';
+  // The API endpoint to which refreshToken requests are sent. null = loginUrl
+  refreshTokenUrl = null;
+
+
+  // Token Options
+  // =============
+
+  // The header property used to contain the authToken in the header of API requests that require authentication
+  authHeader = 'Authorization';
+  // The token name used in the header of API requests that require authentication
+  authTokenType = 'Bearer';
+  // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
+  accessTokenProp = 'access_token';
+
+
+  // If the property defined by `accessTokenProp` is an object:
+  // ------------------------------------------------------------
+
+  //This is the property from which to get the token `{ "accessTokenProp": { "accessTokenName" : '...' } }`
+  accessTokenName = 'token';
+  // This allows the token to be a further object deeper `{ "accessTokenProp": { "accessTokenRoot" : { "accessTokenName" : '...' } } }`
+  accessTokenRoot = false;
+
+
+  // Refresh Token Options
+  // =====================
+
+  // Option to turn refresh tokens On/Off
+  useRefreshToken = false;
+  // The option to enable/disable the automatic refresh of Auth tokens using Refresh Tokens
+  autoUpdateToken = true;
+  // Oauth Client Id
+  clientId = false;
+  // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
+  refreshTokenProp = 'refresh_token';
+
+  // If the property defined by `refreshTokenProp` is an object:
+  // -----------------------------------------------------------
+
+  // This is the property from which to get the token `{ "refreshTokenProp": { "refreshTokenName" : '...' } }`
+  refreshTokenName = 'token';
+  // This allows the refresh token to be a further object deeper `{ "refreshTokenProp": { "refreshTokenRoot" : { "refreshTokenName" : '...' } } }`
+  refreshTokenRoot = false;
+
+
+  // Miscellaneous Options
+  // =====================
+
+  // Whether to enable the fetch interceptor which automatically adds the authentication headers
+  // (or not... e.g. if using a session based API or you want to override the default behaviour)
+  httpInterceptor = true;
+  // For OAuth only: Tell the API whether or not to include token cookies in the response (for session based APIs)
+  withCredentials = true;
+  // Controls how the popup is shown for different devices (Options: 'browser' or 'mobile')
+  platform = 'browser';
+  // Determines the `PLATFORM` property name upon which aurelia-authentication data is stored (Default: `PLATFORM.localStorage`)
+  storage = 'localStorage';
+  // The key used for storing the authentication response locally
+  storageKey = 'aurelia_authentication';
+
+  // List of value-converters to make global
+  globalValueConverters = ['authFilterValueConverter'];
+
+//OAuth provider specific related configuration
+  // ============================================
+  providers = {
+    facebook: {
+      name: 'facebook',
+      url: '/auth/facebook',
+      authorizationEndpoint: 'https://www.facebook.com/v2.5/dialog/oauth',
+      redirectUri: PLATFORM.location.origin + '/',
+      requiredUrlParams: ['display', 'scope'],
+      scope: ['email'],
+      scopeDelimiter: ',',
+      display: 'popup',
+      oauthType: '2.0',
+      popupOptions: { width: 580, height: 400 }
+    },
+    google: {
+      name: 'google',
+      url: '/auth/google',
+      authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
+      redirectUri: PLATFORM.location.origin,
+      requiredUrlParams: ['scope'],
+      optionalUrlParams: ['display', 'state'],
+      scope: ['profile', 'email'],
+      scopePrefix: 'openid',
+      scopeDelimiter: ' ',
+      display: 'popup',
+      oauthType: '2.0',
+      popupOptions: { width: 452, height: 633 },
+      state: randomState
+    },
+    github: {
+      name: 'github',
+      url: '/auth/github',
+      authorizationEndpoint: 'https://github.com/login/oauth/authorize',
+      redirectUri: PLATFORM.location.origin,
+      optionalUrlParams: ['scope'],
+      scope: ['user:email'],
+      scopeDelimiter: ' ',
+      oauthType: '2.0',
+      popupOptions: { width: 1020, height: 618 }
+    },
+    instagram: {
+      name: 'instagram',
+      url: '/auth/instagram',
+      authorizationEndpoint: 'https://api.instagram.com/oauth/authorize',
+      redirectUri: PLATFORM.location.origin,
+      requiredUrlParams: ['scope'],
+      scope: ['basic'],
+      scopeDelimiter: '+',
+      oauthType: '2.0'
+    },
+    linkedin: {
+      name: 'linkedin',
+      url: '/auth/linkedin',
+      authorizationEndpoint: 'https://www.linkedin.com/uas/oauth2/authorization',
+      redirectUri: PLATFORM.location.origin,
+      requiredUrlParams: ['state'],
+      scope: ['r_emailaddress'],
+      scopeDelimiter: ' ',
+      state: 'STATE',
+      oauthType: '2.0',
+      popupOptions: { width: 527, height: 582 }
+    },
+    twitter: {
+      name: 'twitter',
+      url: '/auth/twitter',
+      authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
+      redirectUri: PLATFORM.location.origin,
+      oauthType: '1.0',
+      popupOptions: { width: 495, height: 645 }
+    },
+    twitch: {
+      name: 'twitch',
+      url: '/auth/twitch',
+      authorizationEndpoint: 'https://api.twitch.tv/kraken/oauth2/authorize',
+      redirectUri: PLATFORM.location.origin,
+      requiredUrlParams: ['scope'],
+      scope: ['user_read'],
+      scopeDelimiter: ' ',
+      display: 'popup',
+      oauthType: '2.0',
+      popupOptions: { width: 500, height: 560 }
+    },
+    live: {
+      name: 'live',
+      url: '/auth/live',
+      authorizationEndpoint: 'https://login.live.com/oauth20_authorize.srf',
+      redirectUri: PLATFORM.location.origin,
+      requiredUrlParams: ['display', 'scope'],
+      scope: ['wl.emails'],
+      scopeDelimiter: ' ',
+      display: 'popup',
+      oauthType: '2.0',
+      popupOptions: { width: 500, height: 560 }
+    },
+    yahoo: {
+      name: 'yahoo',
+      url: '/auth/yahoo',
+      authorizationEndpoint: 'https://api.login.yahoo.com/oauth2/request_auth',
+      redirectUri: PLATFORM.location.origin,
+      scope: [],
+      scopeDelimiter: ',',
+      oauthType: '2.0',
+      popupOptions: { width: 559, height: 519 }
+    },
+    bitbucket: {
+      name: 'bitbucket',
+      url: '/auth/bitbucket',
+      authorizationEndpoint: 'https://bitbucket.org/site/oauth2/authorize',
+      redirectUri: PLATFORM.location.origin + '/',
+      requiredUrlParams: ['scope'],
+      scope: ['email'],
+      scopeDelimiter: ' ',
+      oauthType: '2.0',
+      popupOptions: { width: 1028, height: 529 }
+    },
+    auth0: {
+      name: 'auth0',
+      oauthType: 'auth0-lock',
+      clientId: 'your_client_id',
+      clientDomain: 'your_domain_url',
+      display: 'popup',
+      lockOptions: {
+        popup: true
+      },
+      responseType: 'token',
+      state: randomState
+    }
+  };
+
+  /* deprecated defaults */
+  _authToken = 'Bearer';
+  _responseTokenProp = 'access_token';
+  _tokenName = 'token';
+  _tokenRoot = false;
+  _tokenPrefix = 'aurelia';
+
+  /* deprecated methods and parameteres */
+  set authToken(authToken) {
+    LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
+    this._authTokenType = authToken;
+    this.authTokenType = authToken;
+    return authToken;
+  }
+  get authToken() {
+    return this._authTokenType;
+  }
+
+  set responseTokenProp(responseTokenProp) {
+    LogManager.getLogger('authentication').warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
+    this._responseTokenProp = responseTokenProp;
+    this.accessTokenProp = responseTokenProp;
+    return responseTokenProp;
+  }
+  get responseTokenProp() {
+    return this._responseTokenProp;
+  }
+
+  set tokenRoot(tokenRoot) {
+    LogManager.getLogger('authentication').warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
+    this._tokenRoot = tokenRoot;
+    this.accessTokenRoot = tokenRoot;
+    return tokenRoot;
+  }
+  get tokenRoot() {
+    return this._tokenRoot;
+  }
+
+  set tokenName(tokenName) {
+    LogManager.getLogger('authentication').warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
+    this._tokenName = tokenName;
+    this.accessTokenName = tokenName;
+    return tokenName;
+  }
+  get tokenName() {
+    return this._tokenName;
+  }
+
+  set tokenPrefix(tokenPrefix) {
+    LogManager.getLogger('authentication').warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
+    this._tokenPrefix = tokenPrefix;
+    return tokenPrefix;
+  }
+  get tokenPrefix() {
+    return this._tokenPrefix || 'aurelia';
+  }
+
+  get current() {
+    LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
+    return this;
+  }
+  set current(_) {
+    throw new Error('Setter BaseConfig.current is obsolete. Use BaseConfig directly instead.');
+  }
+
+  get _current() {
+    LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
+    return this;
+  }
+  set _current(_) {
+    throw new Error('Setter BaseConfig._current is obsolete. Use BaseConfig directly instead.');
   }
 }
 
-@inject(AuthService)
-export class AuthorizeStep {
-  constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
-
-    this.authService = authService;
-  }
-
-  run(routingContext, next) {
-    const isLoggedIn = this.authService.isAuthenticated();
-    const loginRoute = this.authService.config.loginRoute;
-
-    if (routingContext.getAllInstructions().some(route => route.config.auth)) {
-      if (!isLoggedIn) {
-        return next.cancel(new Redirect(loginRoute));
-      }
-    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
-      return next.cancel(new Redirect( this.authService.config.loginRedirect ));
-    }
-
-    return next();
-  }
+function randomState() {
+  let rand = Math.random().toString(36).substr(2);
+  return encodeURIComponent(rand);
 }
 
 @inject(HttpClient, Config, AuthService, BaseConfig)
@@ -1464,7 +1239,7 @@ export class FetchConfig {
             return resolve(response);
           }
 
-          this.authService.updateToken().then(() => {
+          return this.authService.updateToken().then(() => {
             let token = this.authService.getAccessToken();
 
             if (this.config.authTokenType) {
@@ -1515,72 +1290,289 @@ export class FetchConfig {
   }
 }
 
-// import to ensure value-converters get bundled
-import './authFilterValueConverter';
-
-/**
- * Configure the plugin.
- *
- * @param {{globalResources: Function, container: {Container}}} aurelia
- * @param {{}|Function}                                         config
- */
-function configure(aurelia, config) {
-  // ie9 polyfill
-  if (!PLATFORM.location.origin) {
-    PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
+@inject(Storage, Popup, BaseConfig)
+export class OAuth1 {
+  constructor(storage, popup, config) {
+    this.storage  = storage;
+    this.config   = config;
+    this.popup    = popup;
+    this.defaults = {
+      url: null,
+      name: null,
+      popupOptions: null,
+      redirectUri: null,
+      authorizationEndpoint: null
+    };
   }
 
-  const baseConfig = aurelia.container.get(BaseConfig);
+  open(options, userData) {
+    const provider  = extend(true, {}, this.defaults, options);
+    const serverUrl = this.config.joinBase(provider.url);
 
-  if (typeof config === 'function') {
-    config(baseConfig);
-  } else if (typeof config === 'object') {
-    baseConfig.configure(config);
+    if (this.config.platform !== 'mobile') {
+      this.popup = this.popup.open('', provider.name, provider.popupOptions);
+    }
+
+    return this.config.client.post(serverUrl)
+      .then(response => {
+        const url = provider.authorizationEndpoint + '?' + buildQueryString(response);
+
+        if (this.config.platform === 'mobile') {
+          this.popup = this.popup.open(url, provider.name, provider.popupOptions);
+        } else {
+          this.popup.popupWindow.location = url;
+        }
+
+        const popupListener = this.config.platform === 'mobile'
+                            ? this.popup.eventListener(provider.redirectUri)
+                            : this.popup.pollPopup();
+
+        return popupListener.then(result => this.exchangeForToken(result, userData, provider));
+      });
   }
 
-  // after baseConfig was configured
-  for (let converter of baseConfig.globalValueConverters) {
-    aurelia.globalResources(`./${converter}`);
-    LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${converter}`);
-  }
-  const fetchConfig  = aurelia.container.get(FetchConfig);
-  const clientConfig = aurelia.container.get(Config);
+  exchangeForToken(oauthData, userData, provider) {
+    const data        = extend(true, {}, userData, oauthData);
+    const serverUrl   = this.config.joinBase(provider.url);
+    const credentials = this.config.withCredentials ? 'include' : 'same-origin';
 
-  // Array? Configure the provided endpoints.
-  if (Array.isArray(baseConfig.configureEndpoints)) {
-    baseConfig.configureEndpoints.forEach(endpointToPatch => {
-      fetchConfig.configure(endpointToPatch);
+    return this.config.client.post(serverUrl, data, {credentials: credentials});
+  }
+}
+
+@inject(Storage, Popup, BaseConfig)
+export class OAuth2 {
+  constructor(storage, popup, config) {
+    this.storage      = storage;
+    this.config       = config;
+    this.popup        = popup;
+    this.defaults     = {
+      url: null,
+      name: null,
+      state: null,
+      scope: null,
+      scopeDelimiter: null,
+      redirectUri: null,
+      popupOptions: null,
+      authorizationEndpoint: null,
+      responseParams: null,
+      requiredUrlParams: null,
+      optionalUrlParams: null,
+      defaultUrlParams: ['response_type', 'client_id', 'redirect_uri'],
+      responseType: 'code'
+    };
+  }
+
+  open(options, userData) {
+    const provider  = extend(true, {}, this.defaults, options);
+    const stateName = provider.name + '_state';
+
+    if (typeof provider.state === 'function') {
+      this.storage.set(stateName, provider.state());
+    } else if (typeof provider.state === 'string') {
+      this.storage.set(stateName, provider.state);
+    }
+
+    const url       = provider.authorizationEndpoint
+                    + '?' + buildQueryString(this.buildQuery(provider));
+    const popup     = this.popup.open(url, provider.name, provider.popupOptions);
+    const openPopup = (this.config.platform === 'mobile')
+                    ? popup.eventListener(provider.redirectUri)
+                    : popup.pollPopup();
+
+    return openPopup
+      .then(oauthData => {
+        if (provider.responseType === 'token' ||
+            provider.responseType === 'id_token%20token' ||
+            provider.responseType === 'token%20id_token'
+        ) {
+          return oauthData;
+        }
+        if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
+          return Promise.reject('OAuth 2.0 state parameter mismatch.');
+        }
+        return this.exchangeForToken(oauthData, userData, provider);
+      });
+  }
+
+  exchangeForToken(oauthData, userData, provider) {
+    const data = extend(true, {}, userData, {
+      clientId: provider.clientId,
+      redirectUri: provider.redirectUri
+    }, oauthData);
+
+    const serverUrl   = this.config.joinBase(provider.url);
+    const credentials = this.config.withCredentials ? 'include' : 'same-origin';
+
+    return this.config.client.post(serverUrl, data, {credentials: credentials});
+  }
+
+  buildQuery(provider) {
+    let query = {};
+    const urlParams   = ['defaultUrlParams', 'requiredUrlParams', 'optionalUrlParams'];
+
+    urlParams.forEach( params => {
+      (provider[params] || []).forEach( paramName => {
+        const camelizedName = camelCase(paramName);
+        let paramValue      = (typeof provider[paramName] === 'function')
+                              ? provider[paramName]()
+                              : provider[camelizedName];
+
+        if (paramName === 'state') {
+          paramValue = encodeURIComponent(this.storage.get(provider.name + '_state'));
+        }
+
+        if (paramName === 'scope' && Array.isArray(paramValue)) {
+          paramValue = paramValue.join(provider.scopeDelimiter);
+
+          if (provider.scopePrefix) {
+            paramValue = provider.scopePrefix + provider.scopeDelimiter + paramValue;
+          }
+        }
+
+        query[paramName] = paramValue;
+      });
+    });
+    return query;
+  }
+}
+
+const camelCase = function(name) {
+  return name.replace(/([\:\-\_]+(.))/g, function(_, separator, letter, offset) {
+    return offset ? letter.toUpperCase() : letter;
+  });
+};
+
+export class Popup {
+  constructor() {
+    this.popupWindow = null;
+    this.polling     = null;
+    this.url         = '';
+  }
+
+  open(url, windowName, options) {
+    this.url = url;
+    const optionsString = buildPopupWindowOptions(options || {});
+
+    this.popupWindow = PLATFORM.global.open(url, windowName, optionsString);
+
+    if (this.popupWindow && this.popupWindow.focus) {
+      this.popupWindow.focus();
+    }
+
+    return this;
+  }
+
+  eventListener(redirectUri) {
+    return new Promise((resolve, reject) => {
+      this.popupWindow.addEventListener('loadstart', event => {
+        if (event.url.indexOf(redirectUri) !== 0) {
+          return;
+        }
+
+        const parser  = DOM.createElement('a');
+        parser.href = event.url;
+
+        if (parser.search || parser.hash) {
+          const qs = parseUrl(parser);
+
+          if (qs.error) {
+            reject({error: qs.error});
+          } else {
+            resolve(qs);
+          }
+
+          this.popupWindow.close();
+        }
+      });
+
+      this.popupWindow.addEventListener('exit', () => {
+        reject({data: 'Provider Popup was closed'});
+      });
+
+      this.popupWindow.addEventListener('loaderror', () => {
+        reject({data: 'Authorization Failed'});
+      });
     });
   }
 
-  let client;
+  pollPopup() {
+    return new Promise((resolve, reject) => {
+      this.polling = PLATFORM.global.setInterval(() => {
+        let errorData;
 
-  // Let's see if there's a configured named or default endpoint or a HttpClient.
-  if (baseConfig.endpoint !== null) {
-    if (typeof baseConfig.endpoint === 'string') {
-      const endpoint = clientConfig.getEndpoint(baseConfig.endpoint);
-      if (!endpoint) {
-        throw new Error(`There is no '${baseConfig.endpoint || 'default'}' endpoint registered.`);
-      }
-      client = endpoint;
-    } else if (baseConfig.endpoint instanceof HttpClient) {
-      client = new Rest(baseConfig.endpoint);
-    }
+        try {
+          if (this.popupWindow.location.host ===  PLATFORM.global.document.location.host
+            && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
+            const qs = parseUrl(this.popupWindow.location);
+
+            if (qs.error) {
+              reject({error: qs.error});
+            } else {
+              resolve(qs);
+            }
+
+            this.popupWindow.close();
+            PLATFORM.global.clearInterval(this.polling);
+          }
+        } catch (error) {
+          errorData = error;
+        }
+
+        if (!this.popupWindow) {
+          PLATFORM.global.clearInterval(this.polling);
+          reject({
+            error: errorData,
+            data: 'Provider Popup Blocked'
+          });
+        } else if (this.popupWindow.closed) {
+          PLATFORM.global.clearInterval(this.polling);
+          reject({
+            error: errorData,
+            data: 'Problem poll popup'
+          });
+        }
+      }, 35);
+    });
   }
-
-  // No? Fine. Default to HttpClient. BC all the way.
-  if (!(client instanceof Rest)) {
-    client = new Rest(aurelia.container.get(HttpClient));
-  }
-
-  // Set the client on the config, for use throughout the plugin.
-  baseConfig.client = client;
 }
 
-export {
-  configure,
-  FetchConfig,
-  AuthService,
-  AuthorizeStep,
-  AuthenticateStep
+const buildPopupWindowOptions = options => {
+  const width  = options.width || 500;
+  const height = options.height || 500;
+
+  const extended = extend({
+    width: width,
+    height: height,
+    left: PLATFORM.global.screenX + ((PLATFORM.global.outerWidth - width) / 2),
+    top: PLATFORM.global.screenY + ((PLATFORM.global.outerHeight - height) / 2.5)
+  }, options);
+
+  let parts = [];
+  Object.keys(extended).map(key => parts.push(key + '=' + extended[key]));
+
+  return parts.join(',');
 };
+
+const parseUrl = url => {
+  return extend(true, {}, parseQueryString(url.search), parseQueryString(url.hash));
+};
+
+@inject(BaseConfig)
+export class Storage {
+  constructor(config) {
+    this.config = config;
+  }
+
+  get(key) {
+    return PLATFORM.global[this.config.storage].getItem(key);
+  }
+
+  set(key, value) {
+    PLATFORM.global[this.config.storage].setItem(key, value);
+  }
+
+  remove(key) {
+    PLATFORM.global[this.config.storage].removeItem(key);
+  }
+}

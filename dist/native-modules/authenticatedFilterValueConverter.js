@@ -1,19 +1,11 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.AuthenticatedFilterValueConverter = undefined;
-
 var _dec, _class;
 
-var _aureliaDependencyInjection = require('aurelia-dependency-injection');
-
-var _aureliaAuthentication = require('./aurelia-authentication');
 
 
+import { inject } from 'aurelia-dependency-injection';
+import { AuthService } from './aurelia-authentication';
 
-var AuthenticatedFilterValueConverter = exports.AuthenticatedFilterValueConverter = (_dec = (0, _aureliaDependencyInjection.inject)(_aureliaAuthentication.AuthService), _dec(_class = function () {
+export var AuthenticatedFilterValueConverter = (_dec = inject(AuthService), _dec(_class = function () {
   function AuthenticatedFilterValueConverter(authService) {
     
 

@@ -1,5 +1,9 @@
+<a name="3.0.0-rc6"></a>
+## [3.0.0-rc6](https://github.com/spoonx/aurelia-authentication/compare/3.0.0-rc5...v3.0.0-rc6) (2016-07-04)
+
+
 <a name"3.0.0-rc5"></a>
-### 3.0.1 (2016-06-15)
+### 3.0.0-rc5 (2016-06-15)
 
 
 #### Bug Fixes

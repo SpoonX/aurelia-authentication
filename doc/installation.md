@@ -2,7 +2,19 @@
 
 ## Aureli-Cli
 
-Run `npm i aurelia-authentication` from your project root and add `aurelia-authentication` to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
+Run `npm i aurelia-authentication --save` from your project root.
+
+Add `aurelia-authentication` to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
+
+Aurelia-authentication has submodules (currently only the authFilter). You need to add it to the aurelia build resources in your package.json.
+
+```js
+"aurelia": {
+  "build": {
+    "resources": ["aurelia-authentication/authFilterValueConverter"]
+  }
+},
+```
 
 ## Jspm
 
@@ -27,16 +39,18 @@ jspm resolve --only npm:aurelia-dependency-injection@1.0.0-beta.2.1.0
 
 ## Webpack
 
-Run `npm i aurelia-authentication` from your project root.
+Run `npm i aurelia-authentication --save` from your project root.
 
-Aurelia-authentication has submodules (currently only the authFilter). So you need to add it to the AureliaWebpackPlugin includeSubModules list.
+Add `'aurelia-authentication'` in the `coreBundles.aurelia section` of your `webpack.config.js`.
+
+Aurelia-authentication has submodules (currently only the authFilter). You need to add it to the aurelia build resources in your package.json.
 
 ```js
-AureliaWebpackPlugin({
-    includeSubModules: [
-      { moduleId: 'aurelia-authentication' }
-    ]
-  }),
+"aurelia": {
+  "build": {
+    "resources": ["aurelia-authentication/authFilterValueConverter"]
+  }
+},
 ```
 
 ## Typescript

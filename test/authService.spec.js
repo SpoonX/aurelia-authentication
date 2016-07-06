@@ -1,9 +1,12 @@
 import {Container} from 'aurelia-dependency-injection';
+import {bindingMode, BindingEngine, createScopeForTest} from 'aurelia-binding';
+import {SignalBindingBehavior, BindingSignaler} from 'aurelia-templating-resources';
 import {Config, Rest} from 'aurelia-api';
 
 import {configure} from '../src/aurelia-authentication';
 import {AuthService} from '../src/aurelia-authentication';
 import {Authentication} from '../src/authentication';
+import {AuthFilterValueConverter} from '../src/authFilterValueConverter';
 
 const tokenFuture = {
   payload: {
@@ -251,8 +254,63 @@ describe('AuthService', () => {
       authService.clearTimeout();
       expect(authService.timeoutID).toBe(0);
     });
-  });
 
+    // setup signal test
+    let bindingEngine = container.get(BindingEngine);
+    let bindingBehaviors = {
+      signal: container.get(SignalBindingBehavior)
+    };
+    let valueConverters = {
+      'isAuthenticated': AuthFilterValueConverter
+    };
+    let lookupFunctions = {
+      bindingBehaviors: name => bindingBehaviors[name],
+      valueConverters: name => valueConverters[name]
+    };
+    let bindingSignaler = container.get(BindingSignaler);
+
+    it('Should signal manually', () => {
+      //create element and bind
+      authService.authenticated = true;
+      let scope = createScopeForTest(authService);
+      let target = document.createElement('div');
+      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', `authenticated | isAuthenticated & signal:'auth-token-expired'`, bindingMode.oneWay, lookupFunctions);
+      let binding = bindingExpression.createBinding(target);
+      binding.bind(scope);
+      expect(target.innerHTML).toBe('true');
+
+      // change scope
+      authService.authenticated = false;
+      expect(target.innerHTML).toBe('true');
+
+      // signal
+      bindingSignaler.signal('auth-token-expired');
+      expect(target.innerHTML).toBe('false');
+    });
+
+    it('test signalling on expired', done => {
+      //create element and bind
+      authService.authenticated = true;
+      let scope = createScopeForTest(authService);
+      let target = document.createElement('div');
+      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', `authenticated | isAuthenticated & signal:'auth-token-expired'`, bindingMode.oneWay, lookupFunctions);
+      let binding = bindingExpression.createBinding(target);
+      binding.bind(scope);
+      expect(target.innerHTML).toBe('true');
+
+      // change scope
+      authService.setTimeout(0);
+      expect(target.innerHTML).toBe('true');
+
+      // process signal from authService.setTimeout
+      expect(authService.timeoutID).not.toBe(0);
+      setTimeout( function() {
+        expect(authService.timeoutID).toBe(0);
+        expect(target.innerHTML).toBe('false');
+        done();
+      }, 1);
+    });
+  });
 
   describe('.setResponseObject()', () => {
     const container = new Container();

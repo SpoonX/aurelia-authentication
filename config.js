@@ -11,6 +11,7 @@ System.config({
     "aurelia-binding": "npm:aurelia-binding@1.0.0-rc.1.0.2",
     "aurelia-bootstrapper": "npm:aurelia-bootstrapper@1.0.0-rc.1.0.1",
     "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-rc.1.0.0",
+    "aurelia-event-aggregator": "npm:aurelia-event-aggregator@1.0.0-rc.1.0.0",
     "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-rc.1.0.0",
     "aurelia-logging": "npm:aurelia-logging@1.0.0-rc.1.0.0",
     "aurelia-metadata": "npm:aurelia-metadata@1.0.0-rc.1.0.0",

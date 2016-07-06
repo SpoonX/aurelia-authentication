@@ -1,4 +1,5 @@
 import {Container} from 'aurelia-dependency-injection';
+import {EventAggregator} from 'aurelia-event-aggregator';
 import {bindingMode, BindingEngine, createScopeForTest} from 'aurelia-binding';
 import {SignalBindingBehavior, BindingSignaler} from 'aurelia-templating-resources';
 import {Config, Rest} from 'aurelia-api';
@@ -313,21 +314,25 @@ describe('AuthService', () => {
   });
 
   describe('.setResponseObject()', () => {
-    const container = new Container();
-    let authService = container.get(AuthService);
-
-    authService.getTtl = () => 0;
-
     it('Should set with object', () => {
+      const container = new Container();
+      let authService = container.get(AuthService);
+
+      authService.getTtl = () => 0;
+
       authService.setResponseObject({access_token: 'some'});
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe('some');
       expect(authService.authenticated).toBe(true);
-
       authService.setResponseObject(null);
     });
 
     it('Should set with jwt and not timeout', done => {
+      const container = new Container();
+      let authService = container.get(AuthService);
+
+      authService.getTtl = () => 0;
+
       spyOn(authService, 'getTtl').and.returnValue(1);
       spyOn(authService.authentication, 'redirect').and.callThrough();
 
@@ -343,6 +348,11 @@ describe('AuthService', () => {
     });
 
     it('Should set with jwt and timeout', done => {
+      const container = new Container();
+      let authService = container.get(AuthService);
+
+      authService.getTtl = () => 0;
+
       spyOn(authService, 'getTtl').and.returnValue(0);
       spyOn(authService.authentication, 'redirect').and.callFake((overwriteUri, defaultUri) => {
         expect(overwriteUri).toBe(0);
@@ -359,6 +369,11 @@ describe('AuthService', () => {
     });
 
     it('Should set with jwt,  timeout and redirect', done => {
+      const container = new Container();
+      let authService = container.get(AuthService);
+
+      authService.getTtl = () => 0;
+
       spyOn(authService, 'getTtl').and.returnValue(0);
       spyOn(authService.authentication, 'redirect').and.callFake((overwriteUri, defaultUri) => {
         expect(overwriteUri).toBe(1);
@@ -376,6 +391,11 @@ describe('AuthService', () => {
     });
 
     it('Should delete', () => {
+      const container = new Container();
+      let authService = container.get(AuthService);
+
+      authService.getTtl = () => 0;
+
       window.localStorage.setItem('aurelia_authentication', 'another');
 
       authService.setResponseObject(null);
@@ -383,6 +403,25 @@ describe('AuthService', () => {
       expect(authService.authenticated).toBe(false);
 
       authService.authentication.setResponseObject(null);
+    });
+
+    it('Should publish authentication-change', () => {
+      const container = new Container();
+      let authService = container.get(AuthService);
+
+      authService.getTtl = () => 0;
+      let expectation;
+
+      let ea = container.get(EventAggregator);
+      ea.subscribe('authentication-change', auth => {
+        expect(auth).toBe(expectation);
+      });
+
+      expectation = true;
+      authService.setResponseObject({access_token: 'some'});
+
+      expectation = false;
+      authService.setResponseObject(null);
     });
   });
 

@@ -88,7 +88,7 @@ this.authService.clearTimeout();
 
 ### .setResponseObject(response)
 
-Stores and analyses the servers response as Object. Sets login status and timeout.  Emits the binding signal 'authentication-change' when the authorization status has changed.
+Stores and analyses the servers response as Object. Sets login status and timeout.  Publishes 'authentication-change' with the EventAggregator and emits the binding signal 'authentication-change' when the authorization status has changed.
 
 #### Parameters
 

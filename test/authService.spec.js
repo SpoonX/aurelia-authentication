@@ -261,7 +261,7 @@ describe('AuthService', () => {
       signal: container.get(SignalBindingBehavior)
     };
     let valueConverters = {
-      'isAuthenticated': AuthFilterValueConverter
+      'authFilter': AuthFilterValueConverter
     };
     let lookupFunctions = {
       bindingBehaviors: name => bindingBehaviors[name],
@@ -274,7 +274,7 @@ describe('AuthService', () => {
       authService.authenticated = true;
       let scope = createScopeForTest(authService);
       let target = document.createElement('div');
-      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', `authenticated | isAuthenticated & signal:'auth-token-expired'`, bindingMode.oneWay, lookupFunctions);
+      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', `authenticated | authFilter & signal:'authentication-change'`, bindingMode.oneWay, lookupFunctions);
       let binding = bindingExpression.createBinding(target);
       binding.bind(scope);
       expect(target.innerHTML).toBe('true');
@@ -284,7 +284,7 @@ describe('AuthService', () => {
       expect(target.innerHTML).toBe('true');
 
       // signal
-      bindingSignaler.signal('auth-token-expired');
+      bindingSignaler.signal('authentication-change');
       expect(target.innerHTML).toBe('false');
     });
 
@@ -293,7 +293,7 @@ describe('AuthService', () => {
       authService.authenticated = true;
       let scope = createScopeForTest(authService);
       let target = document.createElement('div');
-      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', `authenticated | isAuthenticated & signal:'auth-token-expired'`, bindingMode.oneWay, lookupFunctions);
+      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', `authenticated | authFilter & signal:'authentication-change'`, bindingMode.oneWay, lookupFunctions);
       let binding = bindingExpression.createBinding(target);
       binding.bind(scope);
       expect(target.innerHTML).toBe('true');

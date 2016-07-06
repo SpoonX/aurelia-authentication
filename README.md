@@ -12,11 +12,13 @@ You have multiple endpoints? No problem! In the recommended setting, aurelia-aut
 
 With aurelia-authentication you can:
 
-* Use local or third-party providers to authenticate the user
+* Use local login or third-party providers to authenticate the user
 * Automatically add your token to requests to the specified endpoints
 * Automatically refresh your token
 * Extensively customize the settings
 * Use standalone or in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api)
+* Use [Auth0](https://auth0.com) as your only authentication provider (see [the relevant section](auth0.md) for more info)
+* Update valueConverters using the 'authorization-change' binding signal.
 * And more
 
 ## Important note
@@ -29,21 +31,21 @@ We've simplified installation and usage! This plugin should now be installed usi
 
 Run `jspm i aurelia-authentication` from your project root.
 
-If install breaks your application, try resolving jspm forks: 
+If install breaks your application, try resolving jspm forks:
 
 ```
 $ jspm inspect --forks
 $ jspm resolve --only registry:package-name@version
 ```
 
-E.g. 
+E.g.
 
 ```
 $ jspm inspect --forks
      Installed Forks
 
          npm:aurelia-dependency-injection 1.0.0-beta.1.2.3 1.0.0-beta.2.1.0
-         
+
 $ jspm resolve --only npm:aurelia-dependency-injection@1.0.0-beta.2.1.0
 ```
 

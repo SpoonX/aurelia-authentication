@@ -88,8 +88,6 @@ export class AuthService {
     this.clearTimeout();
 
     this.timeoutID = PLATFORM.global.setTimeout(() => {
-      this.bindingSignaler.signal('auth-token-expired');
-
       if (this.config.autoUpdateToken
         && this.authentication.getAccessToken()
         && this.authentication.getRefreshToken()) {
@@ -120,9 +118,17 @@ export class AuthService {
 
     this.authentication.setResponseObject(response);
 
+    let wasAuthenticated = this.authenticated;
     this.authenticated = this.authentication.isAuthenticated();
+
     if (this.authenticated && !Number.isNaN(this.authentication.exp)) {
       this.setTimeout(this.getTtl() * 1000);
+    }
+
+    if (wasAuthenticated !== this.authenticated) {
+      this.bindingSignaler.signal('authentication-change');
+
+      LogManager.getLogger('authentication').info(`Authorization changed to: ${this.authenticated}`);
     }
   }
 

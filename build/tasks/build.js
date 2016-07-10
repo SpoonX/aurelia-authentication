@@ -129,8 +129,11 @@ gulp.task('fixup-dts', function(){
 });
 
 gulp.task('clean-dts', function() {
-  return gulp.src(paths.output + paths.resources, {read: false, force: true})
-    .pipe(clean());
+  return gulp.src([
+     paths.output + '**/*.d.ts',
+     '!' + paths.output + '{index,' + paths.packageName + '}.d.ts'
+    ], {read: false})
+  .pipe(clean({force: true}));
 });
 
 gulp.task('build', function(callback) {

@@ -56,7 +56,9 @@ import {AuthService} from 'aurelia-authentication';
 
 ### .setTimeout(ttl)
 
-Sets the login timeout. CAUTION: .authenticated and isAuthenticated() might get different results when set manually.
+Sets the login timeout.
+
+CAUTION: .authenticated and isAuthenticated() might get different results when set manually.
 
 #### Parameters
 
@@ -86,7 +88,7 @@ this.authService.clearTimeout();
 
 ### .setResponseObject(response)
 
-Stores and analyses the servers response as Object. Sets login status and timeout
+Stores and analyses the servers response as Object. Sets login status and timeout.  Publishes 'authentication-change' with the EventAggregator and emits the binding signal 'authentication-change' when the authorization status has changed.
 
 #### Parameters
 
@@ -187,7 +189,9 @@ let currentToken = this.authService.getRefreshToken();
 
 ### .isAuthenticated()
 
-Checks if there is a (valid) token in storage. If the token is isExpired and  BaseConfig.autoUpdateToken===true, it returns true and a new access token automatically requested using the refesh_token. Does not use a timeout as .authenticated does. Hence, when you cancel or manually set the timeout, .isAuthenticated and .authenticated could yield different results.
+Checks if there is a (valid) token in storage. If the token is isExpired and  BaseConfig.autoUpdateToken===true, it returns true and a new access token automatically requested using the refesh_token. If you use it in a getter, aurelia will dirty check on uodates. Hence, may better either use .authenticated or use the binding signal 'authentication-change' to ensure udpdates.
+
+CAUTION: When you cancel or manually set the timeout, .isAuthenticated and .authenticated could yield different results.
 
 #### Returns
 
@@ -196,7 +200,16 @@ Checks if there is a (valid) token in storage. If the token is isExpired and  Ba
 #### Example
 
 ```js
-let auth = this.authService.isAuthenticated();
+  isAuthenticated() {
+    return this.authService.isAuthenticated();
+  }
+```
+
+```html
+<li repeat.for="row of router.navigation | authFilter: isAuthenticated & signal: 'authentication-change" class="${row.isActive ? 'active' : ''}">
+      <a data-toggle="collapse" data-target="#bs-example-navbar-collapse-1.in" href.bind="row.href">${row.title}</a>
+  </li>
+
 ```
 
 ----------

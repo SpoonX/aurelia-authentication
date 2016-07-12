@@ -1,11 +1,13 @@
 import {PLATFORM} from 'aurelia-pal';
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
+import {EventAggregator} from 'aurelia-event-aggregator';
+import {BindingSignaler} from 'aurelia-templating-resources';
 import * as LogManager from 'aurelia-logging';
 import {Authentication} from './authentication';
 import {BaseConfig} from './baseConfig';
 
-@inject(Authentication, BaseConfig)
+@inject(Authentication, BaseConfig, BindingSignaler, EventAggregator)
 export class AuthService {
   /**
    * The Authentication instance that handles the token
@@ -38,12 +40,16 @@ export class AuthService {
   /**
    *  Create an AuthService instance
    *
-   * @param  {Authentication} authentication The Authentication instance to be used
-   * @param  {Config}         config         The Config instance to be used
+   * @param  {Authentication}  authentication  The Authentication instance to be used
+   * @param  {Config}          config          The Config instance to be used
+   * @param  {BindingSignaler} bindingSignaler The BindingSignaler instance to be used
+   * @param  {EventAggregator} eventAggregator The EventAggregator instance to be used
    */
-  constructor(authentication, config) {
-    this.authentication = authentication;
-    this.config         = config;
+  constructor(authentication, config, bindingSignaler, eventAggregator) {
+    this.authentication  = authentication;
+    this.config          = config;
+    this.bindingSignaler = bindingSignaler;
+    this.eventAggregator = eventAggregator;
 
     // get token stored in previous format over
     const oldStorageKey = config.tokenPrefix
@@ -116,9 +122,18 @@ export class AuthService {
 
     this.authentication.setResponseObject(response);
 
+    let wasAuthenticated = this.authenticated;
     this.authenticated = this.authentication.isAuthenticated();
+
     if (this.authenticated && !Number.isNaN(this.authentication.exp)) {
       this.setTimeout(this.getTtl() * 1000);
+    }
+
+    if (wasAuthenticated !== this.authenticated) {
+      this.bindingSignaler.signal('authentication-change');
+      this.eventAggregator.publish('authentication-change', this.authenticated);
+
+      LogManager.getLogger('authentication').info(`Authorization changed to: ${this.authenticated}`);
     }
   }
 

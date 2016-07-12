@@ -22,6 +22,8 @@ With aurelia-authentication you can:
 * Extensively customize the settings
 * Use standalone or in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api)
 * Use [Auth0](https://auth0.com) as your only authentication provider (see [the relevant section](auth0.md) for more info)
+* Update valueConverters using the 'authorization-change' binding signal.
+* Subscribe to the 'authorization-change' event.
 * And more
 
 ## Important note

@@ -3,16 +3,14 @@ var fs = require('fs');
 
 // hide warning //
 var emitter = require('events');
-emitter.defaultMaxListeners = 20;
+emitter.defaultMaxListeners = 5;
 
 var appRoot = 'src/';
 var pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 
 var paths = {
   root: appRoot,
-  source: appRoot + '**/*.js',
-  resources: '*ValueConverter.*',  // relative to root, resources can not that easily be bundled into a single file (due to naming conventions)
-  html: appRoot + '**/*.html',
+  mainSource: [appRoot + '*.js', '!' + appRoot + '*ValueConverter.js'], // all main js which can be concated
   style: 'styles/**/*.css',
   output: 'dist/',
   doc:'./doc',
@@ -23,13 +21,11 @@ var paths = {
   ignore: [],
   useTypeScriptForDTS: false,
   importsToAdd: [],
-  importsToIgnoreForDts: ['extend', 'jwt-decode'],
-  sort: false
+  importsToIgnoreForDts: ['extend', 'jwt-decode'], // imports that are only used internally. no need to d.ts export them
+  jsResources: [appRoot + '*ValueConverter.js'], // js files that should not be concated, but keep their path
+  resources: appRoot + '{**/*.css,**/*.html}',
+  sort: true,
+  concat: true
 };
-
-paths.files = [
-  paths.source,
-  '!' + paths.root + paths.resources
-];
 
 module.exports = paths;

@@ -1,9 +1,6 @@
 import {PLATFORM} from 'aurelia-pal';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Config, Rest} from 'aurelia-api';
-import {AuthService} from './authService';
-import {AuthorizeStep} from './authorizeStep';
-import {AuthenticateStep} from './authenticateStep';
 import {BaseConfig} from './baseConfig';
 import {FetchConfig} from './fetchClientConfig';
 import * as LogManager from 'aurelia-logging';
@@ -16,7 +13,7 @@ import './authFilterValueConverter';
  * @param {{globalResources: Function, container: {Container}}} aurelia
  * @param {{}|Function}                                         config
  */
-function configure(aurelia, config) {
+export function configure(aurelia, config) {
   // ie9 polyfill
   if (!PLATFORM.location.origin) {
     PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
@@ -68,11 +65,3 @@ function configure(aurelia, config) {
   // Set the client on the config, for use throughout the plugin.
   baseConfig.client = client;
 }
-
-export {
-  configure,
-  FetchConfig,
-  AuthService,
-  AuthorizeStep,
-  AuthenticateStep
-};

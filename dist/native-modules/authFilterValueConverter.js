@@ -1,12 +1,6 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 
 
-
-var AuthFilterValueConverter = exports.AuthFilterValueConverter = function () {
+export var AuthFilterValueConverter = function () {
   function AuthFilterValueConverter() {
     
   }

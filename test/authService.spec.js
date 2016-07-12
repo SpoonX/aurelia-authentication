@@ -5,7 +5,7 @@ import {SignalBindingBehavior, BindingSignaler} from 'aurelia-templating-resourc
 import {Config, Rest} from 'aurelia-api';
 
 import {configure} from '../src/aurelia-authentication';
-import {AuthService} from '../src/aurelia-authentication';
+import {AuthService} from '../src/authService';
 import {Authentication} from '../src/authentication';
 import {AuthFilterValueConverter} from '../src/authFilterValueConverter';
 

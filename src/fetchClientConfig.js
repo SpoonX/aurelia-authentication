@@ -57,7 +57,7 @@ export class FetchConfig {
             return resolve(response);
           }
 
-          this.authService.updateToken().then(() => {
+          return this.authService.updateToken().then(() => {
             let token = this.authService.getAccessToken();
 
             if (this.config.authTokenType) {

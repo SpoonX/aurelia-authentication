@@ -2,13 +2,11 @@ import {Container} from 'aurelia-dependency-injection';
 import {Config, Rest} from 'aurelia-api';
 import {HttpClient} from 'aurelia-fetch-client';
 
-import {
-  configure,
-  FetchConfig,
-  AuthService,
-  AuthorizeStep,
-  AuthenticateStep
-} from '../src/aurelia-authentication';
+import {configure} from '../src/aurelia-authentication';
+import {AuthService} from '../src/authService';
+import {AuthorizeStep} from '../src/authorizeStep';
+import {AuthenticateStep} from '../src/authenticateStep';
+import {FetchConfig} from '../src/fetchClientConfig';
 import {BaseConfig} from '../src/baseConfig';
 
 let noop = () => {};

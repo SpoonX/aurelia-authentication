@@ -4,21 +4,33 @@
 
 Run `npm i aurelia-authentication --save` from your project root.
 
-Add `aurelia-authentication` to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
-
-Aurelia-authentication has submodules (currently only the authFilter). You need to add it to the aurelia build resources in your package.json.
+Aurelia-authentication has submodules (currently only the authFilter) and makes use of `extends` and `jwt-decode`. So, add following to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
 
 ```js
-"aurelia": {
-  "build": {
-    "resources": ["aurelia-authentication/authFilterValueConverter"]
+"dependencies": [
+  // ...
+  'extends',
+  {
+    "name": "aurelia-authentication",
+    "path": "../node_modules/aurelia-authentication/dist/amd",
+    "main": "aurelia-authentication"
+  },
+  {
+    "name": "jwt-decode",
+    "path": "../node_modules/jwt-decode/lib",
+    "main": "index"
   }
-},
+  // ...
+],
 ```
 
 ## Jspm
 
 Run `jspm i aurelia-authentication`
+
+Add `aurelia-authentication` to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
+
+Aurelia-authentication has submodules (currently only the authFilter). So, if you use it, add `aurelia-authentication/authFilterValueConverter` as well.
 
 If the installation results in having forks, try resolving them by running:
 
@@ -37,21 +49,14 @@ jspm inspect --forks
 jspm resolve --only npm:aurelia-dependency-injection@1.0.0-beta.2.1.0
 ```
 
+
 ## Webpack
 
 Run `npm i aurelia-authentication --save` from your project root.
 
 Add `'aurelia-authentication'` in the `coreBundles.aurelia section` of your `webpack.config.js`.
 
-Aurelia-authentication has submodules (currently only the authFilter). You need to add it to the aurelia build resources in your package.json.
-
-```js
-"aurelia": {
-  "build": {
-    "resources": ["aurelia-authentication/authFilterValueConverter"]
-  }
-},
-```
+Aurelia-authentication has submodules (currently only the authFilter). They are included in it's package.json, so no further action is required.
 
 ## Typescript
 

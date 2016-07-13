@@ -32,9 +32,25 @@ We've simplified installation and usage! This plugin should now be installed usi
 
 Run `npm i aurelia-authentication --save` from your project root.
 
-Add `aurelia-authentication` to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
+Aurelia-authentication has submodules (currently only the authFilter) and makes use of `extends` and `jwt-decode`. So, add following to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
 
-Aurelia-authentication has submodules (currently only the authFilter). They are included in it's package.json, so no further action is required.
+```js
+"dependencies": [
+  // ...
+  'extends',
+  {
+    "name": "aurelia-authentication",
+    "path": "../node_modules/aurelia-authentication/dist/amd",
+    "main": "aurelia-authentication"
+  },
+  {
+    "name": "jwt-decode",
+    "path": "../node_modules/jwt-decode/lib",
+    "main": "index"
+  }
+  // ...
+],
+```
 
 ### Jspm
 
@@ -68,7 +84,7 @@ Run `npm i aurelia-authentication --save` from your project root.
 
 Add `'aurelia-authentication'` in the `coreBundles.aurelia section` of your `webpack.config.js`.
 
-Aurelia-authentication has submodules (currently only the authFilter). They are included in it's package.json, so no further action is required. 
+Aurelia-authentication has submodules (currently only the authFilter). They are included in it's package.json, so no further action is required.
 
 ### Typescript
 

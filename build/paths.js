@@ -11,6 +11,7 @@ var pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 var paths = {
   root: appRoot,
   mainSource: [appRoot + '*.js', '!' + appRoot + '*ValueConverter.js'], // all main js which can be concated
+  lintSource: appRoot + '**/*.js', // all files
   style: 'styles/**/*.css',
   output: 'dist/',
   doc:'./doc',

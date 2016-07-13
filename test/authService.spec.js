@@ -275,7 +275,7 @@ describe('AuthService', () => {
       authService.authenticated = true;
       let scope = createScopeForTest(authService);
       let target = document.createElement('div');
-      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', `authenticated | authFilter & signal:'authentication-change'`, bindingMode.oneWay, lookupFunctions);
+      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', 'authenticated | authFilter & signal:\'authentication-change\'', bindingMode.oneWay, lookupFunctions);
       let binding = bindingExpression.createBinding(target);
       binding.bind(scope);
       expect(target.innerHTML).toBe('true');
@@ -294,7 +294,7 @@ describe('AuthService', () => {
       authService.authenticated = true;
       let scope = createScopeForTest(authService);
       let target = document.createElement('div');
-      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', `authenticated | authFilter & signal:'authentication-change'`, bindingMode.oneWay, lookupFunctions);
+      let bindingExpression = bindingEngine.createBindingExpression('innerHTML', 'authenticated | authFilter & signal:\'authentication-change\'', bindingMode.oneWay, lookupFunctions);
       let binding = bindingExpression.createBinding(target);
       binding.bind(scope);
       expect(target.innerHTML).toBe('true');

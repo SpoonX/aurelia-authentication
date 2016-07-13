@@ -7,7 +7,7 @@ import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
 import {OAuth1} from './oAuth1';
 import {OAuth2} from './oAuth2';
-import {Auth0Lock} from './authLock';
+import {AuthLock} from './authLock';
 
 @inject(Storage, BaseConfig, OAuth1, OAuth2, AuthLock)
 export class Authentication {

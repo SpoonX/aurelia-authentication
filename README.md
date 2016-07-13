@@ -48,6 +48,10 @@ Aurelia-authentication has submodules (currently only the authFilter). You need 
 
 Run `jspm i aurelia-authentication`
 
+Add `aurelia-authentication` to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
+
+Aurelia-authentication has submodules (currently only the authFilter). So, if you use it, add `aurelia-authentication/authFilterValueConverter` as well.
+
 If the installation results in having forks, try resolving them by running:
 
 ```sh
@@ -64,6 +68,7 @@ jspm inspect --forks
 
 jspm resolve --only npm:aurelia-dependency-injection@1.0.0-beta.2.1.0
 ```
+
 
 ### Webpack
 

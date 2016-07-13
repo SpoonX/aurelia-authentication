@@ -34,15 +34,7 @@ Run `npm i aurelia-authentication --save` from your project root.
 
 Add `aurelia-authentication` to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
 
-Aurelia-authentication has submodules (currently only the authFilter). You need to add it to the aurelia build resources in your package.json.
-
-```js
-"aurelia": {
-  "build": {
-    "resources": ["aurelia-authentication/authFilterValueConverter"]
-  }
-},
-```
+Aurelia-authentication has submodules (currently only the authFilter). They are included in it's package.json, so no further action is required.
 
 ### Jspm
 
@@ -76,15 +68,7 @@ Run `npm i aurelia-authentication --save` from your project root.
 
 Add `'aurelia-authentication'` in the `coreBundles.aurelia section` of your `webpack.config.js`.
 
-Aurelia-authentication has submodules (currently only the authFilter). You need to add it to the aurelia build resources in your package.json.
-
-```js
-"aurelia": {
-  "build": {
-    "resources": ["aurelia-authentication/authFilterValueConverter"]
-  }
-},
-```
+Aurelia-authentication has submodules (currently only the authFilter). They are included in it's package.json, so no further action is required. 
 
 ### Typescript
 

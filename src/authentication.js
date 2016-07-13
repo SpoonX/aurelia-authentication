@@ -7,9 +7,9 @@ import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
 import {OAuth1} from './oAuth1';
 import {OAuth2} from './oAuth2';
-import {Auth0Lock} from './auth0Lock';
+import {Auth0Lock} from './authLock';
 
-@inject(Storage, BaseConfig, OAuth1, OAuth2, Auth0Lock)
+@inject(Storage, BaseConfig, OAuth1, OAuth2, AuthLock)
 export class Authentication {
   constructor(storage, config, oAuth1, oAuth2, auth0Lock) {
     this.storage              = storage;

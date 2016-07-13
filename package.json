@@ -133,5 +133,14 @@
     "vinyl": "^1.1.1",
     "vinyl-paths": "^2.1.0",
     "yargs": "^4.7.1"
+  },
+  "aurelia": {
+    "build": {
+      "resources": [
+        "aurelia-authentication/authFilterValueConverter",
+        "aurelia-authentication/authenticatedFilterValueConverter",
+        "aurelia-authentication/authenticatedValueConverter"
+      ]
+    }
   }
 }

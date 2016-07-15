@@ -10,8 +10,7 @@ var pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 
 var paths = {
   root: appRoot,
-  mainSource: [appRoot + '*.js', '!' + appRoot + '*ValueConverter.js'], // all main js which can be concated
-  lintSource: appRoot + '**/*.js', // all files
+  source: appRoot + '**/*.js',
   style: 'styles/**/*.css',
   output: 'dist/',
   doc:'./doc',
@@ -23,10 +22,15 @@ var paths = {
   useTypeScriptForDTS: false,
   importsToAdd: [],
   importsToIgnoreForDts: ['extend', 'jwt-decode'], // imports that are only used internally. no need to d.ts export them
-  jsResources: [appRoot + '*ValueConverter.js'], // js files that should not be concated, but keep their path
+  jsResources: [appRoot + '*ValueConverter.js'], // js to transpile, but not be concated and keeping their relative path
   resources: appRoot + '{**/*.css,**/*.html}',
   sort: true,
   concat: true
 };
+
+// files to be traspiled (and concated if selected)
+paths.mainSource = [paths.source, '!' + appRoot + '*ValueConverter.js'];
+// files to be linted
+paths.lintSource = paths.source;
 
 module.exports = paths;

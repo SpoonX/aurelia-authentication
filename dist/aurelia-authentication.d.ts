@@ -7,8 +7,6 @@ import {Redirect} from 'aurelia-router';
 import {deprecated} from 'aurelia-metadata';
 import {join,buildQueryString,parseQueryString} from 'aurelia-path';
 
-// import to ensure value-converters get bundled
-import './authFilterValueConverter';
 
 /**
  * Configure the plugin.

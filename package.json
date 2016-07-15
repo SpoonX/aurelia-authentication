@@ -14,6 +14,7 @@
   "license": "MIT",
   "author": "RWOverdijk <wesley@spoonx.nl> (http://spoonx.nl/)",
   "main": "dist/commonjs/aurelia-authentication.js",
+  "typings": "dist/aurelia-authentication.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/spoonx/aurelia-authentication"

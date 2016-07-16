@@ -88,7 +88,7 @@ Aurelia-authentication has submodules (currently only the authFilter). They are 
 
 ### Typescript
 
-Add to your `typings.json`
+If needed, add to your `typings.json`:
 
 ```js
 "aurelia-authentication": "github:spoonx/aurelia-authentication",

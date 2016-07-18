@@ -4,7 +4,7 @@
 
 Run `npm i aurelia-authentication --save` from your project root.
 
-Aurelia-authentication has submodules (currently only the authFilter) and makes use of `extends` and `jwt-decode`. So, add following to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
+Aurelia-authentication has submodules (currently only the authFilter) and makes use of `extends` and `jwt-decode`. So, add following to the `build.bundles.dependencies` section of `aurelia-project/aurelia.json`.
 
 ```js
 "dependencies": [
@@ -28,9 +28,9 @@ Aurelia-authentication has submodules (currently only the authFilter) and makes 
 
 Run `jspm i aurelia-authentication`
 
-Add `aurelia-authentication` to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
+Add `aurelia-authentication` to the `bundles.dist.aurelia.includes` section of `build/bundles.js`.
 
-Aurelia-authentication has submodules (currently only the authFilter). So, if you use it, add `aurelia-authentication/authFilterValueConverter` as well.
+Aurelia-authentication has submodules. They are imported in it's main file, so no further action is required.
 
 If the installation results in having forks, try resolving them by running:
 
@@ -49,18 +49,17 @@ jspm inspect --forks
 jspm resolve --only npm:aurelia-dependency-injection@1.0.0-beta.2.1.0
 ```
 
-
 ## Webpack
 
 Run `npm i aurelia-authentication --save` from your project root.
 
 Add `'aurelia-authentication'` in the `coreBundles.aurelia section` of your `webpack.config.js`.
 
-Aurelia-authentication has submodules (currently only the authFilter). They are included in it's package.json, so no further action is required.
+Aurelia-authentication has submodules. They are listed as resources in the package.json. So, no further action is required.
 
 ## Typescript
 
-If needed, add to your `typings.json`:
+Npm-based installations pick up the typings automatically. For Jspm-based installations, add to your `typings.json`:
 
 ```js
 "aurelia-authentication": "github:spoonx/aurelia-authentication",

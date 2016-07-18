@@ -5,6 +5,11 @@ import {BaseConfig} from './baseConfig';
 import {FetchConfig} from './fetchClientConfig';
 import * as LogManager from 'aurelia-logging';
 
+// added for easy jspm bundling
+import {AuthFilterValueConverter} from './authFilterValueConverter'; // eslint-disable-line no-unused-vars
+import {AuthenticatedFilterValueConverter} from './authenticatedFilterValueConverter'; // eslint-disable-line no-unused-vars
+import {AuthenticatedValueConverter} from './authenticatedValueConverter'; // eslint-disable-line no-unused-vars
+
 /**
  * Configure the plugin.
  *

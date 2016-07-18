@@ -29,7 +29,7 @@ var paths = {
 };
 
 // files to be traspiled (and concated if selected)
-paths.mainSource = [paths.source, '!' + appRoot + '*ValueConverter.js'];
+paths.mainSource = [paths.source].concat(paths.jsResources.map(function(resource) {return '!' + resource;}));
 // files to be linted
 paths.lintSource = paths.source;
 

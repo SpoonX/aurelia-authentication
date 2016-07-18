@@ -10,7 +10,6 @@ var concat = require('gulp-concat');
 var insert = require('gulp-insert');
 var rename = require('gulp-rename');
 var clean = require('gulp-clean');
-var dummy = require('gulp-empty');
 var tools = require('aurelia-tools');
 var ts = require('gulp-typescript');
 var gutil = require('gulp-util');

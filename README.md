@@ -32,21 +32,33 @@ We've simplified installation and usage! This plugin should now be installed usi
 
 Run `npm i aurelia-authentication --save` from your project root.
 
-Add `aurelia-authentication` to the `build/bundles/dependencies` section of `aurelia-project/aurelia.json`.
-
-Aurelia-authentication has submodules (currently only the authFilter). You need to add it to the aurelia build resources in your package.json.
+Aurelia-authentication has submodules (currently only the authFilter) and makes use of `extends` and `jwt-decode`. So, add following to the `build.bundles.dependencies` section of `aurelia-project/aurelia.json`.
 
 ```js
-"aurelia": {
-  "build": {
-    "resources": ["aurelia-authentication/authFilterValueConverter"]
+"dependencies": [
+  // ...
+  'extends',
+  {
+    "name": "aurelia-authentication",
+    "path": "../node_modules/aurelia-authentication/dist/amd",
+    "main": "aurelia-authentication"
+  },
+  {
+    "name": "jwt-decode",
+    "path": "../node_modules/jwt-decode/lib",
+    "main": "index"
   }
-},
+  // ...
+],
 ```
 
 ### Jspm
 
 Run `jspm i aurelia-authentication`
+
+Add `aurelia-authentication` to the `bundles.dist.aurelia.includes` section of `build/bundles.js`.
+
+Aurelia-authentication has submodules. They are imported in it's main file, so no further action is required.
 
 If the installation results in having forks, try resolving them by running:
 
@@ -71,19 +83,11 @@ Run `npm i aurelia-authentication --save` from your project root.
 
 Add `'aurelia-authentication'` in the `coreBundles.aurelia section` of your `webpack.config.js`.
 
-Aurelia-authentication has submodules (currently only the authFilter). You need to add it to the aurelia build resources in your package.json.
-
-```js
-"aurelia": {
-  "build": {
-    "resources": ["aurelia-authentication/authFilterValueConverter"]
-  }
-},
-```
+Aurelia-authentication has submodules. They are listed as resources in the package.json. So, no further action is required.
 
 ### Typescript
 
-Add to your `typings.json`
+Npm-based installations pick up the typings automatically. For Jspm-based installations, add to your `typings.json`:
 
 ```js
 "aurelia-authentication": "github:spoonx/aurelia-authentication",

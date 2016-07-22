@@ -1,4 +1,4 @@
-var _dec, _class, _dec2, _class2, _dec3, _dec4, _dec5, _dec6, _dec7, _dec8, _dec9, _class3, _desc, _value, _class4, _dec10, _class5, _dec11, _dec12, _class6, _desc2, _value2, _class7, _dec13, _class10, _dec14, _class11, _dec15, _class12, _dec16, _class13;
+var _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _class5, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _class6, _desc, _value, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class11, _dec15, _class12, _dec16, _class13;
 
 function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
   var desc = {};
@@ -29,617 +29,132 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
   return desc;
 }
 
-import * as LogManager from 'aurelia-logging';
 import extend from 'extend';
+import * as LogManager from 'aurelia-logging';
 import jwtDecode from 'jwt-decode';
 import { PLATFORM, DOM } from 'aurelia-pal';
+import { parseQueryString, join, buildQueryString } from 'aurelia-path';
+import { inject } from 'aurelia-dependency-injection';
+import { deprecated } from 'aurelia-metadata';
+import { EventAggregator } from 'aurelia-event-aggregator';
+import { BindingSignaler } from 'aurelia-templating-resources';
+import { Redirect } from 'aurelia-router';
 import { HttpClient } from 'aurelia-fetch-client';
 import { Config, Rest } from 'aurelia-api';
-import { inject } from 'aurelia-dependency-injection';
-import { Redirect } from 'aurelia-router';
-import { deprecated } from 'aurelia-metadata';
-import { join, buildQueryString, parseQueryString } from 'aurelia-path';
 
-import './authFilterValueConverter';
-
-export function configure(aurelia, config) {
-  if (!PLATFORM.location.origin) {
-    PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
+export let Popup = class Popup {
+  constructor() {
+    this.popupWindow = null;
+    this.polling = null;
+    this.url = '';
   }
 
-  const baseConfig = aurelia.container.get(BaseConfig);
+  open(url, windowName, options) {
+    this.url = url;
+    const optionsString = buildPopupWindowOptions(options || {});
 
-  if (typeof config === 'function') {
-    config(baseConfig);
-  } else if (typeof config === 'object') {
-    baseConfig.configure(config);
-  }
+    this.popupWindow = PLATFORM.global.open(url, windowName, optionsString);
 
-  for (let converter of baseConfig.globalValueConverters) {
-    aurelia.globalResources(`./${ converter }`);
-    LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${ converter }`);
-  }
-  const fetchConfig = aurelia.container.get(FetchConfig);
-  const clientConfig = aurelia.container.get(Config);
-
-  if (Array.isArray(baseConfig.configureEndpoints)) {
-    baseConfig.configureEndpoints.forEach(endpointToPatch => {
-      fetchConfig.configure(endpointToPatch);
-    });
-  }
-
-  let client;
-
-  if (baseConfig.endpoint !== null) {
-    if (typeof baseConfig.endpoint === 'string') {
-      const endpoint = clientConfig.getEndpoint(baseConfig.endpoint);
-      if (!endpoint) {
-        throw new Error(`There is no '${ baseConfig.endpoint || 'default' }' endpoint registered.`);
-      }
-      client = endpoint;
-    } else if (baseConfig.endpoint instanceof HttpClient) {
-      client = new Rest(baseConfig.endpoint);
-    }
-  }
-
-  if (!(client instanceof Rest)) {
-    client = new Rest(aurelia.container.get(HttpClient));
-  }
-
-  baseConfig.client = client;
-}
-
-export let Auth0Lock = (_dec = inject(Storage, BaseConfig), _dec(_class = class Auth0Lock {
-  constructor(storage, config) {
-    this.storage = storage;
-    this.config = config;
-    this.defaults = {
-      name: null,
-      state: null,
-      scope: null,
-      scopeDelimiter: null,
-      redirectUri: null,
-      clientId: null,
-      clientDomain: null,
-      display: 'popup',
-      lockOptions: {
-        popup: true
-      },
-      popupOptions: null,
-      responseType: 'token'
-    };
-  }
-
-  open(options, userData) {
-    if (typeof PLATFORM.global.Auth0Lock !== 'function') {
-      throw new Error('Auth0Lock was not found in global scope. Please load it before using this provider.');
-    }
-    const provider = extend(true, {}, this.defaults, options);
-    const stateName = provider.name + '_state';
-
-    if (typeof provider.state === 'function') {
-      this.storage.set(stateName, provider.state());
-    } else if (typeof provider.state === 'string') {
-      this.storage.set(stateName, provider.state);
+    if (this.popupWindow && this.popupWindow.focus) {
+      this.popupWindow.focus();
     }
 
-    this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain);
+    return this;
+  }
 
-    const openPopup = new Promise((resolve, reject) => {
-      let opts = provider.lockOptions;
-      opts.popupOptions = provider.popupOptions;
-      opts.responseType = provider.responseType;
-      opts.callbackURL = provider.redirectUri;
-      opts.authParams = opts.authParams || {};
-      if (provider.scope) opts.authParams.scope = provider.scope;
-      if (provider.state) opts.authParams.state = this.storage.get(provider.name + '_state');
+  eventListener(redirectUri) {
+    return new Promise((resolve, reject) => {
+      this.popupWindow.addEventListener('loadstart', event => {
+        if (event.url.indexOf(redirectUri) !== 0) {
+          return;
+        }
 
-      this.lock.show(provider.lockOptions, (err, profile, tokenOrCode) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({
-            access_token: tokenOrCode
-          });
+        const parser = DOM.createElement('a');
+        parser.href = event.url;
+
+        if (parser.search || parser.hash) {
+          const qs = parseUrl(parser);
+
+          if (qs.error) {
+            reject({ error: qs.error });
+          } else {
+            resolve(qs);
+          }
+
+          this.popupWindow.close();
         }
       });
-    });
 
-    return openPopup.then(lockResponse => {
-      if (provider.responseType === 'token' || provider.responseType === 'id_token%20token' || provider.responseType === 'token%20id_token') {
-        return lockResponse;
-      }
-
-      throw new Error('Only `token` responseType is supported');
-    });
-  }
-}) || _class);
-
-export let AuthenticateStep = (_dec2 = inject(AuthService), _dec2(_class2 = class AuthenticateStep {
-  constructor(authService) {
-    this.authService = authService;
-  }
-
-  run(routingContext, next) {
-    const isLoggedIn = this.authService.authenticated;
-    const loginRoute = this.authService.config.loginRoute;
-
-    if (routingContext.getAllInstructions().some(route => route.config.auth === true)) {
-      if (!isLoggedIn) {
-        return next.cancel(new Redirect(loginRoute));
-      }
-    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
-      return next.cancel(new Redirect(this.authService.config.loginRedirect));
-    }
-
-    return next();
-  }
-}) || _class2);
-
-export let Authentication = (_dec3 = inject(Storage, BaseConfig, OAuth1, OAuth2, Auth0Lock), _dec4 = deprecated({ message: 'Use baseConfig.loginRoute instead.' }), _dec5 = deprecated({ message: 'Use baseConfig.loginRedirect instead.' }), _dec6 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.loginUrl) instead.' }), _dec7 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.signupUrl) instead.' }), _dec8 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.profileUrl) instead.' }), _dec9 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec3(_class3 = (_class4 = class Authentication {
-  constructor(storage, config, oAuth1, oAuth2, auth0Lock) {
-    this.storage = storage;
-    this.config = config;
-    this.oAuth1 = oAuth1;
-    this.oAuth2 = oAuth2;
-    this.auth0Lock = auth0Lock;
-    this.updateTokenCallstack = [];
-    this.accessToken = null;
-    this.refreshToken = null;
-    this.payload = null;
-    this.exp = null;
-    this.hasDataStored = false;
-  }
-
-  getLoginRoute() {
-    return this.config.loginRoute;
-  }
-
-  getLoginRedirect() {
-    return this.config.loginRedirect;
-  }
-
-  getLoginUrl() {
-    return this.Config.joinBase(this.config.loginUrl);
-  }
-
-  getSignupUrl() {
-    return this.Config.joinBase(this.config.signupUrl);
-  }
-
-  getProfileUrl() {
-    return this.Config.joinBase(this.config.profileUrl);
-  }
-
-  getToken() {
-    return this.getAccessToken();
-  }
-
-  get responseObject() {
-    LogManager.getLogger('authentication').warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
-    return this.getResponseObject();
-  }
-
-  set responseObject(response) {
-    LogManager.getLogger('authentication').warn('Setter Authentication.responseObject is deprecated. Use AuthServive.setResponseObject(response) instead.');
-    this.setResponseObject(response);
-  }
-
-  getResponseObject() {
-    return JSON.parse(this.storage.get(this.config.storageKey));
-  }
-
-  setResponseObject(response) {
-    if (response) {
-      this.getDataFromResponse(response);
-      this.storage.set(this.config.storageKey, JSON.stringify(response));
-      return;
-    }
-    this.accessToken = null;
-    this.refreshToken = null;
-    this.payload = null;
-    this.exp = null;
-
-    this.hasDataStored = false;
-
-    this.storage.remove(this.config.storageKey);
-  }
-
-  getAccessToken() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
-    return this.accessToken;
-  }
-
-  getRefreshToken() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
-    return this.refreshToken;
-  }
-
-  getPayload() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
-    return this.payload;
-  }
-
-  getExp() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
-    return this.exp;
-  }
-
-  getTtl() {
-    const exp = this.getExp();
-    return Number.isNaN(exp) ? NaN : exp - Math.round(new Date().getTime() / 1000);
-  }
-
-  isTokenExpired() {
-    const timeLeft = this.getTtl();
-    return Number.isNaN(timeLeft) ? undefined : timeLeft < 0;
-  }
-
-  isAuthenticated() {
-    const isTokenExpired = this.isTokenExpired();
-    if (isTokenExpired === undefined) return this.accessToken ? true : false;
-    return !isTokenExpired;
-  }
-
-  getDataFromResponse(response) {
-    const config = this.config;
-
-    this.accessToken = this.getTokenFromResponse(response, config.accessTokenProp, config.accessTokenName, config.accessTokenRoot);
-
-    this.refreshToken = null;
-    if (config.useRefreshToken) {
-      try {
-        this.refreshToken = this.getTokenFromResponse(response, config.refreshTokenProp, config.refreshTokenName, config.refreshTokenRoot);
-      } catch (e) {
-        this.refreshToken = null;
-      }
-    }
-
-    this.payload = null;
-
-    try {
-      this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
-    } catch (_) {
-      _;
-    }
-
-    this.exp = this.payload ? parseInt(this.payload.exp, 10) : NaN;
-
-    this.hasDataStored = true;
-
-    return {
-      accessToken: this.accessToken,
-      refreshToken: this.refreshToken,
-      payload: this.payload,
-      exp: this.exp
-    };
-  }
-
-  getTokenFromResponse(response, tokenProp, tokenName, tokenRoot) {
-    if (!response) return undefined;
-
-    const responseTokenProp = tokenProp.split('.').reduce((o, x) => o[x], response);
-
-    if (typeof responseTokenProp === 'string') {
-      return responseTokenProp;
-    }
-
-    if (typeof responseTokenProp === 'object') {
-      const tokenRootData = tokenRoot && tokenRoot.split('.').reduce((o, x) => o[x], responseTokenProp);
-      const token = tokenRootData ? tokenRootData[tokenName] : responseTokenProp[tokenName];
-
-      if (!token) throw new Error('Token not found in response');
-
-      return token;
-    }
-
-    const token = response[tokenName] === undefined ? null : response[tokenName];
-
-    if (!token) throw new Error('Token not found in response');
-
-    return token;
-  }
-
-  toUpdateTokenCallstack() {
-    return new Promise(resolve => this.updateTokenCallstack.push(resolve));
-  }
-
-  resolveUpdateTokenCallstack(response) {
-    this.updateTokenCallstack.map(resolve => resolve(response));
-    this.updateTokenCallstack = [];
-  }
-
-  authenticate(name, userData = {}) {
-    let oauthType = this.config.providers[name].type;
-
-    if (oauthType) {
-      LogManager.getLogger('authentication').warn('DEPRECATED: Setting provider.type is deprecated and replaced by provider.oauthType');
-    } else {
-      oauthType = this.config.providers[name].oauthType;
-    }
-
-    let providerLogin;
-    if (oauthType === 'auth0-lock') {
-      providerLogin = this.auth0Lock;
-    } else {
-      providerLogin = oauthType === '1.0' ? this.oAuth1 : this.oAuth2;
-    }
-
-    return providerLogin.open(this.config.providers[name], userData);
-  }
-
-  redirect(redirectUrl, defaultRedirectUrl) {
-    if (redirectUrl === true) {
-      LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
-      return;
-    }
-
-    if (redirectUrl === false) {
-      LogManager.getLogger('authentication').warn('BREAKING CHANGE: Setting redirectUrl === false to actually *do redirect* is deprecated. Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
-    }
-
-    if (redirectUrl === 0) {
-      return;
-    }
-    if (typeof redirectUrl === 'string') {
-      PLATFORM.location.href = encodeURI(redirectUrl);
-    } else if (defaultRedirectUrl) {
-      PLATFORM.location.href = defaultRedirectUrl;
-    }
-  }
-}, (_applyDecoratedDescriptor(_class4.prototype, 'getLoginRoute', [_dec4], Object.getOwnPropertyDescriptor(_class4.prototype, 'getLoginRoute'), _class4.prototype), _applyDecoratedDescriptor(_class4.prototype, 'getLoginRedirect', [_dec5], Object.getOwnPropertyDescriptor(_class4.prototype, 'getLoginRedirect'), _class4.prototype), _applyDecoratedDescriptor(_class4.prototype, 'getLoginUrl', [_dec6], Object.getOwnPropertyDescriptor(_class4.prototype, 'getLoginUrl'), _class4.prototype), _applyDecoratedDescriptor(_class4.prototype, 'getSignupUrl', [_dec7], Object.getOwnPropertyDescriptor(_class4.prototype, 'getSignupUrl'), _class4.prototype), _applyDecoratedDescriptor(_class4.prototype, 'getProfileUrl', [_dec8], Object.getOwnPropertyDescriptor(_class4.prototype, 'getProfileUrl'), _class4.prototype), _applyDecoratedDescriptor(_class4.prototype, 'getToken', [_dec9], Object.getOwnPropertyDescriptor(_class4.prototype, 'getToken'), _class4.prototype)), _class4)) || _class3);
-
-export let AuthorizeStep = (_dec10 = inject(AuthService), _dec10(_class5 = class AuthorizeStep {
-  constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
-
-    this.authService = authService;
-  }
-
-  run(routingContext, next) {
-    const isLoggedIn = this.authService.isAuthenticated();
-    const loginRoute = this.authService.config.loginRoute;
-
-    if (routingContext.getAllInstructions().some(route => route.config.auth)) {
-      if (!isLoggedIn) {
-        return next.cancel(new Redirect(loginRoute));
-      }
-    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
-      return next.cancel(new Redirect(this.authService.config.loginRedirect));
-    }
-
-    return next();
-  }
-}) || _class5);
-
-export let AuthService = (_dec11 = inject(Authentication, BaseConfig), _dec12 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec11(_class6 = (_class7 = class AuthService {
-  constructor(authentication, config) {
-    this.authenticated = false;
-    this.timeoutID = 0;
-
-    this.authentication = authentication;
-    this.config = config;
-
-    const oldStorageKey = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : config.tokenName;
-    const oldToken = authentication.storage.get(oldStorageKey);
-
-    if (oldToken) {
-      LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
-      let fakeOldResponse = {};
-      fakeOldResponse[config.accessTokenProp] = oldToken;
-      this.setResponseObject(fakeOldResponse);
-      authentication.storage.remove(oldStorageKey);
-    }
-
-    this.setResponseObject(this.authentication.getResponseObject());
-  }
-
-  get client() {
-    return this.config.client;
-  }
-
-  get auth() {
-    LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
-    return this.authentication;
-  }
-
-  setTimeout(ttl) {
-    this.clearTimeout();
-
-    this.timeoutID = PLATFORM.global.setTimeout(() => {
-      if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-        this.updateToken();
-      } else {
-        this.logout(this.config.expiredRedirect);
-      }
-    }, ttl);
-  }
-
-  clearTimeout() {
-    if (this.timeoutID) {
-      PLATFORM.global.clearTimeout(this.timeoutID);
-    }
-    this.timeoutID = 0;
-  }
-
-  setResponseObject(response) {
-    this.clearTimeout();
-
-    this.authentication.setResponseObject(response);
-
-    this.authenticated = this.authentication.isAuthenticated();
-    if (this.authenticated && !Number.isNaN(this.authentication.exp)) {
-      this.setTimeout(this.getTtl() * 1000);
-    }
-  }
-
-  getMe(criteriaOrId) {
-    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
-      criteriaOrId = { id: criteriaOrId };
-    }
-    return this.client.find(this.config.joinBase(this.config.profileUrl), criteriaOrId);
-  }
-
-  updateMe(body, criteriaOrId) {
-    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
-      criteriaOrId = { id: criteriaOrId };
-    }
-    if (this.config.profileMethod === 'put') {
-      return this.client.update(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
-    }
-    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
-  }
-
-  getAccessToken() {
-    return this.authentication.getAccessToken();
-  }
-
-  getCurrentToken() {
-    return this.getAccessToken();
-  }
-
-  getRefreshToken() {
-    return this.authentication.getRefreshToken();
-  }
-
-  isAuthenticated() {
-    let authenticated = this.authentication.isAuthenticated();
-
-    if (!authenticated && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-      this.updateToken();
-      authenticated = true;
-    }
-
-    return authenticated;
-  }
-
-  getExp() {
-    return this.authentication.getExp();
-  }
-
-  getTtl() {
-    return this.authentication.getTtl();
-  }
-
-  isTokenExpired() {
-    return this.authentication.isTokenExpired();
-  }
-
-  getTokenPayload() {
-    return this.authentication.getPayload();
-  }
-
-  updateToken() {
-    if (!this.authentication.getRefreshToken()) {
-      return Promise.reject(new Error('refreshToken not set'));
-    }
-
-    if (this.authentication.updateTokenCallstack.length === 0) {
-      const content = {
-        grant_type: 'refresh_token',
-        refresh_token: this.authentication.getRefreshToken(),
-        client_id: this.config.clientId ? this.config.clientId : undefined
-      };
-
-      this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(response => {
-        this.setResponseObject(response);
-        this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
-      }).catch(err => {
-        this.setResponseObject(null);
-        this.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
+      this.popupWindow.addEventListener('exit', () => {
+        reject({ data: 'Provider Popup was closed' });
       });
-    }
 
-    return this.authentication.toUpdateTokenCallstack();
-  }
-
-  signup(displayNameOrCredentials, emailOrOptions, passwordOrRedirectUri, options, redirectUri) {
-    let content;
-
-    if (typeof arguments[0] === 'object') {
-      content = arguments[0];
-      options = arguments[1];
-      redirectUri = arguments[2];
-    } else {
-      content = {
-        'displayName': displayNameOrCredentials,
-        'email': emailOrOptions,
-        'password': passwordOrRedirectUri
-      };
-    }
-    return this.client.post(this.config.joinBase(this.config.signupUrl), content, options).then(response => {
-      if (this.config.loginOnSignup) {
-        this.setResponseObject(response);
-      }
-      this.authentication.redirect(redirectUri, this.config.signupRedirect);
-
-      return response;
+      this.popupWindow.addEventListener('loaderror', () => {
+        reject({ data: 'Authorization Failed' });
+      });
     });
   }
 
-  login(emailOrCredentials, passwordOrOptions, optionsOrRedirectUri, redirectUri) {
-    let content;
+  pollPopup() {
+    return new Promise((resolve, reject) => {
+      this.polling = PLATFORM.global.setInterval(() => {
+        let errorData;
 
-    if (typeof arguments[0] === 'object') {
-      content = arguments[0];
-      optionsOrRedirectUri = arguments[1];
-      redirectUri = arguments[2];
-    } else {
-      content = {
-        'email': emailOrCredentials,
-        'password': passwordOrOptions
-      };
-      optionsOrRedirectUri = optionsOrRedirectUri;
-    }
+        try {
+          if (this.popupWindow.location.host === PLATFORM.global.document.location.host && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
+            const qs = parseUrl(this.popupWindow.location);
 
-    if (this.config.clientId) {
-      content.client_id = this.config.clientId;
-    }
+            if (qs.error) {
+              reject({ error: qs.error });
+            } else {
+              resolve(qs);
+            }
 
-    return this.client.post(this.config.joinBase(this.config.loginUrl), content, optionsOrRedirectUri).then(response => {
-      this.setResponseObject(response);
+            this.popupWindow.close();
+            PLATFORM.global.clearInterval(this.polling);
+          }
+        } catch (error) {
+          errorData = error;
+        }
 
-      this.authentication.redirect(redirectUri, this.config.loginRedirect);
-
-      return response;
+        if (!this.popupWindow) {
+          PLATFORM.global.clearInterval(this.polling);
+          reject({
+            error: errorData,
+            data: 'Provider Popup Blocked'
+          });
+        } else if (this.popupWindow.closed) {
+          PLATFORM.global.clearInterval(this.polling);
+          reject({
+            error: errorData,
+            data: 'Problem poll popup'
+          });
+        }
+      }, 35);
     });
   }
+};
 
-  logout(redirectUri) {
-    let localLogout = response => new Promise(resolve => {
-      this.setResponseObject(null);
+const buildPopupWindowOptions = options => {
+  const width = options.width || 500;
+  const height = options.height || 500;
 
-      this.authentication.redirect(redirectUri, this.config.logoutRedirect);
+  const extended = extend({
+    width: width,
+    height: height,
+    left: PLATFORM.global.screenX + (PLATFORM.global.outerWidth - width) / 2,
+    top: PLATFORM.global.screenY + (PLATFORM.global.outerHeight - height) / 2.5
+  }, options);
 
-      if (typeof this.onLogout === 'function') {
-        this.onLogout(response);
-      }
+  let parts = [];
+  Object.keys(extended).map(key => parts.push(key + '=' + extended[key]));
 
-      resolve(response);
-    });
+  return parts.join(',');
+};
 
-    return this.config.logoutUrl ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout) : localLogout();
-  }
-
-  authenticate(name, redirectUri, userData = {}) {
-    return this.authentication.authenticate(name, userData).then(response => {
-      this.setResponseObject(response);
-
-      this.authentication.redirect(redirectUri, this.config.loginRedirect);
-
-      return response;
-    });
-  }
-
-  unlink(name, redirectUri) {
-    const unlinkUrl = this.config.joinBase(this.config.unlinkUrl) + name;
-    return this.client.request(this.config.unlinkMethod, unlinkUrl).then(response => {
-      this.authentication.redirect(redirectUri);
-
-      return response;
-    });
-  }
-}, (_applyDecoratedDescriptor(_class7.prototype, 'getCurrentToken', [_dec12], Object.getOwnPropertyDescriptor(_class7.prototype, 'getCurrentToken'), _class7.prototype)), _class7)) || _class6);
+const parseUrl = url => {
+  return extend(true, {}, parseQueryString(url.search), parseQueryString(url.hash));
+};
 
 export let BaseConfig = class BaseConfig {
   constructor() {
@@ -901,90 +416,91 @@ function randomState() {
   return encodeURIComponent(rand);
 }
 
-export let FetchConfig = (_dec13 = inject(HttpClient, Config, AuthService, BaseConfig), _dec13(_class10 = class FetchConfig {
-  constructor(httpClient, clientConfig, authService, config) {
-    this.httpClient = httpClient;
-    this.clientConfig = clientConfig;
-    this.authService = authService;
+export let Storage = (_dec = inject(BaseConfig), _dec(_class2 = class Storage {
+  constructor(config) {
     this.config = config;
   }
 
-  get interceptor() {
-    return {
-      request: request => {
-        if (!this.config.httpInterceptor || !this.authService.isAuthenticated()) {
-          return request;
-        }
-        let token = this.authService.getAccessToken();
+  get(key) {
+    return PLATFORM.global[this.config.storage].getItem(key);
+  }
 
-        if (this.config.authTokenType) {
-          token = `${ this.config.authTokenType } ${ token }`;
-        }
+  set(key, value) {
+    PLATFORM.global[this.config.storage].setItem(key, value);
+  }
 
-        request.headers.set(this.config.authHeader, token);
+  remove(key) {
+    PLATFORM.global[this.config.storage].removeItem(key);
+  }
+}) || _class2);
 
-        return request;
+export let AuthLock = (_dec2 = inject(Storage, BaseConfig), _dec2(_class3 = class AuthLock {
+  constructor(storage, config) {
+    this.storage = storage;
+    this.config = config;
+    this.defaults = {
+      name: null,
+      state: null,
+      scope: null,
+      scopeDelimiter: null,
+      redirectUri: null,
+      clientId: null,
+      clientDomain: null,
+      display: 'popup',
+      lockOptions: {
+        popup: true
       },
-      response: (response, request) => {
-        return new Promise((resolve, reject) => {
-          if (response.ok) {
-            return resolve(response);
-          }
-          if (response.status !== 401) {
-            return resolve(response);
-          }
-          if (!this.config.httpInterceptor || !this.authService.isTokenExpired()) {
-            return resolve(response);
-          }
-          if (!this.config.useRefreshToken || !this.authService.getRefreshToken()) {
-            return resolve(response);
-          }
-
-          return this.authService.updateToken().then(() => {
-            let token = this.authService.getAccessToken();
-
-            if (this.config.authTokenType) {
-              token = `${ this.config.authTokenType } ${ token }`;
-            }
-
-            request.headers.set(this.config.authHeader, token);
-
-            return this.client.fetch(request).then(resolve);
-          });
-        });
-      }
+      popupOptions: null,
+      responseType: 'token'
     };
   }
 
-  configure(client) {
-    if (Array.isArray(client)) {
-      let configuredClients = [];
-      client.forEach(toConfigure => {
-        configuredClients.push(this.configure(toConfigure));
+  open(options, userData) {
+    if (typeof PLATFORM.global.Auth0Lock !== 'function') {
+      throw new Error('Auth0Lock was not found in global scope. Please load it before using this provider.');
+    }
+    const provider = extend(true, {}, this.defaults, options);
+    const stateName = provider.name + '_state';
+
+    if (typeof provider.state === 'function') {
+      this.storage.set(stateName, provider.state());
+    } else if (typeof provider.state === 'string') {
+      this.storage.set(stateName, provider.state);
+    }
+
+    this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain);
+
+    const openPopup = new Promise((resolve, reject) => {
+      let opts = provider.lockOptions;
+      opts.popupOptions = provider.popupOptions;
+      opts.responseType = provider.responseType;
+      opts.callbackURL = provider.redirectUri;
+      opts.authParams = opts.authParams || {};
+      if (provider.scope) opts.authParams.scope = provider.scope;
+      if (provider.state) opts.authParams.state = this.storage.get(provider.name + '_state');
+
+      this.lock.show(provider.lockOptions, (err, profile, tokenOrCode) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({
+            access_token: tokenOrCode
+          });
+        }
       });
+    });
 
-      return configuredClients;
-    }
-
-    if (typeof client === 'string') {
-      const endpoint = this.clientConfig.getEndpoint(client);
-      if (!endpoint) {
-        throw new Error(`There is no '${ client || 'default' }' endpoint registered.`);
+    return openPopup.then(lockResponse => {
+      if (provider.responseType === 'token' || provider.responseType === 'id_token%20token' || provider.responseType === 'token%20id_token') {
+        return lockResponse;
       }
-      client = endpoint.client;
-    } else if (client instanceof Rest) {
-      client = client.client;
-    } else if (!(client instanceof HttpClient)) {
-      client = this.httpClient;
-    }
 
-    client.interceptors.push(this.interceptor);
-
-    return client;
+      throw new Error('Only `token` responseType is supported');
+    });
   }
-}) || _class10);
+}) || _class3);
 
-export let OAuth1 = (_dec14 = inject(Storage, Popup, BaseConfig), _dec14(_class11 = class OAuth1 {
+export let OAuth1 = (_dec3 = inject(Storage, Popup, BaseConfig), _dec3(_class4 = class OAuth1 {
   constructor(storage, popup, config) {
     this.storage = storage;
     this.config = config;
@@ -1028,9 +544,9 @@ export let OAuth1 = (_dec14 = inject(Storage, Popup, BaseConfig), _dec14(_class1
 
     return this.config.client.post(serverUrl, data, { credentials: credentials });
   }
-}) || _class11);
+}) || _class4);
 
-export let OAuth2 = (_dec15 = inject(Storage, Popup, BaseConfig), _dec15(_class12 = class OAuth2 {
+export let OAuth2 = (_dec4 = inject(Storage, Popup, BaseConfig), _dec4(_class5 = class OAuth2 {
   constructor(storage, popup, config) {
     this.storage = storage;
     this.config = config;
@@ -1115,7 +631,7 @@ export let OAuth2 = (_dec15 = inject(Storage, Popup, BaseConfig), _dec15(_class1
     });
     return query;
   }
-}) || _class12);
+}) || _class5);
 
 const camelCase = function (name) {
   return name.replace(/([\:\-\_]+(.))/g, function (_, separator, letter, offset) {
@@ -1123,134 +639,629 @@ const camelCase = function (name) {
   });
 };
 
-export let Popup = class Popup {
-  constructor() {
-    this.popupWindow = null;
-    this.polling = null;
-    this.url = '';
+export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2, AuthLock), _dec6 = deprecated({ message: 'Use baseConfig.loginRoute instead.' }), _dec7 = deprecated({ message: 'Use baseConfig.loginRedirect instead.' }), _dec8 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.loginUrl) instead.' }), _dec9 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.signupUrl) instead.' }), _dec10 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.profileUrl) instead.' }), _dec11 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec5(_class6 = (_class7 = class Authentication {
+  constructor(storage, config, oAuth1, oAuth2, auth0Lock) {
+    this.storage = storage;
+    this.config = config;
+    this.oAuth1 = oAuth1;
+    this.oAuth2 = oAuth2;
+    this.auth0Lock = auth0Lock;
+    this.updateTokenCallstack = [];
+    this.accessToken = null;
+    this.refreshToken = null;
+    this.payload = null;
+    this.exp = null;
+    this.hasDataStored = false;
   }
 
-  open(url, windowName, options) {
-    this.url = url;
-    const optionsString = buildPopupWindowOptions(options || {});
+  getLoginRoute() {
+    return this.config.loginRoute;
+  }
 
-    this.popupWindow = PLATFORM.global.open(url, windowName, optionsString);
+  getLoginRedirect() {
+    return this.config.loginRedirect;
+  }
 
-    if (this.popupWindow && this.popupWindow.focus) {
-      this.popupWindow.focus();
+  getLoginUrl() {
+    return this.Config.joinBase(this.config.loginUrl);
+  }
+
+  getSignupUrl() {
+    return this.Config.joinBase(this.config.signupUrl);
+  }
+
+  getProfileUrl() {
+    return this.Config.joinBase(this.config.profileUrl);
+  }
+
+  getToken() {
+    return this.getAccessToken();
+  }
+
+  get responseObject() {
+    LogManager.getLogger('authentication').warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
+    return this.getResponseObject();
+  }
+
+  set responseObject(response) {
+    LogManager.getLogger('authentication').warn('Setter Authentication.responseObject is deprecated. Use AuthServive.setResponseObject(response) instead.');
+    this.setResponseObject(response);
+  }
+
+  getResponseObject() {
+    return JSON.parse(this.storage.get(this.config.storageKey));
+  }
+
+  setResponseObject(response) {
+    if (response) {
+      this.getDataFromResponse(response);
+      this.storage.set(this.config.storageKey, JSON.stringify(response));
+      return;
+    }
+    this.accessToken = null;
+    this.refreshToken = null;
+    this.payload = null;
+    this.exp = null;
+
+    this.hasDataStored = false;
+
+    this.storage.remove(this.config.storageKey);
+  }
+
+  getAccessToken() {
+    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
+    return this.accessToken;
+  }
+
+  getRefreshToken() {
+    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
+    return this.refreshToken;
+  }
+
+  getPayload() {
+    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
+    return this.payload;
+  }
+
+  getExp() {
+    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
+    return this.exp;
+  }
+
+  getTtl() {
+    const exp = this.getExp();
+    return Number.isNaN(exp) ? NaN : exp - Math.round(new Date().getTime() / 1000);
+  }
+
+  isTokenExpired() {
+    const timeLeft = this.getTtl();
+    return Number.isNaN(timeLeft) ? undefined : timeLeft < 0;
+  }
+
+  isAuthenticated() {
+    const isTokenExpired = this.isTokenExpired();
+    if (isTokenExpired === undefined) return this.accessToken ? true : false;
+    return !isTokenExpired;
+  }
+
+  getDataFromResponse(response) {
+    const config = this.config;
+
+    this.accessToken = this.getTokenFromResponse(response, config.accessTokenProp, config.accessTokenName, config.accessTokenRoot);
+
+    this.refreshToken = null;
+    if (config.useRefreshToken) {
+      try {
+        this.refreshToken = this.getTokenFromResponse(response, config.refreshTokenProp, config.refreshTokenName, config.refreshTokenRoot);
+      } catch (e) {
+        this.refreshToken = null;
+      }
     }
 
-    return this;
+    this.payload = null;
+
+    try {
+      this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
+    } catch (_) {
+      _;
+    }
+
+    this.exp = this.payload ? parseInt(this.payload.exp, 10) : NaN;
+
+    this.hasDataStored = true;
+
+    return {
+      accessToken: this.accessToken,
+      refreshToken: this.refreshToken,
+      payload: this.payload,
+      exp: this.exp
+    };
   }
 
-  eventListener(redirectUri) {
-    return new Promise((resolve, reject) => {
-      this.popupWindow.addEventListener('loadstart', event => {
-        if (event.url.indexOf(redirectUri) !== 0) {
-          return;
-        }
+  getTokenFromResponse(response, tokenProp, tokenName, tokenRoot) {
+    if (!response) return undefined;
 
-        const parser = DOM.createElement('a');
-        parser.href = event.url;
+    const responseTokenProp = tokenProp.split('.').reduce((o, x) => o[x], response);
 
-        if (parser.search || parser.hash) {
-          const qs = parseUrl(parser);
+    if (typeof responseTokenProp === 'string') {
+      return responseTokenProp;
+    }
 
-          if (qs.error) {
-            reject({ error: qs.error });
-          } else {
-            resolve(qs);
-          }
+    if (typeof responseTokenProp === 'object') {
+      const tokenRootData = tokenRoot && tokenRoot.split('.').reduce((o, x) => o[x], responseTokenProp);
+      const token = tokenRootData ? tokenRootData[tokenName] : responseTokenProp[tokenName];
 
-          this.popupWindow.close();
-        }
+      if (!token) throw new Error('Token not found in response');
+
+      return token;
+    }
+
+    const token = response[tokenName] === undefined ? null : response[tokenName];
+
+    if (!token) throw new Error('Token not found in response');
+
+    return token;
+  }
+
+  toUpdateTokenCallstack() {
+    return new Promise(resolve => this.updateTokenCallstack.push(resolve));
+  }
+
+  resolveUpdateTokenCallstack(response) {
+    this.updateTokenCallstack.map(resolve => resolve(response));
+    this.updateTokenCallstack = [];
+  }
+
+  authenticate(name, userData = {}) {
+    let oauthType = this.config.providers[name].type;
+
+    if (oauthType) {
+      LogManager.getLogger('authentication').warn('DEPRECATED: Setting provider.type is deprecated and replaced by provider.oauthType');
+    } else {
+      oauthType = this.config.providers[name].oauthType;
+    }
+
+    let providerLogin;
+    if (oauthType === 'auth0-lock') {
+      providerLogin = this.auth0Lock;
+    } else {
+      providerLogin = oauthType === '1.0' ? this.oAuth1 : this.oAuth2;
+    }
+
+    return providerLogin.open(this.config.providers[name], userData);
+  }
+
+  redirect(redirectUrl, defaultRedirectUrl) {
+    if (redirectUrl === true) {
+      LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
+      return;
+    }
+
+    if (redirectUrl === false) {
+      LogManager.getLogger('authentication').warn('BREAKING CHANGE: Setting redirectUrl === false to actually *do redirect* is deprecated. Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
+    }
+
+    if (redirectUrl === 0) {
+      return;
+    }
+    if (typeof redirectUrl === 'string') {
+      PLATFORM.location.href = encodeURI(redirectUrl);
+    } else if (defaultRedirectUrl) {
+      PLATFORM.location.href = defaultRedirectUrl;
+    }
+  }
+}, (_applyDecoratedDescriptor(_class7.prototype, 'getLoginRoute', [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRoute'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginRedirect', [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRedirect'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginUrl', [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getSignupUrl', [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, 'getSignupUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getProfileUrl', [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, 'getProfileUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getToken', [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, 'getToken'), _class7.prototype)), _class7)) || _class6);
+
+export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSignaler, EventAggregator), _dec13 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec12(_class8 = (_class9 = class AuthService {
+  constructor(authentication, config, bindingSignaler, eventAggregator) {
+    this.authenticated = false;
+    this.timeoutID = 0;
+
+    this.authentication = authentication;
+    this.config = config;
+    this.bindingSignaler = bindingSignaler;
+    this.eventAggregator = eventAggregator;
+
+    const oldStorageKey = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : config.tokenName;
+    const oldToken = authentication.storage.get(oldStorageKey);
+
+    if (oldToken) {
+      LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
+      let fakeOldResponse = {};
+      fakeOldResponse[config.accessTokenProp] = oldToken;
+      this.setResponseObject(fakeOldResponse);
+      authentication.storage.remove(oldStorageKey);
+    }
+
+    this.setResponseObject(this.authentication.getResponseObject());
+  }
+
+  get client() {
+    return this.config.client;
+  }
+
+  get auth() {
+    LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
+    return this.authentication;
+  }
+
+  setTimeout(ttl) {
+    this.clearTimeout();
+
+    this.timeoutID = PLATFORM.global.setTimeout(() => {
+      if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+        this.updateToken();
+      } else {
+        this.logout(this.config.expiredRedirect);
+      }
+    }, ttl);
+  }
+
+  clearTimeout() {
+    if (this.timeoutID) {
+      PLATFORM.global.clearTimeout(this.timeoutID);
+    }
+    this.timeoutID = 0;
+  }
+
+  setResponseObject(response) {
+    this.clearTimeout();
+
+    this.authentication.setResponseObject(response);
+
+    let wasAuthenticated = this.authenticated;
+    this.authenticated = this.authentication.isAuthenticated();
+
+    if (this.authenticated && !Number.isNaN(this.authentication.exp)) {
+      this.setTimeout(this.getTtl() * 1000);
+    }
+
+    if (wasAuthenticated !== this.authenticated) {
+      this.bindingSignaler.signal('authentication-change');
+      this.eventAggregator.publish('authentication-change', this.authenticated);
+
+      LogManager.getLogger('authentication').info(`Authorization changed to: ${ this.authenticated }`);
+    }
+  }
+
+  getMe(criteriaOrId) {
+    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+      criteriaOrId = { id: criteriaOrId };
+    }
+    return this.client.find(this.config.joinBase(this.config.profileUrl), criteriaOrId);
+  }
+
+  updateMe(body, criteriaOrId) {
+    if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
+      criteriaOrId = { id: criteriaOrId };
+    }
+    if (this.config.profileMethod === 'put') {
+      return this.client.update(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
+    }
+    return this.client.patch(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
+  }
+
+  getAccessToken() {
+    return this.authentication.getAccessToken();
+  }
+
+  getCurrentToken() {
+    return this.getAccessToken();
+  }
+
+  getRefreshToken() {
+    return this.authentication.getRefreshToken();
+  }
+
+  isAuthenticated() {
+    let authenticated = this.authentication.isAuthenticated();
+
+    if (!authenticated && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+      this.updateToken();
+      authenticated = true;
+    }
+
+    return authenticated;
+  }
+
+  getExp() {
+    return this.authentication.getExp();
+  }
+
+  getTtl() {
+    return this.authentication.getTtl();
+  }
+
+  isTokenExpired() {
+    return this.authentication.isTokenExpired();
+  }
+
+  getTokenPayload() {
+    return this.authentication.getPayload();
+  }
+
+  updateToken() {
+    if (!this.authentication.getRefreshToken()) {
+      return Promise.reject(new Error('refreshToken not set'));
+    }
+
+    if (this.authentication.updateTokenCallstack.length === 0) {
+      const content = {
+        grant_type: 'refresh_token',
+        refresh_token: this.authentication.getRefreshToken(),
+        client_id: this.config.clientId ? this.config.clientId : undefined
+      };
+
+      this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(response => {
+        this.setResponseObject(response);
+        this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
+      }).catch(err => {
+        this.setResponseObject(null);
+        this.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
       });
+    }
 
-      this.popupWindow.addEventListener('exit', () => {
-        reject({ data: 'Provider Popup was closed' });
-      });
+    return this.authentication.toUpdateTokenCallstack();
+  }
 
-      this.popupWindow.addEventListener('loaderror', () => {
-        reject({ data: 'Authorization Failed' });
-      });
+  signup(displayNameOrCredentials, emailOrOptions, passwordOrRedirectUri, options, redirectUri) {
+    let content;
+
+    if (typeof arguments[0] === 'object') {
+      content = arguments[0];
+      options = arguments[1];
+      redirectUri = arguments[2];
+    } else {
+      content = {
+        'displayName': displayNameOrCredentials,
+        'email': emailOrOptions,
+        'password': passwordOrRedirectUri
+      };
+    }
+    return this.client.post(this.config.joinBase(this.config.signupUrl), content, options).then(response => {
+      if (this.config.loginOnSignup) {
+        this.setResponseObject(response);
+      }
+      this.authentication.redirect(redirectUri, this.config.signupRedirect);
+
+      return response;
     });
   }
 
-  pollPopup() {
-    return new Promise((resolve, reject) => {
-      this.polling = PLATFORM.global.setInterval(() => {
-        let errorData;
+  login(emailOrCredentials, passwordOrOptions, optionsOrRedirectUri, redirectUri) {
+    let content;
 
-        try {
-          if (this.popupWindow.location.host === PLATFORM.global.document.location.host && (this.popupWindow.location.search || this.popupWindow.location.hash)) {
-            const qs = parseUrl(this.popupWindow.location);
+    if (typeof arguments[0] === 'object') {
+      content = arguments[0];
+      optionsOrRedirectUri = arguments[1];
+      redirectUri = arguments[2];
+    } else {
+      content = {
+        'email': emailOrCredentials,
+        'password': passwordOrOptions
+      };
+      optionsOrRedirectUri = optionsOrRedirectUri;
+    }
 
-            if (qs.error) {
-              reject({ error: qs.error });
-            } else {
-              resolve(qs);
-            }
+    if (this.config.clientId) {
+      content.client_id = this.config.clientId;
+    }
 
-            this.popupWindow.close();
-            PLATFORM.global.clearInterval(this.polling);
-          }
-        } catch (error) {
-          errorData = error;
-        }
+    return this.client.post(this.config.joinBase(this.config.loginUrl), content, optionsOrRedirectUri).then(response => {
+      this.setResponseObject(response);
 
-        if (!this.popupWindow) {
-          PLATFORM.global.clearInterval(this.polling);
-          reject({
-            error: errorData,
-            data: 'Provider Popup Blocked'
-          });
-        } else if (this.popupWindow.closed) {
-          PLATFORM.global.clearInterval(this.polling);
-          reject({
-            error: errorData,
-            data: 'Problem poll popup'
-          });
-        }
-      }, 35);
+      this.authentication.redirect(redirectUri, this.config.loginRedirect);
+
+      return response;
     });
   }
-};
 
-const buildPopupWindowOptions = options => {
-  const width = options.width || 500;
-  const height = options.height || 500;
+  logout(redirectUri) {
+    let localLogout = response => new Promise(resolve => {
+      this.setResponseObject(null);
 
-  const extended = extend({
-    width: width,
-    height: height,
-    left: PLATFORM.global.screenX + (PLATFORM.global.outerWidth - width) / 2,
-    top: PLATFORM.global.screenY + (PLATFORM.global.outerHeight - height) / 2.5
-  }, options);
+      this.authentication.redirect(redirectUri, this.config.logoutRedirect);
 
-  let parts = [];
-  Object.keys(extended).map(key => parts.push(key + '=' + extended[key]));
+      if (typeof this.onLogout === 'function') {
+        this.onLogout(response);
+      }
 
-  return parts.join(',');
-};
+      resolve(response);
+    });
 
-const parseUrl = url => {
-  return extend(true, {}, parseQueryString(url.search), parseQueryString(url.hash));
-};
+    return this.config.logoutUrl ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout) : localLogout();
+  }
 
-export let Storage = (_dec16 = inject(BaseConfig), _dec16(_class13 = class Storage {
-  constructor(config) {
+  authenticate(name, redirectUri, userData = {}) {
+    return this.authentication.authenticate(name, userData).then(response => {
+      this.setResponseObject(response);
+
+      this.authentication.redirect(redirectUri, this.config.loginRedirect);
+
+      return response;
+    });
+  }
+
+  unlink(name, redirectUri) {
+    const unlinkUrl = this.config.joinBase(this.config.unlinkUrl) + name;
+    return this.client.request(this.config.unlinkMethod, unlinkUrl).then(response => {
+      this.authentication.redirect(redirectUri);
+
+      return response;
+    });
+  }
+}, (_applyDecoratedDescriptor(_class9.prototype, 'getCurrentToken', [_dec13], Object.getOwnPropertyDescriptor(_class9.prototype, 'getCurrentToken'), _class9.prototype)), _class9)) || _class8);
+
+export let AuthenticateStep = (_dec14 = inject(AuthService), _dec14(_class11 = class AuthenticateStep {
+  constructor(authService) {
+    this.authService = authService;
+  }
+
+  run(routingContext, next) {
+    const isLoggedIn = this.authService.authenticated;
+    const loginRoute = this.authService.config.loginRoute;
+
+    if (routingContext.getAllInstructions().some(route => route.config.auth === true)) {
+      if (!isLoggedIn) {
+        return next.cancel(new Redirect(loginRoute));
+      }
+    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
+      return next.cancel(new Redirect(this.authService.config.loginRedirect));
+    }
+
+    return next();
+  }
+}) || _class11);
+
+export let AuthorizeStep = (_dec15 = inject(AuthService), _dec15(_class12 = class AuthorizeStep {
+  constructor(authService) {
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
+
+    this.authService = authService;
+  }
+
+  run(routingContext, next) {
+    const isLoggedIn = this.authService.isAuthenticated();
+    const loginRoute = this.authService.config.loginRoute;
+
+    if (routingContext.getAllInstructions().some(route => route.config.auth)) {
+      if (!isLoggedIn) {
+        return next.cancel(new Redirect(loginRoute));
+      }
+    } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
+      return next.cancel(new Redirect(this.authService.config.loginRedirect));
+    }
+
+    return next();
+  }
+}) || _class12);
+
+export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseConfig), _dec16(_class13 = class FetchConfig {
+  constructor(httpClient, clientConfig, authService, config) {
+    this.httpClient = httpClient;
+    this.clientConfig = clientConfig;
+    this.authService = authService;
     this.config = config;
   }
 
-  get(key) {
-    return PLATFORM.global[this.config.storage].getItem(key);
+  get interceptor() {
+    return {
+      request: request => {
+        if (!this.config.httpInterceptor || !this.authService.isAuthenticated()) {
+          return request;
+        }
+        let token = this.authService.getAccessToken();
+
+        if (this.config.authTokenType) {
+          token = `${ this.config.authTokenType } ${ token }`;
+        }
+
+        request.headers.set(this.config.authHeader, token);
+
+        return request;
+      },
+      response: (response, request) => {
+        return new Promise((resolve, reject) => {
+          if (response.ok) {
+            return resolve(response);
+          }
+          if (response.status !== 401) {
+            return resolve(response);
+          }
+          if (!this.config.httpInterceptor || !this.authService.isTokenExpired()) {
+            return resolve(response);
+          }
+          if (!this.config.useRefreshToken || !this.authService.getRefreshToken()) {
+            return resolve(response);
+          }
+
+          return this.authService.updateToken().then(() => {
+            let token = this.authService.getAccessToken();
+
+            if (this.config.authTokenType) {
+              token = `${ this.config.authTokenType } ${ token }`;
+            }
+
+            request.headers.set(this.config.authHeader, token);
+
+            return this.client.fetch(request).then(resolve);
+          });
+        });
+      }
+    };
   }
 
-  set(key, value) {
-    PLATFORM.global[this.config.storage].setItem(key, value);
-  }
+  configure(client) {
+    if (Array.isArray(client)) {
+      let configuredClients = [];
+      client.forEach(toConfigure => {
+        configuredClients.push(this.configure(toConfigure));
+      });
 
-  remove(key) {
-    PLATFORM.global[this.config.storage].removeItem(key);
+      return configuredClients;
+    }
+
+    if (typeof client === 'string') {
+      const endpoint = this.clientConfig.getEndpoint(client);
+      if (!endpoint) {
+        throw new Error(`There is no '${ client || 'default' }' endpoint registered.`);
+      }
+      client = endpoint.client;
+    } else if (client instanceof Rest) {
+      client = client.client;
+    } else if (!(client instanceof HttpClient)) {
+      client = this.httpClient;
+    }
+
+    client.interceptors.push(this.interceptor);
+
+    return client;
   }
 }) || _class13);
+
+export function configure(aurelia, config) {
+  if (!PLATFORM.location.origin) {
+    PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
+  }
+
+  const baseConfig = aurelia.container.get(BaseConfig);
+
+  if (typeof config === 'function') {
+    config(baseConfig);
+  } else if (typeof config === 'object') {
+    baseConfig.configure(config);
+  }
+
+  for (let converter of baseConfig.globalValueConverters) {
+    aurelia.globalResources(`./${ converter }`);
+    LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${ converter }`);
+  }
+  const fetchConfig = aurelia.container.get(FetchConfig);
+  const clientConfig = aurelia.container.get(Config);
+
+  if (Array.isArray(baseConfig.configureEndpoints)) {
+    baseConfig.configureEndpoints.forEach(endpointToPatch => {
+      fetchConfig.configure(endpointToPatch);
+    });
+  }
+
+  let client;
+
+  if (baseConfig.endpoint !== null) {
+    if (typeof baseConfig.endpoint === 'string') {
+      const endpoint = clientConfig.getEndpoint(baseConfig.endpoint);
+      if (!endpoint) {
+        throw new Error(`There is no '${ baseConfig.endpoint || 'default' }' endpoint registered.`);
+      }
+      client = endpoint;
+    } else if (baseConfig.endpoint instanceof HttpClient) {
+      client = new Rest(baseConfig.endpoint);
+    }
+  }
+
+  if (!(client instanceof Rest)) {
+    client = new Rest(aurelia.container.get(HttpClient));
+  }
+
+  baseConfig.client = client;
+}

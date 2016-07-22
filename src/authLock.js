@@ -5,7 +5,7 @@ import {Storage} from './storage';
 import {BaseConfig} from './baseConfig';
 
 @inject(Storage, BaseConfig)
-export class Auth0Lock {
+export class AuthLock {
   constructor(storage, config) {
     this.storage      = storage;
     this.config       = config;

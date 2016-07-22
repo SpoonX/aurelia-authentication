@@ -1,27 +1,193 @@
 import * as LogManager from 'aurelia-logging';
 import {PLATFORM,DOM} from 'aurelia-pal';
+import {parseQueryString,join,buildQueryString} from 'aurelia-path';
+import {inject} from 'aurelia-dependency-injection';
+import {deprecated} from 'aurelia-metadata';
+import {EventAggregator} from 'aurelia-event-aggregator';
+import {BindingSignaler} from 'aurelia-templating-resources';
+import {Redirect} from 'aurelia-router';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Config,Rest} from 'aurelia-api';
-import {inject} from 'aurelia-dependency-injection';
-import {Redirect} from 'aurelia-router';
-import {deprecated} from 'aurelia-metadata';
-import {join,buildQueryString,parseQueryString} from 'aurelia-path';
 
-
-/**
- * Configure the plugin.
- *
- * @param {{globalResources: Function, container: {Container}}} aurelia
- * @param {{}|Function}                                         config
- */
-export declare function configure(aurelia?: any, config?: any): any;
-export declare class Auth0Lock {
+export declare class Popup {
+  constructor();
+  open(url?: any, windowName?: any, options?: any): any;
+  eventListener(redirectUri?: any): any;
+  pollPopup(): any;
+}
+export declare class BaseConfig {
+  
+  /**
+     * Prepends baseUrl to a given url
+     * @param  {String} url The relative url to append
+     * @return {String}     joined baseUrl and url
+     */
+  joinBase(url?: any): any;
+  
+  /**
+     * Merge current settings with incomming settings
+     * @param  {Object} incomming Settings object to be merged into the current configuration
+     * @return {Config}           this
+     */
+  configure(incomming?: any): any;
+  
+  /* ----------- default  config ----------- */
+  // Used internally. The used Rest instance; set during configuration (see index.js)
+  client: any;
+  
+  // If using aurelia-api:
+  // =====================
+  // This is the name of the endpoint used for any requests made in relation to authentication (login, logout, etc.). An empty string selects the default endpoint of aurelia-api.
+  endpoint: any;
+  
+  // When authenticated, these endpoints will have the token added to the header of any requests (for authorization). Accepts an array of endpoint names. An empty string selects the default endpoint of aurelia-api.
+  configureEndpoints: any;
+  
+  // SPA related options
+  // ===================
+  // The SPA url to which the user is redirected after a successful login
+  loginRedirect: any;
+  
+  // The SPA url to which the user is redirected after a successful logout
+  logoutRedirect: any;
+  
+  // The SPA route used when an unauthenticated user tries to access an SPA page that requires authentication
+  loginRoute: any;
+  
+  // Whether or not an authentication token is provided in the response to a successful signup
+  loginOnSignup: any;
+  
+  // If loginOnSignup == false: The SPA url to which the user is redirected after a successful signup (else loginRedirect is used)
+  signupRedirect: any;
+  
+  // redirect  when token expires. 0 = don't redirect (default), 1 = use logoutRedirect, string = redirect there
+  expiredRedirect: any;
+  
+  // API related options
+  // ===================
+  // The base url used for all authentication related requests, including provider.url below.
+  // This appends to the httpClient/endpoint base url, it does not override it.
+  baseUrl: any;
+  
+  // The API endpoint to which login requests are sent
+  loginUrl: any;
+  
+  // The API endpoint to which logout requests are sent (not needed for jwt)
+  logoutUrl: any;
+  
+  // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
+  logoutMethod: any;
+  
+  // The API endpoint to which signup requests are sent
+  signupUrl: any;
+  
+  // The API endpoint used in profile requests (inc. `find/get` and `update`)
+  profileUrl: any;
+  
+  // The method used to update the profile ('put' or 'patch')
+  profileMethod: any;
+  
+  // The API endpoint used with oAuth to unlink authentication
+  unlinkUrl: any;
+  
+  // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
+  unlinkMethod: any;
+  
+  // The API endpoint to which refreshToken requests are sent. null = loginUrl
+  refreshTokenUrl: any;
+  
+  // Token Options
+  // =============
+  // The header property used to contain the authToken in the header of API requests that require authentication
+  authHeader: any;
+  
+  // The token name used in the header of API requests that require authentication
+  authTokenType: any;
+  
+  // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
+  accessTokenProp: any;
+  
+  // If the property defined by `accessTokenProp` is an object:
+  // ------------------------------------------------------------
+  //This is the property from which to get the token `{ "accessTokenProp": { "accessTokenName" : '...' } }`
+  accessTokenName: any;
+  
+  // This allows the token to be a further object deeper `{ "accessTokenProp": { "accessTokenRoot" : { "accessTokenName" : '...' } } }`
+  accessTokenRoot: any;
+  
+  // Refresh Token Options
+  // =====================
+  // Option to turn refresh tokens On/Off
+  useRefreshToken: any;
+  
+  // The option to enable/disable the automatic refresh of Auth tokens using Refresh Tokens
+  autoUpdateToken: any;
+  
+  // Oauth Client Id
+  clientId: any;
+  
+  // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
+  refreshTokenProp: any;
+  
+  // If the property defined by `refreshTokenProp` is an object:
+  // -----------------------------------------------------------
+  // This is the property from which to get the token `{ "refreshTokenProp": { "refreshTokenName" : '...' } }`
+  refreshTokenName: any;
+  
+  // This allows the refresh token to be a further object deeper `{ "refreshTokenProp": { "refreshTokenRoot" : { "refreshTokenName" : '...' } } }`
+  refreshTokenRoot: any;
+  
+  // Miscellaneous Options
+  // =====================
+  // Whether to enable the fetch interceptor which automatically adds the authentication headers
+  // (or not... e.g. if using a session based API or you want to override the default behaviour)
+  httpInterceptor: any;
+  
+  // For OAuth only: Tell the API whether or not to include token cookies in the response (for session based APIs)
+  withCredentials: any;
+  
+  // Controls how the popup is shown for different devices (Options: 'browser' or 'mobile')
+  platform: any;
+  
+  // Determines the `PLATFORM` property name upon which aurelia-authentication data is stored (Default: `PLATFORM.localStorage`)
+  storage: any;
+  
+  // The key used for storing the authentication response locally
+  storageKey: any;
+  
+  // List of value-converters to make global
+  globalValueConverters: any;
+  
+  //OAuth provider specific related configuration
+  // ============================================
+  providers: any;
+  authToken: any;
+  responseTokenProp: any;
+  tokenRoot: any;
+  tokenName: any;
+  tokenPrefix: any;
+  current: any;
+}
+export declare class Storage {
+  constructor(config?: any);
+  get(key?: any): any;
+  set(key?: any, value?: any): any;
+  remove(key?: any): any;
+}
+export declare class AuthLock {
   constructor(storage?: any, config?: any);
   open(options?: any, userData?: any): any;
 }
-export declare class AuthenticateStep {
-  constructor(authService?: any);
-  run(routingContext?: any, next?: any): any;
+export declare class OAuth1 {
+  constructor(storage?: any, popup?: any, config?: any);
+  open(options?: any, userData?: any): any;
+  exchangeForToken(oauthData?: any, userData?: any, provider?: any): any;
+}
+export declare class OAuth2 {
+  constructor(storage?: any, popup?: any, config?: any);
+  open(options?: any, userData?: any): any;
+  exchangeForToken(oauthData?: any, userData?: any, provider?: any): any;
+  buildQuery(provider?: any): any;
 }
 export declare class Authentication {
   constructor(storage?: any, config?: any, oAuth1?: any, oAuth2?: any, auth0Lock?: any);
@@ -67,10 +233,6 @@ export declare class Authentication {
   authenticate(name?: any, userData?: any): any;
   redirect(redirectUrl?: any, defaultRedirectUrl?: any): any;
 }
-export declare class AuthorizeStep {
-  constructor(authService?: any);
-  run(routingContext?: any, next?: any): any;
-}
 export declare class AuthService {
   
   /**
@@ -104,10 +266,12 @@ export declare class AuthService {
   /**
      *  Create an AuthService instance
      *
-     * @param  {Authentication} authentication The Authentication instance to be used
-     * @param  {Config}         config         The Config instance to be used
+     * @param  {Authentication}  authentication  The Authentication instance to be used
+     * @param  {Config}          config          The Config instance to be used
+     * @param  {BindingSignaler} bindingSignaler The BindingSignaler instance to be used
+     * @param  {EventAggregator} eventAggregator The EventAggregator instance to be used
      */
-  constructor(authentication?: any, config?: any);
+  constructor(authentication?: any, config?: any, bindingSignaler?: any, eventAggregator?: any);
   
   /**
      * Getter: The configured client for all aurelia-authentication requests
@@ -266,158 +430,13 @@ export declare class AuthService {
      */
   unlink(name?: any, redirectUri?: any): any;
 }
-export declare class BaseConfig {
-  
-  /**
-     * Prepends baseUrl to a given url
-     * @param  {String} url The relative url to append
-     * @return {String}     joined baseUrl and url
-     */
-  joinBase(url?: any): any;
-  
-  /**
-     * Merge current settings with incomming settings
-     * @param  {Object} incomming Settings object to be merged into the current configuration
-     * @return {Config}           this
-     */
-  configure(incomming?: any): any;
-  
-  /* ----------- default  config ----------- */
-  // Used internally. The used Rest instance; set during configuration (see index.js)
-  client: any;
-  
-  // If using aurelia-api:
-  // =====================
-  // This is the name of the endpoint used for any requests made in relation to authentication (login, logout, etc.). An empty string selects the default endpoint of aurelia-api.
-  endpoint: any;
-  
-  // When authenticated, these endpoints will have the token added to the header of any requests (for authorization). Accepts an array of endpoint names. An empty string selects the default endpoint of aurelia-api.
-  configureEndpoints: any;
-  
-  // SPA related options
-  // ===================
-  // The SPA url to which the user is redirected after a successful login
-  loginRedirect: any;
-  
-  // The SPA url to which the user is redirected after a successful logout
-  logoutRedirect: any;
-  
-  // The SPA route used when an unauthenticated user tries to access an SPA page that requires authentication
-  loginRoute: any;
-  
-  // Whether or not an authentication token is provided in the response to a successful signup
-  loginOnSignup: any;
-  
-  // If loginOnSignup == false: The SPA url to which the user is redirected after a successful signup (else loginRedirect is used)
-  signupRedirect: any;
-  
-  // redirect  when token expires. 0 = don't redirect (default), 1 = use logoutRedirect, string = redirect there
-  expiredRedirect: any;
-  
-  // API related options
-  // ===================
-  // The base url used for all authentication related requests, including provider.url below.
-  // This appends to the httpClient/endpoint base url, it does not override it.
-  baseUrl: any;
-  
-  // The API endpoint to which login requests are sent
-  loginUrl: any;
-  
-  // The API endpoint to which logout requests are sent (not needed for jwt)
-  logoutUrl: any;
-  
-  // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
-  logoutMethod: any;
-  
-  // The API endpoint to which signup requests are sent
-  signupUrl: any;
-  
-  // The API endpoint used in profile requests (inc. `find/get` and `update`)
-  profileUrl: any;
-  
-  // The method used to update the profile ('put' or 'patch')
-  profileMethod: any;
-  
-  // The API endpoint used with oAuth to unlink authentication
-  unlinkUrl: any;
-  
-  // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
-  unlinkMethod: any;
-  
-  // The API endpoint to which refreshToken requests are sent. null = loginUrl
-  refreshTokenUrl: any;
-  
-  // Token Options
-  // =============
-  // The header property used to contain the authToken in the header of API requests that require authentication
-  authHeader: any;
-  
-  // The token name used in the header of API requests that require authentication
-  authTokenType: any;
-  
-  // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
-  accessTokenProp: any;
-  
-  // If the property defined by `accessTokenProp` is an object:
-  // ------------------------------------------------------------
-  //This is the property from which to get the token `{ "accessTokenProp": { "accessTokenName" : '...' } }`
-  accessTokenName: any;
-  
-  // This allows the token to be a further object deeper `{ "accessTokenProp": { "accessTokenRoot" : { "accessTokenName" : '...' } } }`
-  accessTokenRoot: any;
-  
-  // Refresh Token Options
-  // =====================
-  // Option to turn refresh tokens On/Off
-  useRefreshToken: any;
-  
-  // The option to enable/disable the automatic refresh of Auth tokens using Refresh Tokens
-  autoUpdateToken: any;
-  
-  // Oauth Client Id
-  clientId: any;
-  
-  // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
-  refreshTokenProp: any;
-  
-  // If the property defined by `refreshTokenProp` is an object:
-  // -----------------------------------------------------------
-  // This is the property from which to get the token `{ "refreshTokenProp": { "refreshTokenName" : '...' } }`
-  refreshTokenName: any;
-  
-  // This allows the refresh token to be a further object deeper `{ "refreshTokenProp": { "refreshTokenRoot" : { "refreshTokenName" : '...' } } }`
-  refreshTokenRoot: any;
-  
-  // Miscellaneous Options
-  // =====================
-  // Whether to enable the fetch interceptor which automatically adds the authentication headers
-  // (or not... e.g. if using a session based API or you want to override the default behaviour)
-  httpInterceptor: any;
-  
-  // For OAuth only: Tell the API whether or not to include token cookies in the response (for session based APIs)
-  withCredentials: any;
-  
-  // Controls how the popup is shown for different devices (Options: 'browser' or 'mobile')
-  platform: any;
-  
-  // Determines the `PLATFORM` property name upon which aurelia-authentication data is stored (Default: `PLATFORM.localStorage`)
-  storage: any;
-  
-  // The key used for storing the authentication response locally
-  storageKey: any;
-  
-  // List of value-converters to make global
-  globalValueConverters: any;
-  
-  //OAuth provider specific related configuration
-  // ============================================
-  providers: any;
-  authToken: any;
-  responseTokenProp: any;
-  tokenRoot: any;
-  tokenName: any;
-  tokenPrefix: any;
-  current: any;
+export declare class AuthenticateStep {
+  constructor(authService?: any);
+  run(routingContext?: any, next?: any): any;
+}
+export declare class AuthorizeStep {
+  constructor(authService?: any);
+  run(routingContext?: any, next?: any): any;
 }
 export declare class FetchConfig {
   
@@ -447,29 +466,18 @@ export declare class FetchConfig {
      */
   configure(client?: any): any;
 }
-export declare class OAuth1 {
-  constructor(storage?: any, popup?: any, config?: any);
-  open(options?: any, userData?: any): any;
-  exchangeForToken(oauthData?: any, userData?: any, provider?: any): any;
-}
-export declare class OAuth2 {
-  constructor(storage?: any, popup?: any, config?: any);
-  open(options?: any, userData?: any): any;
-  exchangeForToken(oauthData?: any, userData?: any, provider?: any): any;
-  buildQuery(provider?: any): any;
-}
-export declare class Popup {
-  constructor();
-  open(url?: any, windowName?: any, options?: any): any;
-  eventListener(redirectUri?: any): any;
-  pollPopup(): any;
-}
-export declare class Storage {
-  constructor(config?: any);
-  get(key?: any): any;
-  set(key?: any, value?: any): any;
-  remove(key?: any): any;
-}
+
+// added for easy jspm bundling
+// eslint-disable-line no-unused-vars
+// eslint-disable-line no-unused-vars
+// eslint-disable-line no-unused-vars
+/**
+ * Configure the plugin.
+ *
+ * @param {{globalResources: Function, container: {Container}}} aurelia
+ * @param {{}|Function}                                         config
+ */
+export declare function configure(aurelia?: any, config?: any): any;
 export declare class AuthenticatedFilterValueConverter {
   constructor(authService?: any);
   
@@ -500,4 +508,3 @@ export declare class AuthFilterValueConverter {
      */
   toView(routes?: any, isAuthenticated?: any): any;
 }
-export * from 'aurelia-authentication/aurelia-authentication';

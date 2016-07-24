@@ -9,7 +9,7 @@ Aurelia-authentication has submodules (currently only the authFilter) and makes 
 ```js
 "dependencies": [
   // ...
-  'extends',
+  'extend',
   {
     "name": "aurelia-authentication",
     "path": "../node_modules/aurelia-authentication/dist/amd",

@@ -4,7 +4,7 @@
 
 Run `npm i aurelia-authentication --save` from your project root.
 
-Aurelia-authentication has submodules (currently only the authFilter) and makes use of `extends` and `jwt-decode`. So, add following to the `build.bundles.dependencies` section of `aurelia-project/aurelia.json`.
+Aurelia-authentication has submodules (currently only the authFilter) and makes use of `extend` and `jwt-decode`. So, add following to the `build.bundles.dependencies` section of `aurelia-project/aurelia.json`.
 
 ```js
 "dependencies": [

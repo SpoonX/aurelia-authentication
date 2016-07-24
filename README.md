@@ -26,18 +26,24 @@ With aurelia-authentication you can:
 
 We've simplified installation and usage! This plugin should now be installed using `jspm i aurelia-authentication` or (for webpack) `npm i aurelia-authentication --save`. Make sure you update all references to `spoonx/aurelia-authentication` and `spoonx/aurelia-api` and remove the `spoonx/` prefix (don't forget your config.js, package.json, imports and bundles).
 
+## Documentation
+
+You can find usage examples and the documentation at the [aurelia-authentication-docs](http://aurelia-authentication.spoonx.org/).
+
+The [changelog](doc/changelog.md) provides you with information about important changes.
+
 ## Installation
 
 ### Aureli-Cli
 
 Run `npm i aurelia-authentication --save` from your project root.
 
-Aurelia-authentication has submodules (currently only the authFilter) and makes use of `extends` and `jwt-decode`. So, add following to the `build.bundles.dependencies` section of `aurelia-project/aurelia.json`.
+Aurelia-authentication has submodules (currently only the authFilter) and makes use of `extend` and `jwt-decode`. So, add following to the `build.bundles.dependencies` section of `aurelia-project/aurelia.json`.
 
 ```js
 "dependencies": [
   // ...
-  'extends',
+  'extend',
   {
     "name": "aurelia-authentication",
     "path": "../node_modules/aurelia-authentication/dist/amd",
@@ -100,12 +106,6 @@ or run
 ```sh
 typings i github:spoonx/aurelia-authentication
 ```
-
-## Documentation
-
-You can find usage examples and the documentation at the [aurelia-authentication-docs](http://aurelia-authentication.spoonx.org/).
-
-The [changelog](doc/changelog.md) provides you with information about important changes.
 
 ## Usage
 

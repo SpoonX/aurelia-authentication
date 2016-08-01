@@ -20,7 +20,7 @@ var paths = {
   packageName: pkg.name,
   ignore: [],
   useTypeScriptForDTS: false,
-  importsToAdd: [],
+  importsToAdd: [], // eg. non-concated local imports in the main file as they will get removed during the build process
   importsToIgnoreForDts: ['extend', 'jwt-decode'], // imports that are only used internally. no need to d.ts export them
   jsResources: [appRoot + '*ValueConverter.js'], // js to transpile, but not be concated and keeping their relative path
   resources: appRoot + '{**/*.css,**/*.html}',

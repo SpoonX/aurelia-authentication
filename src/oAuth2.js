@@ -48,8 +48,8 @@ export class OAuth2 {
     return openPopup
       .then(oauthData => {
         if (provider.responseType === 'token' ||
-            provider.responseType === 'id_token%20token' ||
-            provider.responseType === 'token%20id_token'
+            provider.responseType === 'id_token token' ||
+            provider.responseType === 'token id_token'
         ) {
           return oauthData;
         }

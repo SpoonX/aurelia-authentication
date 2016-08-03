@@ -1,6 +1,6 @@
 {
   "name": "aurelia-authentication",
-  "version": "3.0.0-rc7",
+  "version": "3.0.0-rc8",
   "description": "Plugin for social media authentication and local authentication together with other authentication utilities.",
   "keywords": [
     "aurelia",
@@ -14,12 +14,15 @@
   "authors": [
     "RWOverdijk <wesley@spoonx.nl> (http://spoonx.nl/)"
   ],
+  "contributors": [
+    "Dirk Eisinger <doktordirk@outlook.de>"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/SpoonX/aurelia-authentication"
   },
   "dependencies": {
-    "aurelia-api": "^3.0.0-rc1",
+    "aurelia-api": "^3.0.0-rc5",
     "aurelia-dependency-injection": "^1.0.0-rc.1.0.0",
     "aurelia-event-aggregator": "^1.0.0-rc.1.0.0",
     "aurelia-fetch-client": "^1.0.0-rc.1.0.0",

@@ -207,6 +207,8 @@ export class AuthService {
   * @returns {Boolean} For Non-JWT and unexpired JWT: true, else: false
   */
   isAuthenticated() {
+    this.authentication.hasTokenAnalyzed = false;
+
     let authenticated = this.authentication.isAuthenticated();
 
     // auto-update token?

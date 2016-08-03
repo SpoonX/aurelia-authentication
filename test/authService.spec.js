@@ -483,6 +483,32 @@ describe('AuthService', () => {
       expect(typeof result).toBe('boolean');
     });
 
+    describe('should analyse token from storage each time', () => {
+      it('should be true after setResponseObject with token', () => {
+        authService.setResponseObject({token: 'some', refresh_token: 'another'});
+
+        expect(authService.isAuthenticated()).toBe(true);
+      });
+
+      it('should be false after clearing storage directly', () => {
+        authService.authentication.storage.remove(authService.config.storageKey);
+
+        expect(authService.isAuthenticated()).toBe(false);
+      });
+
+      it('should be true after setting storage directly', () => {
+        authService.authentication.storage.set(authService.config.storageKey, JSON.stringify({token: 'some', refresh_token: 'another'}));
+
+        expect(authService.isAuthenticated()).toBe(true);
+      });
+
+      it('should be false after setResponseObject with null', () => {
+        authService.setResponseObject(null);
+
+        expect(authService.isAuthenticated()).toBe(false);
+      });
+    });
+
     describe('with autoUpdateToken=true', () => {
       it('should return boolean true', () => {
         authService.setResponseObject({token: 'some', refresh_token: 'another'});

@@ -53,7 +53,7 @@ export class AuthService {
 
     // get token stored in previous format over
     const oldStorageKey = config.tokenPrefix
-                        ? config.tokenPrefix + '_' + config.tokenName
+                        ? `${config.tokenPrefix}_${config.tokenName}`
                         : config.tokenName;
     const oldToken = authentication.storage.get(oldStorageKey);
 
@@ -67,7 +67,32 @@ export class AuthService {
 
     // initialize status by resetting if existing stored responseObject
     this.setResponseObject(this.authentication.getResponseObject());
+
+    // listen to storage events in case the user logs in or out in another tab/window
+    PLATFORM.addEventListener('storage', this.storageEventHandler);
   }
+
+  /**
+   * The handler used for storage events. Detects and handles authentication changes in other tabs/windows
+   *
+   * @param {StorageEvent}
+   */
+  storageEventHandler = event => {
+    if (event.key !== this.config.storageKey) {
+      return;
+    }
+
+    LogManager.getLogger('authentication').info('Stored token changed event');
+
+    let wasAuthenticated = this.authenticated;
+    this.authentication.responseAnalyzed = false;
+    this.updateAuthenticated();
+
+    if (this.config.storageChangedRedirect && wasAuthenticated !== this.authenticated) {
+      PLATFORM.location.assign(this.config.storageChangedRedirect);
+    }
+  }
+
 
   /**
    * Getter: The configured client for all aurelia-authentication requests
@@ -78,6 +103,12 @@ export class AuthService {
     return this.config.client;
   }
 
+  /**
+   * Getter: The authentication class instance
+   *
+   * @return {boolean}
+   * @deprecated
+   */
   get auth() {
     LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
     return this.authentication;
@@ -96,8 +127,14 @@ export class AuthService {
         && this.authentication.getAccessToken()
         && this.authentication.getRefreshToken()) {
         this.updateToken();
-      } else {
-        this.logout(this.config.expiredRedirect);
+
+        return;
+      }
+
+      this.setResponseObject(null);
+
+      if (this.config.expiredRedirect) {
+        PLATFORM.location.assign(this.config.expiredRedirect);
       }
     }, ttl);
   }
@@ -118,9 +155,16 @@ export class AuthService {
    * @param {Object} response The servers response as GOJO
    */
   setResponseObject(response) {
-    this.clearTimeout();
-
     this.authentication.setResponseObject(response);
+
+    this.updateAuthenticated();
+  }
+
+  /**
+   * Update authenticated. Sets login status and timeout
+   */
+  updateAuthenticated() {
+    this.clearTimeout();
 
     let wasAuthenticated = this.authenticated;
     this.authenticated = this.authentication.isAuthenticated();
@@ -202,12 +246,12 @@ export class AuthService {
   }
 
  /**
-  * Gets authentication status
+  * Gets authentication status from storage
   *
   * @returns {Boolean} For Non-JWT and unexpired JWT: true, else: false
   */
   isAuthenticated() {
-    this.authentication.hasTokenAnalyzed = false;
+    this.authentication.responseAnalyzed = false;
 
     let authenticated = this.authentication.isAuthenticated();
 
@@ -307,8 +351,8 @@ export class AuthService {
     let content;
 
     if (typeof arguments[0] === 'object') {
-      content = arguments[0];
-      options = arguments[1];
+      content     = arguments[0];
+      options     = arguments[1];
       redirectUri = arguments[2];
     } else {
       content = {
@@ -342,9 +386,9 @@ export class AuthService {
     let content;
 
     if (typeof arguments[0] === 'object') {
-      content             = arguments[0];
+      content              = arguments[0];
       optionsOrRedirectUri = arguments[1];
-      redirectUri         = arguments[2];
+      redirectUri          = arguments[2];
     } else {
       content = {
         'email': emailOrCredentials,
@@ -370,15 +414,15 @@ export class AuthService {
   /**
    * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
    *
-   * @param {[String]}    [redirectUri]                      [optional redirectUri overwrite]
+   * @param {[String]}    [redirectUri]                     [optional redirectUri overwrite]
    *
    * @return {Promise<>|Promise<Object>|Promise<Error>}     Server response as Object
    */
-  logout(redirectUri) {
+  logout(redirectUri, query) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
 
-      this.authentication.redirect(redirectUri, this.config.logoutRedirect);
+      this.authentication.redirect(redirectUri, this.config.logoutRedirect, query);
 
       if (typeof this.onLogout === 'function') {
         this.onLogout(response);

@@ -62,8 +62,35 @@ describe('AuthService', () => {
   describe('.client', () => {
     const container   = getContainer();
     const authService = container.get(AuthService);
+
     it('to be instanceof HttpClient', () => {
       expect(authService.client instanceof Rest).toBe(true);
+    });
+  });
+
+
+  describe('.authenticated', () => {
+    const container   = getContainer();
+    const authService = container.get(AuthService);
+
+    describe('should change status if storage changes', () => {
+      it('should be true after setResponseObject with token', () => {
+        authService.setResponseObject({token: 'some', refresh_token: 'another'});
+
+        expect(authService.authenticated).toBe(true);
+      });
+
+      it('should not change after clearing storage directly in same window/tab', () => {
+        authService.authentication.storage.remove(authService.config.storageKey);
+
+        expect(authService.authenticated).not.toBe(false);
+      });
+
+      it('should be false after setResponseObject with null', () => {
+        authService.setResponseObject(null);
+
+        expect(authService.authenticated).toBe(false);
+      });
     });
   });
 
@@ -350,44 +377,21 @@ describe('AuthService', () => {
     it('Should set with jwt and timeout', done => {
       const container = new Container();
       let authService = container.get(AuthService);
+      authService.config.expiredReload = 0;
 
       authService.getTtl = () => 0;
 
       spyOn(authService, 'getTtl').and.returnValue(0);
-      spyOn(authService.authentication, 'redirect').and.callFake((overwriteUri, defaultUri) => {
-        expect(overwriteUri).toBe(0);
-        expect(defaultUri).toBe(authService.config.logoutRedirect);
-
-        expect(authService.authenticated).toBe(false);
-        done();
-      });
 
       authService.setResponseObject({access_token: tokenFuture.jwt});
 
       expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);
       expect(authService.authenticated).toBe(true);
-    });
 
-    it('Should set with jwt,  timeout and redirect', done => {
-      const container = new Container();
-      let authService = container.get(AuthService);
-
-      authService.getTtl = () => 0;
-
-      spyOn(authService, 'getTtl').and.returnValue(0);
-      spyOn(authService.authentication, 'redirect').and.callFake((overwriteUri, defaultUri) => {
-        expect(overwriteUri).toBe(1);
-        expect(defaultUri).toBe(authService.config.logoutRedirect);
-
+      setTimeout(() => {
         expect(authService.authenticated).toBe(false);
         done();
-      });
-
-      authService.setResponseObject({access_token: tokenFuture.jwt});
-      authService.config.expiredRedirect = 1;
-
-      expect(JSON.parse(window.localStorage.getItem('aurelia_authentication')).access_token).toBe(tokenFuture.jwt);
-      expect(authService.authenticated).toBe(true);
+      }, 1);
     });
 
     it('Should delete', () => {

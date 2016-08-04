@@ -23,8 +23,10 @@ loginRoute = '/login';
 loginOnSignup = true;
 // If loginOnSignup == false: The SPA url to which the user is redirected after a successful signup (else loginRedirect is used)
 signupRedirect = '#/login';
-// redirect  when token expires. 0 = don't redirect (default), 1 = use logoutRedirect, string = redirect there
-expiredRedirect = 0;
+// reload page when token expires. 0 = don't reload (default), 1 = do reload page
+expiredReload = 0;
+// reload page when storage changed aka login/logout in other tabs/windows. 0 = don't reload (default), 1 = do reload page
+storageChangedReload = 0;
 
 
 // API related options

@@ -44,9 +44,9 @@ import {AuthService} from 'aurelia-authentication';
 
 ### .authenticated
 
-| Type    | Description                                      |
-| ------- | ------------------------------------------------ |
-| Boolean | Authentication status as set by timeout function |
+| Type    | Description                                 |
+| ------- | ------------------------------------------- |
+| Boolean | Automatically updated authentication status |
 
 ----------
 

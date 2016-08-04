@@ -145,14 +145,23 @@ export class Authentication {
   getDataFromResponse(response) {
     const config   = this.config;
 
-    this.accessToken = this.getTokenFromResponse(response, config.accessTokenProp, config.accessTokenName, config.accessTokenRoot);
+    // get access token either with from supplied parameters or with supplied function
+    this.accessToken = typeof this.config.getAccessTokenFromResponse === 'function'
+                     ? this.config.getAccessTokenFromResponse(response)
+                     : this.getTokenFromResponse(response, config.accessTokenProp, config.accessTokenName, config.accessTokenRoot);
+
 
     this.refreshToken = null;
     if (config.useRefreshToken) {
       try {
-        this.refreshToken = this.getTokenFromResponse(response, config.refreshTokenProp, config.refreshTokenName, config.refreshTokenRoot);
+        // get refresh token either with from supplied parameters or with supplied function
+        this.refreshToken = typeof this.config.getRefreshTokenFromResponse === 'function'
+                         ? this.config.getRefreshTokenFromResponse(response)
+                         : this.getTokenFromResponse(response, config.refreshTokenProp, config.refreshTokenName, config.refreshTokenRoot);
       } catch (e) {
         this.refreshToken = null;
+
+        LogManager.getLogger('authentication').warn('useRefreshToken is set, but could not extract a refresh token');
       }
     }
 
@@ -168,7 +177,10 @@ export class Authentication {
       this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
     } catch (_) {_;}
 
-    this.exp = this.payload ? parseInt(this.payload.exp, 10) : NaN;
+    // get exp either with from jwt or with supplied function
+    this.exp = typeof this.config.getExpirationDateFromResponse === 'function'
+            ? this.config.getExpirationDateFromResponse(response)
+            : (this.payload && parseInt(this.payload.exp, 10)) ||  NaN;
 
     this.hasDataStored = true;
 

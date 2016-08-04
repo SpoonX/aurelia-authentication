@@ -82,6 +82,14 @@ describe('Authentication', () => {
 
       expect(authentication.getAccessToken()).toBe('some');
     });
+
+    it('Should use custom function to analyze response first and return accessToken', () => {
+      authentication.config.getAccessTokenFromResponse = response => response.custom;
+
+      authentication.setResponseObject({custom: 'custom'});
+
+      expect(authentication.getAccessToken()).toBe('custom');
+    });
   });
 
   describe('.getRefreshToken()', () => {
@@ -95,9 +103,19 @@ describe('Authentication', () => {
 
     it('Should analyze response first and return refreshToken', () => {
       authentication.config.useRefreshToken = true;
+
       authentication.setResponseObject({token: 'some', refresh_token: 'another'});
 
       expect(authentication.getRefreshToken()).toBe('another');
+    });
+
+    it('Should use custom function to analyze response first and return refreshToken', () => {
+      authentication.config.useRefreshToken = true;
+      authentication.config.getRefreshTokenFromResponse = response => response.custom;
+
+      authentication.setResponseObject({token: 'some', custom: 'other custom'});
+
+      expect(authentication.getRefreshToken()).toBe('other custom');
     });
   });
 
@@ -161,6 +179,16 @@ describe('Authentication', () => {
       const exp = authentication.getExp();
       expect(typeof exp === 'number').toBe(true);
       expect(exp).toBe(Number(tokenPast.payload.exp));
+    });
+
+    it('Should use custom function to analyze response first and return exp', () => {
+      authentication.config.getExpirationDateFromResponse = response => response.custom;
+
+      authentication.setResponseObject({token: 'some', custom: 2460017154});
+
+      const exp = authentication.getExp();
+      expect(typeof exp === 'number').toBe(true);
+      expect(exp).toBe(2460017154);
     });
   });
 

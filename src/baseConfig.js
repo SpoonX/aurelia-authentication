@@ -149,6 +149,15 @@ export class BaseConfig {
   storage = 'localStorage';
   // The key used for storing the authentication response locally
   storageKey = 'aurelia_authentication';
+  // optional function to extract the expiration date. takes the server responseas parameter
+  // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in * 1000;
+  getExpirationDateFromResponse = null;
+  // optional function to extract the access token from the response. takes the server response as parameter
+  // eg: getAccessTokenFromResponse = serverResponse => serverResponse.data[0].access_token;
+  getAccessTokenFromResponse = null;
+  // optional function to extract the refresh token from the response. takes the server response as parameter
+  // eg: getRefreshTokenFromResponse = serverResponse => serverResponse.data[0].refresh_token;
+  getRefreshTokenFromResponse = null;
 
   // List of value-converters to make global
   globalValueConverters = ['authFilterValueConverter'];

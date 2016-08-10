@@ -121,7 +121,7 @@ platform = 'browser';
 storage = 'localStorage';
 // The key used for storing the authentication response locally
 storageKey = 'aurelia_authentication';
-// optional function to extract the expiration date. takes the server responseas parameter
+// optional function to extract the expiration date. takes the server response as parameter
 // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in * 1000;
 getExpirationDateFromResponse = null;
 // optional function to extract the access token from the response. takes the server response as parameter

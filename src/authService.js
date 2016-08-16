@@ -192,6 +192,15 @@ export class AuthService {
     return this.authentication.getRefreshToken();
   }
 
+  /**
+   * Get idToken from storage
+   *
+   * @returns {String} Current idToken
+   */
+  getIdToken() {
+    return this.authentication.getIdToken();
+  }
+
  /**
   * Gets authentication status
   *

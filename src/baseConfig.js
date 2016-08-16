@@ -128,6 +128,12 @@ export class BaseConfig {
   // This allows the refresh token to be a further object deeper `{ "refreshTokenProp": { "refreshTokenRoot" : { "refreshTokenName" : '...' } } }`
   refreshTokenRoot = false;
 
+  // The property name from which to get the user authentication token. Can also be dotted idTokenProp.idTokenName
+  idTokenProp = 'id_token';
+  // This is the property from which to get the id token `{ "idTokenProp": { "idTokenName" : '...' } }`
+  idTokenName = 'token';
+  // This allows the id_token to be a further object deeper `{ "idTokenProp": { "idTokenRoot" : { "idTokenName" : '...' } } }`
+  idTokenRoot = false;
 
   // Miscellaneous Options
   // =====================

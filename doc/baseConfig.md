@@ -58,7 +58,7 @@ unlinkMethod = 'get';
 authHeader = 'Authorization';
 // The token name used in the header of API requests that require authentication
 authTokenType = 'Bearer';
-// The the property from which to get the access token after a successful login or signup
+// The property from which to get the access token after a successful login or signup
 accessTokenProp = 'access_token';
 
 
@@ -80,7 +80,7 @@ useRefreshToken = false;
 autoUpdateToken = true;
 // Oauth Client Id
 clientId = false;
-// The the property from which to get the refresh token after a successful token refresh
+// The property from which to get the refresh token after a successful token refresh
 refreshTokenProp = 'refresh_token';
 
 // If the property defined by `refreshTokenProp` is an object:
@@ -90,6 +90,21 @@ refreshTokenProp = 'refresh_token';
 refreshTokenName = 'token';
 // This allows the refresh token to be a further object deeper `{ "refreshTokenProp": { "refreshTokenRoot" : { "refreshTokenName" : '...' } } }`
 refreshTokenRoot = false;
+
+
+// Id Token Options
+// =====================
+
+// The property from which to get the id token after a successful login
+idTokenProp = 'id_token';
+
+// If the property defined by `idTokenProp` is an object:
+// -----------------------------------------------------------
+
+// This is the property from which to get the token `{ "idTokenProp": { "idTokenName" : '...' } }`
+idTokenName = 'token';
+// This allows the id token to be a further object deeper `{ "idTokenProp": { "idTokenRoot" : { "idTokenName" : '...' } } }`
+idTokenRoot = false;
 
 
 // Miscellaneous Options

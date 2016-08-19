@@ -335,7 +335,7 @@ this.authService.signup({
   fullname: 'Jane Doe',
   username: 'janedoe',
   password: 'securePasword'
-}, {headers: {Authorization: 'none'}},
+}, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}},
   "#/confirm-page")
   .then(response => {
     console.log(response);
@@ -375,16 +375,25 @@ Promise: response
 #### Examples
 
 ```js
-this.authService.signup('janedoe@example.com', 'securePasword')
+this.authService.login('janedoe@example.com', 'securePasword')
   .then(response => {
     console.log(response);
   });
 //or
-this.authService.signup({
+this.authService.login({
   username: 'janedoe',
   password: 'securePasword'
 }, {headers: {Authorization: 'none'}},
   "#/special-page")
+  .then(response => {
+    console.log(response);
+  });
+  // or for eg OpenIddict
+this.authService.login({
+  username: this.email,
+  password: this.password,
+  grant_type: "password"
+}, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})  
   .then(response => {
     console.log(response);
   });

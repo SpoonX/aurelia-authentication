@@ -158,7 +158,7 @@ export class Login {
 
     // use authService.login(credentialsObject) to login to your auth server
     // authService.authenticated holds the current status
-    // authService.getPayload() gives you the current payload object
+    // authService.getPayload() gives you the current payload object (for jwt)
     login(credentialsObject) {
       return this.authService.login(credentialsObject)
         .then(() => {

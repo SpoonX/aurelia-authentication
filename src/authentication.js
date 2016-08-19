@@ -1,4 +1,5 @@
 import {PLATFORM} from 'aurelia-pal';
+import {buildQueryString} from 'aurelia-path';
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import jwtDecode from 'jwt-decode';
@@ -23,7 +24,7 @@ export class Authentication {
     this.idToken              = null;
     this.payload              = null;
     this.exp                  = null;
-    this.hasDataStored        = false;
+    this.responseAnalyzed     = false;
   }
 
 
@@ -81,13 +82,12 @@ export class Authentication {
       this.storage.set(this.config.storageKey, JSON.stringify(response));
       return;
     }
-    this.accessToken = null;
-    this.refreshToken = null;
-    this.idToken = null;
-    this.payload = null;
-    this.exp = null;
-
-    this.hasDataStored = false;
+    this.accessToken      = null;
+    this.refreshToken     = null;
+    this.idToken          = null;
+    this.payload          = null;
+    this.exp              = null;
+    this.responseAnalyzed = false;
 
     this.storage.remove(this.config.storageKey);
   }
@@ -96,27 +96,27 @@ export class Authentication {
   /* get data, update if needed first */
 
   getAccessToken() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
+    if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
     return this.accessToken;
   }
 
   getRefreshToken() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
+    if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
     return this.refreshToken;
   }
 
   getIdToken() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
+    if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
     return this.idToken;
   }
 
   getPayload() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
+    if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
     return this.payload;
   }
 
   getExp() {
-    if (!this.hasDataStored) this.getDataFromResponse(this.getResponseObject());
+    if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
     return this.exp;
   }
 
@@ -170,7 +170,7 @@ export class Authentication {
 
     this.exp = this.payload ? parseInt(this.payload.exp, 10) : NaN;
 
-    this.hasDataStored = true;
+    this.responseAnalyzed = true;
 
     return {
       accessToken: this.accessToken,
@@ -244,7 +244,7 @@ export class Authentication {
     return providerLogin.open(this.config.providers[name], userData);
   }
 
-  redirect(redirectUrl, defaultRedirectUrl) {
+  redirect(redirectUrl, defaultRedirectUrl, query) {
     // stupid rule to keep it BC
     if (redirectUrl === true) {
       LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
@@ -259,9 +259,9 @@ export class Authentication {
       return;
     }
     if (typeof redirectUrl === 'string') {
-      PLATFORM.location.href = encodeURI(redirectUrl);
+      PLATFORM.location.href = encodeURI(redirectUrl + (query ? `?${buildQueryString(query)}` : ''));
     } else if (defaultRedirectUrl) {
-      PLATFORM.location.href = defaultRedirectUrl;
+      PLATFORM.location.href = defaultRedirectUrl + (query ? `?${buildQueryString(query)}` : '');
     }
   }
 }

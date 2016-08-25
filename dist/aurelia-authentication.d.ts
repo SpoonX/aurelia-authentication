@@ -523,7 +523,7 @@ export declare class FetchConfig {
   configure(client?: any): any;
 }
 
-// added for easy jspm bundling
+// added for bundling
 // eslint-disable-line no-unused-vars
 // eslint-disable-line no-unused-vars
 // eslint-disable-line no-unused-vars

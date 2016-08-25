@@ -35,6 +35,9 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 
 
 
+import { AuthFilterValueConverter } from "./authFilterValueConverter";
+import { AuthenticatedValueConverter } from "./authenticatedValueConverter";
+import { AuthenticatedFilterValueConverter } from "./authenticatedFilterValueConverter";
 import extend from 'extend';
 import * as LogManager from 'aurelia-logging';
 import jwtDecode from 'jwt-decode';
@@ -363,7 +366,7 @@ export var BaseConfig = function () {
     for (var key in incomming) {
       var value = incomming[key];
       if (value !== undefined) {
-        if (Array.isArray(value) || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object' || value === null) {
+        if (Array.isArray(value) || (typeof value === "undefined" ? "undefined" : _typeof(value)) !== 'object' || value === null) {
           this[key] = value;
         } else {
           extend(true, this[key], value);
@@ -373,7 +376,7 @@ export var BaseConfig = function () {
   };
 
   _createClass(BaseConfig, [{
-    key: 'authToken',
+    key: "authToken",
     set: function set(authToken) {
       LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
       this._authTokenType = authToken;
@@ -384,7 +387,7 @@ export var BaseConfig = function () {
       return this._authTokenType;
     }
   }, {
-    key: 'responseTokenProp',
+    key: "responseTokenProp",
     set: function set(responseTokenProp) {
       LogManager.getLogger('authentication').warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
       this._responseTokenProp = responseTokenProp;
@@ -395,7 +398,7 @@ export var BaseConfig = function () {
       return this._responseTokenProp;
     }
   }, {
-    key: 'tokenRoot',
+    key: "tokenRoot",
     set: function set(tokenRoot) {
       LogManager.getLogger('authentication').warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
       this._tokenRoot = tokenRoot;
@@ -406,7 +409,7 @@ export var BaseConfig = function () {
       return this._tokenRoot;
     }
   }, {
-    key: 'tokenName',
+    key: "tokenName",
     set: function set(tokenName) {
       LogManager.getLogger('authentication').warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
       this._tokenName = tokenName;
@@ -417,7 +420,7 @@ export var BaseConfig = function () {
       return this._tokenName;
     }
   }, {
-    key: 'tokenPrefix',
+    key: "tokenPrefix",
     set: function set(tokenPrefix) {
       LogManager.getLogger('authentication').warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
       this._tokenPrefix = tokenPrefix;
@@ -427,7 +430,7 @@ export var BaseConfig = function () {
       return this._tokenPrefix || 'aurelia';
     }
   }, {
-    key: 'current',
+    key: "current",
     get: function get() {
       LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
       return this;
@@ -436,7 +439,7 @@ export var BaseConfig = function () {
       throw new Error('Setter BaseConfig.current has been removed. Use BaseConfig directly instead.');
     }
   }, {
-    key: '_current',
+    key: "_current",
     get: function get() {
       LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
       return this;
@@ -860,7 +863,7 @@ export var Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
       return responseTokenProp;
     }
 
-    if ((typeof responseTokenProp === 'undefined' ? 'undefined' : _typeof(responseTokenProp)) === 'object') {
+    if ((typeof responseTokenProp === "undefined" ? "undefined" : _typeof(responseTokenProp)) === 'object') {
       var tokenRootData = tokenRoot && tokenRoot.split('.').reduce(function (o, x) {
         return o[x];
       }, responseTokenProp);
@@ -928,14 +931,14 @@ export var Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
       return;
     }
     if (typeof redirectUrl === 'string') {
-      PLATFORM.location.href = encodeURI(redirectUrl + (query ? '?' + buildQueryString(query) : ''));
+      PLATFORM.location.href = encodeURI(redirectUrl + (query ? "?" + buildQueryString(query) : ''));
     } else if (defaultRedirectUrl) {
-      PLATFORM.location.href = defaultRedirectUrl + (query ? '?' + buildQueryString(query) : '');
+      PLATFORM.location.href = defaultRedirectUrl + (query ? "?" + buildQueryString(query) : '');
     }
   };
 
   _createClass(Authentication, [{
-    key: 'responseObject',
+    key: "responseObject",
     get: function get() {
       LogManager.getLogger('authentication').warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
       return this.getResponseObject();
@@ -945,7 +948,7 @@ export var Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
       this.setResponseObject(response);
     }
   }, {
-    key: 'hasDataStored',
+    key: "hasDataStored",
     get: function get() {
       LogManager.getLogger('authentication').warn('Authentication.hasDataStored is deprecated. Use Authentication.responseAnalyzed instead.');
       return this.responseAnalyzed;
@@ -953,7 +956,7 @@ export var Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
   }]);
 
   return Authentication;
-}(), (_applyDecoratedDescriptor(_class7.prototype, 'getLoginRoute', [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRoute'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginRedirect', [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRedirect'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginUrl', [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getSignupUrl', [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, 'getSignupUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getProfileUrl', [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, 'getProfileUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getToken', [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, 'getToken'), _class7.prototype)), _class7)) || _class6);
+}(), (_applyDecoratedDescriptor(_class7.prototype, "getLoginRoute", [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, "getLoginRoute"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getLoginRedirect", [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, "getLoginRedirect"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getLoginUrl", [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, "getLoginUrl"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getSignupUrl", [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, "getSignupUrl"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getProfileUrl", [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, "getProfileUrl"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getToken", [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, "getToken"), _class7.prototype)), _class7)) || _class6);
 
 export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSignaler, EventAggregator), _dec13 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec12(_class8 = (_class9 = function () {
   function AuthService(authentication, config, bindingSignaler, eventAggregator) {
@@ -985,7 +988,7 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     this.bindingSignaler = bindingSignaler;
     this.eventAggregator = eventAggregator;
 
-    var oldStorageKey = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : config.tokenName;
+    var oldStorageKey = config.tokenPrefix ? config.tokenPrefix + "_" + config.tokenName : config.tokenName;
     var oldToken = authentication.storage.get(oldStorageKey);
 
     if (oldToken) {
@@ -1048,7 +1051,7 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       this.bindingSignaler.signal('authentication-change');
       this.eventAggregator.publish('authentication-change', this.authenticated);
 
-      LogManager.getLogger('authentication').info('Authorization changed to: ' + this.authenticated);
+      LogManager.getLogger('authentication').info("Authorization changed to: " + this.authenticated);
     }
   };
 
@@ -1242,12 +1245,12 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
   };
 
   _createClass(AuthService, [{
-    key: 'client',
+    key: "client",
     get: function get() {
       return this.config.client;
     }
   }, {
-    key: 'auth',
+    key: "auth",
     get: function get() {
       LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
       return this.authentication;
@@ -1255,7 +1258,7 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
   }]);
 
   return AuthService;
-}(), (_applyDecoratedDescriptor(_class9.prototype, 'getCurrentToken', [_dec13], Object.getOwnPropertyDescriptor(_class9.prototype, 'getCurrentToken'), _class9.prototype)), _class9)) || _class8);
+}(), (_applyDecoratedDescriptor(_class9.prototype, "getCurrentToken", [_dec13], Object.getOwnPropertyDescriptor(_class9.prototype, "getCurrentToken"), _class9.prototype)), _class9)) || _class8);
 
 export var AuthenticateStep = (_dec14 = inject(AuthService), _dec14(_class11 = function () {
   function AuthenticateStep(authService) {
@@ -1342,13 +1345,13 @@ export var FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
         };
       }();
 
-      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
     }
 
     if (typeof client === 'string') {
       var endpoint = this.clientConfig.getEndpoint(client);
       if (!endpoint) {
-        throw new Error('There is no \'' + (client || 'default') + '\' endpoint registered.');
+        throw new Error("There is no '" + (client || 'default') + "' endpoint registered.");
       }
       client = endpoint.client;
     } else if (client instanceof Rest) {
@@ -1363,7 +1366,7 @@ export var FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
   };
 
   _createClass(FetchConfig, [{
-    key: 'interceptor',
+    key: "interceptor",
     get: function get() {
       var _this17 = this;
 
@@ -1375,7 +1378,7 @@ export var FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
           var token = _this17.authService.getAccessToken();
 
           if (_this17.config.authTokenType) {
-            token = _this17.config.authTokenType + ' ' + token;
+            token = _this17.config.authTokenType + " " + token;
           }
 
           _request.headers.set(_this17.config.authHeader, token);
@@ -1401,7 +1404,7 @@ export var FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
               var token = _this17.authService.getAccessToken();
 
               if (_this17.config.authTokenType) {
-                token = _this17.config.authTokenType + ' ' + token;
+                token = _this17.config.authTokenType + " " + token;
               }
 
               request.headers.set(_this17.config.authHeader, token);
@@ -1426,7 +1429,7 @@ export function configure(aurelia, config) {
 
   if (typeof config === 'function') {
     config(baseConfig);
-  } else if ((typeof config === 'undefined' ? 'undefined' : _typeof(config)) === 'object') {
+  } else if ((typeof config === "undefined" ? "undefined" : _typeof(config)) === 'object') {
     baseConfig.configure(config);
   }
 
@@ -1444,8 +1447,8 @@ export function configure(aurelia, config) {
 
     var converter = _ref;
 
-    aurelia.globalResources('./' + converter);
-    LogManager.getLogger('authentication').info('Add globalResources value-converter: ' + converter);
+    aurelia.globalResources("./" + converter);
+    LogManager.getLogger('authentication').info("Add globalResources value-converter: " + converter);
   }
   var fetchConfig = aurelia.container.get(FetchConfig);
   var clientConfig = aurelia.container.get(Config);
@@ -1462,7 +1465,7 @@ export function configure(aurelia, config) {
     if (typeof baseConfig.endpoint === 'string') {
       var endpoint = clientConfig.getEndpoint(baseConfig.endpoint);
       if (!endpoint) {
-        throw new Error('There is no \'' + (baseConfig.endpoint || 'default') + '\' endpoint registered.');
+        throw new Error("There is no '" + (baseConfig.endpoint || 'default') + "' endpoint registered.");
       }
       client = endpoint;
     } else if (baseConfig.endpoint instanceof HttpClient) {

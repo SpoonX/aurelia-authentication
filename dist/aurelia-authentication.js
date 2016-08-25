@@ -1,3 +1,6 @@
+import {AuthFilterValueConverter} from "./authFilterValueConverter"
+import {AuthenticatedValueConverter} from "./authenticatedValueConverter"
+import {AuthenticatedFilterValueConverter} from "./authenticatedFilterValueConverter"
 import extend from 'extend';
 import * as LogManager from 'aurelia-logging';
 import jwtDecode from 'jwt-decode';
@@ -1669,7 +1672,7 @@ export class FetchConfig {
   }
 }
 
-// added for easy jspm bundling
+// added for bundling
 // eslint-disable-line no-unused-vars
 // eslint-disable-line no-unused-vars
 // eslint-disable-line no-unused-vars

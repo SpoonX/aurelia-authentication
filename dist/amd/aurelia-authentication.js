@@ -1,5 +1,5 @@
-define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia-dependency-injection', 'aurelia-metadata', 'aurelia-event-aggregator', 'aurelia-templating-resources', 'aurelia-router', 'aurelia-fetch-client', 'aurelia-api'], function (exports, _extend, _aureliaLogging, _jwtDecode, _aureliaPal, _aureliaPath, _aureliaDependencyInjection, _aureliaMetadata, _aureliaEventAggregator, _aureliaTemplatingResources, _aureliaRouter, _aureliaFetchClient, _aureliaApi) {
-  'use strict';
+define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter", "./authenticatedFilterValueConverter", "extend", "aurelia-logging", "jwt-decode", "aurelia-pal", "aurelia-path", "aurelia-dependency-injection", "aurelia-metadata", "aurelia-event-aggregator", "aurelia-templating-resources", "aurelia-router", "aurelia-fetch-client", "aurelia-api"], function (exports, _authFilterValueConverter, _authenticatedValueConverter, _authenticatedFilterValueConverter, _extend, _aureliaLogging, _jwtDecode, _aureliaPal, _aureliaPath, _aureliaDependencyInjection, _aureliaMetadata, _aureliaEventAggregator, _aureliaTemplatingResources, _aureliaRouter, _aureliaFetchClient, _aureliaApi) {
+  "use strict";
 
   Object.defineProperty(exports, "__esModule", {
     value: true
@@ -408,7 +408,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
       for (var key in incomming) {
         var value = incomming[key];
         if (value !== undefined) {
-          if (Array.isArray(value) || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object' || value === null) {
+          if (Array.isArray(value) || (typeof value === "undefined" ? "undefined" : _typeof(value)) !== 'object' || value === null) {
             this[key] = value;
           } else {
             (0, _extend2.default)(true, this[key], value);
@@ -418,7 +418,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
     };
 
     _createClass(BaseConfig, [{
-      key: 'authToken',
+      key: "authToken",
       set: function set(authToken) {
         LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
         this._authTokenType = authToken;
@@ -429,7 +429,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         return this._authTokenType;
       }
     }, {
-      key: 'responseTokenProp',
+      key: "responseTokenProp",
       set: function set(responseTokenProp) {
         LogManager.getLogger('authentication').warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
         this._responseTokenProp = responseTokenProp;
@@ -440,7 +440,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         return this._responseTokenProp;
       }
     }, {
-      key: 'tokenRoot',
+      key: "tokenRoot",
       set: function set(tokenRoot) {
         LogManager.getLogger('authentication').warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
         this._tokenRoot = tokenRoot;
@@ -451,7 +451,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         return this._tokenRoot;
       }
     }, {
-      key: 'tokenName',
+      key: "tokenName",
       set: function set(tokenName) {
         LogManager.getLogger('authentication').warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
         this._tokenName = tokenName;
@@ -462,7 +462,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         return this._tokenName;
       }
     }, {
-      key: 'tokenPrefix',
+      key: "tokenPrefix",
       set: function set(tokenPrefix) {
         LogManager.getLogger('authentication').warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
         this._tokenPrefix = tokenPrefix;
@@ -472,7 +472,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         return this._tokenPrefix || 'aurelia';
       }
     }, {
-      key: 'current',
+      key: "current",
       get: function get() {
         LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
         return this;
@@ -481,7 +481,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         throw new Error('Setter BaseConfig.current has been removed. Use BaseConfig directly instead.');
       }
     }, {
-      key: '_current',
+      key: "_current",
       get: function get() {
         LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
         return this;
@@ -903,7 +903,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         return responseTokenProp;
       }
 
-      if ((typeof responseTokenProp === 'undefined' ? 'undefined' : _typeof(responseTokenProp)) === 'object') {
+      if ((typeof responseTokenProp === "undefined" ? "undefined" : _typeof(responseTokenProp)) === 'object') {
         var tokenRootData = tokenRoot && tokenRoot.split('.').reduce(function (o, x) {
           return o[x];
         }, responseTokenProp);
@@ -971,14 +971,14 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         return;
       }
       if (typeof redirectUrl === 'string') {
-        _aureliaPal.PLATFORM.location.href = encodeURI(redirectUrl + (query ? '?' + (0, _aureliaPath.buildQueryString)(query) : ''));
+        _aureliaPal.PLATFORM.location.href = encodeURI(redirectUrl + (query ? "?" + (0, _aureliaPath.buildQueryString)(query) : ''));
       } else if (defaultRedirectUrl) {
-        _aureliaPal.PLATFORM.location.href = defaultRedirectUrl + (query ? '?' + (0, _aureliaPath.buildQueryString)(query) : '');
+        _aureliaPal.PLATFORM.location.href = defaultRedirectUrl + (query ? "?" + (0, _aureliaPath.buildQueryString)(query) : '');
       }
     };
 
     _createClass(Authentication, [{
-      key: 'responseObject',
+      key: "responseObject",
       get: function get() {
         LogManager.getLogger('authentication').warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
         return this.getResponseObject();
@@ -988,7 +988,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         this.setResponseObject(response);
       }
     }, {
-      key: 'hasDataStored',
+      key: "hasDataStored",
       get: function get() {
         LogManager.getLogger('authentication').warn('Authentication.hasDataStored is deprecated. Use Authentication.responseAnalyzed instead.');
         return this.responseAnalyzed;
@@ -996,7 +996,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
     }]);
 
     return Authentication;
-  }(), (_applyDecoratedDescriptor(_class7.prototype, 'getLoginRoute', [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRoute'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginRedirect', [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRedirect'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginUrl', [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getSignupUrl', [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, 'getSignupUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getProfileUrl', [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, 'getProfileUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getToken', [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, 'getToken'), _class7.prototype)), _class7)) || _class6);
+  }(), (_applyDecoratedDescriptor(_class7.prototype, "getLoginRoute", [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, "getLoginRoute"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getLoginRedirect", [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, "getLoginRedirect"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getLoginUrl", [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, "getLoginUrl"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getSignupUrl", [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, "getSignupUrl"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getProfileUrl", [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, "getProfileUrl"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getToken", [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, "getToken"), _class7.prototype)), _class7)) || _class6);
   var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjection.inject)(Authentication, BaseConfig, _aureliaTemplatingResources.BindingSignaler, _aureliaEventAggregator.EventAggregator), _dec13 = (0, _aureliaMetadata.deprecated)({ message: 'Use .getAccessToken() instead.' }), _dec12(_class8 = (_class9 = function () {
     function AuthService(authentication, config, bindingSignaler, eventAggregator) {
       var _this8 = this;
@@ -1027,7 +1027,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
       this.bindingSignaler = bindingSignaler;
       this.eventAggregator = eventAggregator;
 
-      var oldStorageKey = config.tokenPrefix ? config.tokenPrefix + '_' + config.tokenName : config.tokenName;
+      var oldStorageKey = config.tokenPrefix ? config.tokenPrefix + "_" + config.tokenName : config.tokenName;
       var oldToken = authentication.storage.get(oldStorageKey);
 
       if (oldToken) {
@@ -1090,7 +1090,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
         this.bindingSignaler.signal('authentication-change');
         this.eventAggregator.publish('authentication-change', this.authenticated);
 
-        LogManager.getLogger('authentication').info('Authorization changed to: ' + this.authenticated);
+        LogManager.getLogger('authentication').info("Authorization changed to: " + this.authenticated);
       }
     };
 
@@ -1284,12 +1284,12 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
     };
 
     _createClass(AuthService, [{
-      key: 'client',
+      key: "client",
       get: function get() {
         return this.config.client;
       }
     }, {
-      key: 'auth',
+      key: "auth",
       get: function get() {
         LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
         return this.authentication;
@@ -1297,7 +1297,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
     }]);
 
     return AuthService;
-  }(), (_applyDecoratedDescriptor(_class9.prototype, 'getCurrentToken', [_dec13], Object.getOwnPropertyDescriptor(_class9.prototype, 'getCurrentToken'), _class9.prototype)), _class9)) || _class8);
+  }(), (_applyDecoratedDescriptor(_class9.prototype, "getCurrentToken", [_dec13], Object.getOwnPropertyDescriptor(_class9.prototype, "getCurrentToken"), _class9.prototype)), _class9)) || _class8);
   var AuthenticateStep = exports.AuthenticateStep = (_dec14 = (0, _aureliaDependencyInjection.inject)(AuthService), _dec14(_class11 = function () {
     function AuthenticateStep(authService) {
       
@@ -1381,13 +1381,13 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
           };
         }();
 
-        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
       }
 
       if (typeof client === 'string') {
         var endpoint = this.clientConfig.getEndpoint(client);
         if (!endpoint) {
-          throw new Error('There is no \'' + (client || 'default') + '\' endpoint registered.');
+          throw new Error("There is no '" + (client || 'default') + "' endpoint registered.");
         }
         client = endpoint.client;
       } else if (client instanceof _aureliaApi.Rest) {
@@ -1402,7 +1402,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
     };
 
     _createClass(FetchConfig, [{
-      key: 'interceptor',
+      key: "interceptor",
       get: function get() {
         var _this17 = this;
 
@@ -1414,7 +1414,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
             var token = _this17.authService.getAccessToken();
 
             if (_this17.config.authTokenType) {
-              token = _this17.config.authTokenType + ' ' + token;
+              token = _this17.config.authTokenType + " " + token;
             }
 
             _request.headers.set(_this17.config.authHeader, token);
@@ -1440,7 +1440,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
                 var token = _this17.authService.getAccessToken();
 
                 if (_this17.config.authTokenType) {
-                  token = _this17.config.authTokenType + ' ' + token;
+                  token = _this17.config.authTokenType + " " + token;
                 }
 
                 request.headers.set(_this17.config.authHeader, token);
@@ -1464,7 +1464,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
 
     if (typeof config === 'function') {
       config(baseConfig);
-    } else if ((typeof config === 'undefined' ? 'undefined' : _typeof(config)) === 'object') {
+    } else if ((typeof config === "undefined" ? "undefined" : _typeof(config)) === 'object') {
       baseConfig.configure(config);
     }
 
@@ -1482,8 +1482,8 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
 
       var converter = _ref;
 
-      aurelia.globalResources('./' + converter);
-      LogManager.getLogger('authentication').info('Add globalResources value-converter: ' + converter);
+      aurelia.globalResources("./" + converter);
+      LogManager.getLogger('authentication').info("Add globalResources value-converter: " + converter);
     }
     var fetchConfig = aurelia.container.get(FetchConfig);
     var clientConfig = aurelia.container.get(_aureliaApi.Config);
@@ -1500,7 +1500,7 @@ define(['exports', 'extend', 'aurelia-logging', 'jwt-decode', 'aurelia-pal', 'au
       if (typeof baseConfig.endpoint === 'string') {
         var endpoint = clientConfig.getEndpoint(baseConfig.endpoint);
         if (!endpoint) {
-          throw new Error('There is no \'' + (baseConfig.endpoint || 'default') + '\' endpoint registered.');
+          throw new Error("There is no '" + (baseConfig.endpoint || 'default') + "' endpoint registered.");
         }
         client = endpoint;
       } else if (baseConfig.endpoint instanceof _aureliaFetchClient.HttpClient) {

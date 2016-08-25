@@ -1,3 +1,13 @@
+<a name="3.0.0-rc10"></a>
+# [3.0.0-rc10](https://github.com/spoonx/aurelia-authentication/compare/3.0.0-rc9...v3.0.0-rc10) (2016-08-25)
+
+
+### Bug Fixes
+
+* **bundle:** re-add imports for bundling ([4b6208c](https://github.com/spoonx/aurelia-authentication/commit/4b6208c))
+
+
+
 <a name="3.0.0-rc9"></a>
 # [3.0.0-rc9](https://github.com/spoonx/aurelia-authentication/compare/3.0.0-rc8...v3.0.0-rc9) (2016-08-23)
 

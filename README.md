@@ -111,7 +111,7 @@ typings i github:spoonx/aurelia-authentication
 
 ### Add a configuration file
 
-Set your custom configuration. You can find all options and the default values in the [baseConfig](http://aurelia-authentication.spoonx.org/baseConfig).
+Set your custom configuration. You can find all options and the default values in the [baseConfig](http://aurelia-authentication.spoonx.org/baseConfig.html).
 
 ```js
 /* authConfig.js */

@@ -28,6 +28,17 @@ function getContainer() {
   return container;
 }
 
+let oidcProviderConfig = {
+  providers: {
+    oidcProvider: {
+      name: 'oidcProvider',
+      postLogoutRedirectUri: 'http://localhost:1927/',
+      logoutEndpoint: 'http://localhost:54540/connect/logout',
+      popupOptions: { width: 1028, height: 529 }
+    }
+  }
+};
+
 describe('OAuth2', () => {
   const container = getContainer();
   const storage = container.get(Storage);
@@ -51,7 +62,7 @@ describe('OAuth2', () => {
       oAuth2.exchangeForToken(
         {access_token: 'someToken'},
         {userData: 'some'},
-        baseConfig.providers['facebook']
+        baseConfig.providers.facebook
       ).then(res => {
         expect(res).toBeUndefined();
         expect(false).toBe(true);
@@ -68,7 +79,7 @@ describe('OAuth2', () => {
       oAuth2.exchangeForToken(
         {access_token: 'someToken'},
         {userData: 'some'},
-        baseConfig.providers['facebook']
+        baseConfig.providers.facebook
       ).then(res => {
         expect(res).toBeDefined();
         expect(res.path).toBe('/auth/facebook');
@@ -87,7 +98,7 @@ describe('OAuth2', () => {
   describe('.open()', () => {
     it('not fails with withCredentials = false', done => {
       baseConfig.withCredentials = false;
-      oAuth2.open(baseConfig.providers['facebook'], {userData: 'some'})
+      oAuth2.open(baseConfig.providers.facebook, {userData: 'some'})
         .then(res=>{
           expect(res).toBeDefined();
           expect(res.path).toBe('/auth/facebook');
@@ -107,9 +118,49 @@ describe('OAuth2', () => {
 
   describe('.buildQuery()', () => {
     it('return query', () => {
-      const query = oAuth2.buildQuery(baseConfig.providers['facebook']);
+      const query = oAuth2.buildQuery(baseConfig.providers.facebook);
       expect(query.display).toBe('popup');
       expect(query.scope).toBe('email');
+    });
+  });
+
+  describe('.close()', () => {
+    it('logout popup url correct', done => {
+      const expectedIdToken = 'Some Id Token';
+      const expectedLogoutRedirect = 'http://localhost:1927/';
+      const expectedState = '1234567890';
+
+      spyOn(storage, 'get').and.callFake((key) => {
+        if (key === 'oidcProvider_state') {
+          return expectedState;
+        }
+        if (key === oAuth2.config.storageKey) {
+          return `{ "id_token": "${expectedIdToken}" }`;
+        }
+      });
+      oAuth2.close(oidcProviderConfig.providers.oidcProvider)
+        .then(res => {
+          const expectedUrl = `http://localhost:54540/connect/logout?id_token_hint=${encodeURIComponent(expectedIdToken)}&post_logout_redirect_uri=${encodeURIComponent(expectedLogoutRedirect)}&state=${encodeURIComponent(expectedState)}`;
+          expect(popup.url).toBe(expectedUrl);
+          done();
+        });
+    });
+  });
+
+  describe('.buildLogoutQuery()', () => {
+    it('return query parameters', () => {
+      spyOn(storage, 'get').and.callFake((key) => {
+        if (key === 'oidcProvider_state') {
+          return '123456789';
+        }
+        if (key === oAuth2.config.storageKey) {
+          return '{ "id_token": "IdTokenHere" }';
+        }
+      });
+      const query = oAuth2.buildLogoutQuery(oidcProviderConfig.providers.oidcProvider);
+      expect(query.post_logout_redirect_uri).toBe('http://localhost:1927/');
+      expect(query.state).toBe('123456789');
+      expect(query.id_token_hint).toBe('IdTokenHere');
     });
   });
 });

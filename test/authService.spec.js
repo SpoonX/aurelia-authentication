@@ -40,6 +40,17 @@ function getContainer() {
   return container;
 }
 
+let oidcProviderConfig = {
+  providers: {
+    oidcProvider: {
+      name: 'oidcProvider',
+      oauthType: '2.0',
+      postLogoutRedirectUri: 'http://localhost:1927/',
+      logoutEndpoint: 'http://localhost:54540/connect/logout',
+      popupOptions: { width: 1028, height: 529 }
+    }
+  }
+};
 
 describe('AuthService', () => {
   describe('.constructor()', () => {
@@ -794,6 +805,7 @@ describe('AuthService', () => {
     beforeEach(() => {
       authService.setResponseObject({token: 'some', refresh_token: 'another'});
       authService.config.logoutRedirect = 'nowhere';
+      authService.config.configure(oidcProviderConfig);
     });
 
     afterEach(() => {
@@ -806,6 +818,8 @@ describe('AuthService', () => {
         .then(() => {
           expect(authService.isAuthenticated()).toBe(false);
 
+          done();
+        }, err => {
           done();
         });
     });
@@ -820,10 +834,40 @@ describe('AuthService', () => {
           expect(response.method).toBe('GET');
 
           done();
+        }, err => {
+          done();
+        });
+    });
+
+    it('should call oAuth2.close() if logoutEndpoint defined', done => {
+      spyOn(authService.authentication.oAuth2, 'close').and.returnValue(Promise.resolve({ state: 'ThisIsTheState' }));
+      authService.config.logoutRedirect = false;
+      authService.authentication.storage.set('oidcProvider_state', 'ThisIsTheState');
+      authService.logout(0, undefined, 'oidcProvider')
+        .then(response => {
+          expect(authService.authentication.oAuth2.close).toHaveBeenCalled();
+          done();
+        }, err => {
+          expect(err).toBeUndefined();
+          done();
+        });
+    });
+
+    it('return reject Promise if states differ', done => {
+      spyOn(authService.authentication.oAuth2, 'close').and.callFake( () => {
+        return Promise.resolve({ state: 'ThisIsTheState' });
+      });
+      authService.authentication.storage.set('oidcProvider_state', 'ThisIsNotTheState');
+      authService.logout(0, undefined, 'oidcProvider')
+        .then(response => {
+          expect(authService.authentication.oAuth2.close).toHaveBeenCalled();
+          done();
+        }, err => {
+          expect(err).toBe('OAuth2 response state value differs');
+          done();
         });
     });
   });
-
 
   describe('.authenticate()', () => {
     const container   = getContainer();
@@ -852,7 +896,7 @@ describe('AuthService', () => {
 
       authService.authenticate('twitter', 0, {data: 'some'})
         .then(response => {
-          expect(response.provider).toBe(authService.config.providers['twitter']);
+          expect(response.provider).toBe(authService.config.providers.twitter);
           expect(response.userData.data).toBe('some');
           expect(response.access_token).toBe('oauth1');
 
@@ -868,7 +912,7 @@ describe('AuthService', () => {
 
       authService.authenticate('facebook', null, {data: 'some'})
         .then(response => {
-          expect(response.provider).toBe(authService.config.providers['facebook']);
+          expect(response.provider).toBe(authService.config.providers.facebook);
           expect(response.userData.data).toBe('some');
           expect(response.access_token).toBe('oauth2');
 

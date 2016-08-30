@@ -1,3 +1,4 @@
+/// <reference path="../test/oAuth2.spec.js" />
 import {PLATFORM} from 'aurelia-pal';
 import {buildQueryString} from 'aurelia-path';
 import {inject} from 'aurelia-dependency-injection';
@@ -259,6 +260,14 @@ export class Authentication {
     }
 
     return providerLogin.open(this.config.providers[name], userData);
+  }
+
+  logout(name) {
+    let rtnValue = Promise.resolve('Not Applicable');
+    if (this.config.providers[name].oauthType !== '2.0' || !this.config.providers[name].logoutEndpoint) {
+      return rtnValue;
+    }
+    return this.oAuth2.close(this.config.providers[name]);
   }
 
   redirect(redirectUrl, defaultRedirectUrl, query) {

@@ -415,10 +415,12 @@ export class AuthService {
    * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
    *
    * @param {[String]}    [redirectUri]                     [optional redirectUri overwrite]
+   * @param {[String]}    [query]                           [optional query]
+   * @param {[String]}    [name]                            [optional name Name of the provider]
    *
    * @return {Promise<>|Promise<Object>|Promise<Error>}     Server response as Object
    */
-  logout(redirectUri, query) {
+  logout(redirectUri, query, name) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
 
@@ -427,13 +429,25 @@ export class AuthService {
       if (typeof this.onLogout === 'function') {
         this.onLogout(response);
       }
-
       resolve(response);
     });
 
-    return (this.config.logoutUrl
-      ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout)
-      : localLogout());
+    if (name) {
+      if (this.config.providers[name].logoutEndpoint) {
+        return this.authentication.logout(name)
+          .then(logoutResponse => {
+            let stateValue = this.authentication.storage.get(name + '_state');
+            if (logoutResponse.state !== stateValue) {
+              return Promise.reject('OAuth2 response state value differs');
+            }
+            return localLogout(logoutResponse);
+          });
+      }
+    } else {
+      return (this.config.logoutUrl
+        ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout)
+        : localLogout());
+    }
   }
 
   /**

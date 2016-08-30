@@ -20,6 +20,17 @@ const tokenFuture = {
   jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9rZW5GdXR1cmUiLCJhZG1pbiI6dHJ1ZSwiZXhwIjoiMjQ2MDAxNzE1NCJ9.iHXLzWGY5U9WwVT4IVRLuKTf65XpgrA1Qq_Jlynv6bc'
 };
 
+const oidcProviderConfig = {
+  providers: {
+    oidcProvider: {
+      name: 'oidcProvider',
+      oauthType: '2.0',
+      postLogoutRedirectUri: 'http://localhost:1927/',
+      logoutEndpoint: 'http://localhost:54540/connect/logout',
+      popupOptions: { width: 1028, height: 529 }
+    }
+  }
+};
 
 describe('Authentication', () => {
   describe('.getResponseObject', () => {
@@ -402,6 +413,56 @@ describe('Authentication', () => {
     });
   });
 
+  describe('.logout', () => {
+    const container      = new Container();
+    const authentication = container.get(Authentication);
+
+    afterEach(() => {
+      authentication.setResponseObject(null);
+    });
+
+    it('should return Not Applicable when logoutEndpoint not defined', done => {
+      authentication.config.configure(oidcProviderConfig);
+      authentication.config.providers.oidcProvider.logoutEndpoint = null;
+      authentication.logout('oidcProvider')
+        .then( (value) => {
+          expect(value).toBe('Not Applicable');
+          done();
+        })
+        .catch( err => {
+          done();
+        });
+    });
+
+    it('should return Not Applicable when oauthType not equal to 2.0', done => {
+      authentication.config.configure(oidcProviderConfig);
+      authentication.config.providers.oidcProvider.oauthType = '1.0';
+      authentication.logout('oidcProvider')
+        .then( (value) => {
+          expect(value).toBe('Not Applicable');
+          done();
+        })
+        .catch( err => {
+          done();
+        });
+    });
+
+    it('should return state', done => {
+      let stateValue = '123456789';
+      authentication.config.configure(oidcProviderConfig);
+      spyOn(authentication.oAuth2, 'close').and.callFake(() => {
+        return Promise.resolve(stateValue);
+      });
+      authentication.logout('oidcProvider')
+        .then( state => {
+          expect(state).toBe(stateValue);
+          done();
+        })
+        .catch( err => {
+          done();
+        });
+    });
+  });
 
   describe('.redirect', () => {
     const container      = new Container();

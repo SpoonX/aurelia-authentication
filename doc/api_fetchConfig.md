@@ -2,14 +2,14 @@
 
 ## Configuring the aurelia fetch client
 
-Aurelia-authentication uses [aurelia-api](https://github.com/SpoonX/aurelia-api), which has support for [multiple endpoints](https://spoonx-aurelia-api/getting-started#multiple-endpoints).
-By default, aurelia-authentication uses the HttpClient from [aurelia-fetch-client](https://github.com/aurelia/fetch-client) when no specific endpoint has been configured, and if no [default endpoint](https://spoonx-aurelia-api/getting-started#default-endpoint) was configured.
+Aurelia-authentication uses [aurelia-api](https://github.com/SpoonX/aurelia-api), which has support for [multiple endpoints](http://aurelia-api.spoonx.org/Quick%20start.html#multiple-endpoints).
+By default, aurelia-authentication uses the HttpClient from [aurelia-fetch-client](https://github.com/aurelia/fetch-client) when no specific endpoint has been configured, and if no [default endpoint](http://aurelia-api.spoonx.org/Quick%20start.html#default-endpoint) was configured.
 So, if you want aurelia-authentication to use your **default** endpoint, you only have to configure aurelia-api.
 If you wish to use a **specific** endpoint to have aurelia-authentication talk to, you have to set the `endpoint` config option to a string, being the endpoint name.
 
 ### Configure aurelia-api endpoints
 
-If you are using [aurelia-api](https://spoonx-aurelia-api/), you can simply use the `configureEndpoints` config option. Set this to an array of endpoint names to configure, and aurelia-authentication will do the rest, and make sure that all requests to these endpoints (when authenticated) get enriched with the authorization header.
+If you are using [aurelia-api](http://aurelia-api.spoonx.org/), you can simply use the `configureEndpoints` config option. Set this to an array of endpoint names to configure, and aurelia-authentication will do the rest, and make sure that all requests to these endpoints (when authenticated) get enriched with the authorization header.
 
 ## Configure the Fetch Client
 

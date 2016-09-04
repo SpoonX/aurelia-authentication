@@ -173,7 +173,7 @@ The logout and profile links are only shown when the user is authenticated, wher
         <li><a href="/#/signup">Sign up</a></li>
     </ul>
 
-    <ul if.bind="authenticated'" class="nav navbar-nav navbar-right">
+    <ul if.bind="authenticated" class="nav navbar-nav navbar-right">
         <li><a href="/#/profile">Profile</a></li>
         <li><a href="/#/logout">Logout</a></li>
     </ul>

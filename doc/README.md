@@ -22,6 +22,8 @@ With aurelia-authentication you can:
 * Extensively customize the settings
 * Use standalone or in conjunction with [aurelia-api](https://github.com/SpoonX/aurelia-api)
 * Use [Auth0](https://auth0.com) as your only authentication provider (see [the relevant section](auth0.md) for more info)
+* Use an [OpenID Connect](http://openid.net/connect/) provider such as [IdentityServer](https://github.com/IdentityServer/IdentityServer4) 
+or [OpenIddict](https://github.com/openiddict/openiddict-core) as your only authentication provider (see [the relevant section](oidc.md))
 * Update valueConverters using the 'authorization-change' binding signal.
 * Subscribe to the 'authorization-change' event.
 * And more

@@ -774,6 +774,37 @@ export class OAuth2 {
     });
     return query;
   }
+
+  close(options) {
+    const provider  = extend(true, {}, this.defaults, options);
+    const url       = provider.logoutEndpoint + '?'
+                    + buildQueryString(this.buildLogoutQuery(provider));
+    const popup     = this.popup.open(url, provider.name, provider.popupOptions);
+    const openPopup = (this.config.platform === 'mobile')
+                    ? popup.eventListener(provider.postLogoutRedirectUri)
+                    : popup.pollPopup();
+
+    return openPopup
+      .then(response => {
+        return response;
+      });
+  }
+
+  buildLogoutQuery(provider) {
+    let query = {};
+    let authResponse = this.storage.get(this.config.storageKey);
+
+    if (provider.postLogoutRedirectUri) {
+      query.post_logout_redirect_uri = provider.postLogoutRedirectUri;
+    }
+    if (this.storage.get(provider.name + '_state')) {
+      query.state = this.storage.get(provider.name + '_state');
+    }
+    if (JSON.parse(authResponse).id_token) {
+      query.id_token_hint = JSON.parse(authResponse).id_token;
+    }
+    return query;
+  }
 }
 
 const camelCase = function(name) {
@@ -782,6 +813,7 @@ const camelCase = function(name) {
   });
 };
 
+/// <reference path="../test/oAuth2.spec.js" />
 @inject(Storage, BaseConfig, OAuth1, OAuth2, AuthLock)
 export class Authentication {
   constructor(storage, config, oAuth1, oAuth2, auth0Lock) {
@@ -1033,6 +1065,14 @@ export class Authentication {
     return providerLogin.open(this.config.providers[name], userData);
   }
 
+  logout(name) {
+    let rtnValue = Promise.resolve('Not Applicable');
+    if (this.config.providers[name].oauthType !== '2.0' || !this.config.providers[name].logoutEndpoint) {
+      return rtnValue;
+    }
+    return this.oAuth2.close(this.config.providers[name]);
+  }
+
   redirect(redirectUrl, defaultRedirectUrl, query) {
     // stupid rule to keep it BC
     if (redirectUrl === true) {
@@ -1131,6 +1171,14 @@ export class AuthService {
     }
 
     LogManager.getLogger('authentication').info('Stored token changed event');
+
+    // IE runs the event handler before updating the storage value. Update it now.
+    // An unset storage key in IE is an empty string, where-as chrome is null
+    if (event.newValue) {
+      this.authentication.storage.set(this.config.storageKey, event.newValue);
+    } else {
+      this.authentication.storage.remove(this.config.storageKey);
+    }
 
     let wasAuthenticated = this.authenticated;
     this.authentication.responseAnalyzed = false;
@@ -1463,10 +1511,12 @@ export class AuthService {
    * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
    *
    * @param {[String]}    [redirectUri]                     [optional redirectUri overwrite]
+   * @param {[String]}    [query]                           [optional query]
+   * @param {[String]}    [name]                            [optional name Name of the provider]
    *
    * @return {Promise<>|Promise<Object>|Promise<Error>}     Server response as Object
    */
-  logout(redirectUri, query) {
+  logout(redirectUri, query, name) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
 
@@ -1475,13 +1525,25 @@ export class AuthService {
       if (typeof this.onLogout === 'function') {
         this.onLogout(response);
       }
-
       resolve(response);
     });
 
-    return (this.config.logoutUrl
-      ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout)
-      : localLogout());
+    if (name) {
+      if (this.config.providers[name].logoutEndpoint) {
+        return this.authentication.logout(name)
+          .then(logoutResponse => {
+            let stateValue = this.authentication.storage.get(name + '_state');
+            if (logoutResponse.state !== stateValue) {
+              return Promise.reject('OAuth2 response state value differs');
+            }
+            return localLogout(logoutResponse);
+          });
+      }
+    } else {
+      return (this.config.logoutUrl
+        ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout)
+        : localLogout());
+    }
   }
 
   /**
@@ -1547,7 +1609,7 @@ export class AuthenticateStep {
 @inject(AuthService)
 export class AuthorizeStep {
   constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticateStep instead.');
 
     this.authService = authService;
   }

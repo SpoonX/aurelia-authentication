@@ -643,6 +643,33 @@ export let OAuth2 = (_dec4 = inject(Storage, Popup, BaseConfig), _dec4(_class5 =
     });
     return query;
   }
+
+  close(options) {
+    const provider = extend(true, {}, this.defaults, options);
+    const url = provider.logoutEndpoint + '?' + buildQueryString(this.buildLogoutQuery(provider));
+    const popup = this.popup.open(url, provider.name, provider.popupOptions);
+    const openPopup = this.config.platform === 'mobile' ? popup.eventListener(provider.postLogoutRedirectUri) : popup.pollPopup();
+
+    return openPopup.then(response => {
+      return response;
+    });
+  }
+
+  buildLogoutQuery(provider) {
+    let query = {};
+    let authResponse = this.storage.get(this.config.storageKey);
+
+    if (provider.postLogoutRedirectUri) {
+      query.post_logout_redirect_uri = provider.postLogoutRedirectUri;
+    }
+    if (this.storage.get(provider.name + '_state')) {
+      query.state = this.storage.get(provider.name + '_state');
+    }
+    if (JSON.parse(authResponse).id_token) {
+      query.id_token_hint = JSON.parse(authResponse).id_token;
+    }
+    return query;
+  }
 }) || _class5);
 
 const camelCase = function (name) {
@@ -863,6 +890,14 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
     return providerLogin.open(this.config.providers[name], userData);
   }
 
+  logout(name) {
+    let rtnValue = Promise.resolve('Not Applicable');
+    if (this.config.providers[name].oauthType !== '2.0' || !this.config.providers[name].logoutEndpoint) {
+      return rtnValue;
+    }
+    return this.oAuth2.close(this.config.providers[name]);
+  }
+
   redirect(redirectUrl, defaultRedirectUrl, query) {
     if (redirectUrl === true) {
       LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
@@ -895,6 +930,12 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       }
 
       LogManager.getLogger('authentication').info('Stored token changed event');
+
+      if (event.newValue) {
+        this.authentication.storage.set(this.config.storageKey, event.newValue);
+      } else {
+        this.authentication.storage.remove(this.config.storageKey);
+      }
 
       let wasAuthenticated = this.authenticated;
       this.authentication.responseAnalyzed = false;
@@ -1122,7 +1163,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     });
   }
 
-  logout(redirectUri, query) {
+  logout(redirectUri, query, name) {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
 
@@ -1131,11 +1172,22 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       if (typeof this.onLogout === 'function') {
         this.onLogout(response);
       }
-
       resolve(response);
     });
 
-    return this.config.logoutUrl ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout) : localLogout();
+    if (name) {
+      if (this.config.providers[name].logoutEndpoint) {
+        return this.authentication.logout(name).then(logoutResponse => {
+          let stateValue = this.authentication.storage.get(name + '_state');
+          if (logoutResponse.state !== stateValue) {
+            return Promise.reject('OAuth2 response state value differs');
+          }
+          return localLogout(logoutResponse);
+        });
+      }
+    } else {
+      return this.config.logoutUrl ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout) : localLogout();
+    }
   }
 
   authenticate(name, redirectUri, userData = {}) {
@@ -1181,7 +1233,7 @@ export let AuthenticateStep = (_dec14 = inject(AuthService), _dec14(_class11 = c
 
 export let AuthorizeStep = (_dec15 = inject(AuthService), _dec15(_class12 = class AuthorizeStep {
   constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticateStep instead.');
 
     this.authService = authService;
   }

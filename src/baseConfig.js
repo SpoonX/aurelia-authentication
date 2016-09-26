@@ -120,6 +120,8 @@ export class BaseConfig {
   clientId = false;
   // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
   refreshTokenProp = 'refresh_token';
+  // The proprety name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
+  refreshTokenSubmitProp = 'refresh_token';
 
   // If the property defined by `refreshTokenProp` is an object:
   // -----------------------------------------------------------

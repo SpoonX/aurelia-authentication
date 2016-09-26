@@ -84,6 +84,14 @@ export class AuthService {
 
     LogManager.getLogger('authentication').info('Stored token changed event');
 
+    // IE runs the event handler before updating the storage value. Update it now.
+    // An unset storage key in IE is an empty string, where-as chrome is null
+    if (event.newValue) {
+      this.authentication.storage.set(this.config.storageKey, event.newValue);
+    } else {
+      this.authentication.storage.remove(this.config.storageKey);
+    }
+
     let wasAuthenticated = this.authenticated;
     this.authentication.responseAnalyzed = false;
     this.updateAuthenticated();

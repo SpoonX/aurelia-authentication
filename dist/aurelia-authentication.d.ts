@@ -216,7 +216,11 @@ export declare class OAuth2 {
   open(options?: any, userData?: any): any;
   exchangeForToken(oauthData?: any, userData?: any, provider?: any): any;
   buildQuery(provider?: any): any;
+  close(options?: any): any;
+  buildLogoutQuery(provider?: any): any;
 }
+
+/// <reference path="../test/oAuth2.spec.js" />
 export declare class Authentication {
   constructor(storage?: any, config?: any, oAuth1?: any, oAuth2?: any, auth0Lock?: any);
   
@@ -261,6 +265,7 @@ export declare class Authentication {
      * @return {Promise<response>}
      */
   authenticate(name?: any, userData?: any): any;
+  logout(name?: any): any;
   redirect(redirectUrl?: any, defaultRedirectUrl?: any, query?: any): any;
 }
 export declare class AuthService {
@@ -461,10 +466,12 @@ export declare class AuthService {
      * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
      *
      * @param {[String]}    [redirectUri]                     [optional redirectUri overwrite]
+     * @param {[String]}    [query]                           [optional query]
+     * @param {[String]}    [name]                            [optional name Name of the provider]
      *
      * @return {Promise<>|Promise<Object>|Promise<Error>}     Server response as Object
      */
-  logout(redirectUri?: any, query?: any): any;
+  logout(redirectUri?: any, query?: any, name?: any): any;
   
   /**
      * Authenticate with third-party and redirect to redirectUri (if set) or redirectUri of config

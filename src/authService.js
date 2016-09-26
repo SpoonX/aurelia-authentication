@@ -314,11 +314,12 @@ export class AuthService {
     }
 
     if (this.authentication.updateTokenCallstack.length === 0) {
-      const content = {
+      let content = {
         grant_type: 'refresh_token',
-        refresh_token: this.authentication.getRefreshToken(),
         client_id: this.config.clientId ? this.config.clientId : undefined
       };
+
+      content[this.config.refreshTokenSubmitProp] = this.authentication.getRefreshToken();
 
       this.client.post(this.config.joinBase(this.config.refreshTokenUrl
                                             ? this.config.refreshTokenUrl

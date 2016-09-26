@@ -1,3 +1,18 @@
+<a name="3.0.0-rc11"></a>
+# [3.0.0-rc11](https://github.com/spoonx/aurelia-authentication/compare/3.0.0-rc10...v3.0.0-rc11) (2016-09-22)
+
+
+### Bug Fixes
+
+* **authService:** storage events do not work properly in IE11 ([944a716](https://github.com/spoonx/aurelia-authentication/commit/944a716))
+
+
+### Features
+
+* **authService:** add logout handling for openid connect ([91e9217](https://github.com/spoonx/aurelia-authentication/commit/91e9217))
+
+
+
 <a name="3.0.0-rc10"></a>
 # [3.0.0-rc10](https://github.com/spoonx/aurelia-authentication/compare/3.0.0-rc9...v3.0.0-rc10) (2016-08-25)
 

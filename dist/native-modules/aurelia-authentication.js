@@ -697,6 +697,33 @@ export var OAuth2 = (_dec4 = inject(Storage, Popup, BaseConfig), _dec4(_class5 =
     return query;
   };
 
+  OAuth2.prototype.close = function close(options) {
+    var provider = extend(true, {}, this.defaults, options);
+    var url = provider.logoutEndpoint + '?' + buildQueryString(this.buildLogoutQuery(provider));
+    var popup = this.popup.open(url, provider.name, provider.popupOptions);
+    var openPopup = this.config.platform === 'mobile' ? popup.eventListener(provider.postLogoutRedirectUri) : popup.pollPopup();
+
+    return openPopup.then(function (response) {
+      return response;
+    });
+  };
+
+  OAuth2.prototype.buildLogoutQuery = function buildLogoutQuery(provider) {
+    var query = {};
+    var authResponse = this.storage.get(this.config.storageKey);
+
+    if (provider.postLogoutRedirectUri) {
+      query.post_logout_redirect_uri = provider.postLogoutRedirectUri;
+    }
+    if (this.storage.get(provider.name + '_state')) {
+      query.state = this.storage.get(provider.name + '_state');
+    }
+    if (JSON.parse(authResponse).id_token) {
+      query.id_token_hint = JSON.parse(authResponse).id_token;
+    }
+    return query;
+  };
+
   return OAuth2;
 }()) || _class5);
 
@@ -917,6 +944,14 @@ export var Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
     return providerLogin.open(this.config.providers[name], userData);
   };
 
+  Authentication.prototype.logout = function logout(name) {
+    var rtnValue = Promise.resolve('Not Applicable');
+    if (this.config.providers[name].oauthType !== '2.0' || !this.config.providers[name].logoutEndpoint) {
+      return rtnValue;
+    }
+    return this.oAuth2.close(this.config.providers[name]);
+  };
+
   Authentication.prototype.redirect = function redirect(redirectUrl, defaultRedirectUrl, query) {
     if (redirectUrl === true) {
       LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
@@ -973,6 +1008,12 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       }
 
       LogManager.getLogger('authentication').info('Stored token changed event');
+
+      if (event.newValue) {
+        _this8.authentication.storage.set(_this8.config.storageKey, event.newValue);
+      } else {
+        _this8.authentication.storage.remove(_this8.config.storageKey);
+      }
 
       var wasAuthenticated = _this8.authenticated;
       _this8.authentication.responseAnalyzed = false;
@@ -1199,7 +1240,7 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     });
   };
 
-  AuthService.prototype.logout = function logout(redirectUri, query) {
+  AuthService.prototype.logout = function logout(redirectUri, query, name) {
     var _this13 = this;
 
     var localLogout = function localLogout(response) {
@@ -1211,12 +1252,23 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
         if (typeof _this13.onLogout === 'function') {
           _this13.onLogout(response);
         }
-
         resolve(response);
       });
     };
 
-    return this.config.logoutUrl ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout) : localLogout();
+    if (name) {
+      if (this.config.providers[name].logoutEndpoint) {
+        return this.authentication.logout(name).then(function (logoutResponse) {
+          var stateValue = _this13.authentication.storage.get(name + '_state');
+          if (logoutResponse.state !== stateValue) {
+            return Promise.reject('OAuth2 response state value differs');
+          }
+          return localLogout(logoutResponse);
+        });
+      }
+    } else {
+      return this.config.logoutUrl ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout) : localLogout();
+    }
   };
 
   AuthService.prototype.authenticate = function authenticate(name, redirectUri) {
@@ -1293,7 +1345,7 @@ export var AuthorizeStep = (_dec15 = inject(AuthService), _dec15(_class12 = func
   function AuthorizeStep(authService) {
     
 
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticationStep instead.');
+    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticateStep instead.');
 
     this.authService = authService;
   }

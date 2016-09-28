@@ -248,6 +248,8 @@ export class BaseConfig {
   clientId = false;
   // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
   refreshTokenProp = 'refresh_token';
+  // The proprety name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
+  refreshTokenSubmitProp = 'refresh_token';
 
   // If the property defined by `refreshTokenProp` is an object:
   // -----------------------------------------------------------
@@ -413,9 +415,7 @@ export class BaseConfig {
       clientId: 'your_client_id',
       clientDomain: 'your_domain_url',
       display: 'popup',
-      lockOptions: {
-        popup: true
-      },
+      lockOptions: {},
       responseType: 'token',
       state: randomState
     }
@@ -564,14 +564,12 @@ export class AuthLock {
       name: null,
       state: null,
       scope: null,
-      scopeDelimiter: null,
+      scopeDelimiter: ' ',
       redirectUri: null,
       clientId: null,
       clientDomain: null,
       display: 'popup',
-      lockOptions: {
-        popup: true
-      },
+      lockOptions: {},
       popupOptions: null,
       responseType: 'token'
     };
@@ -591,27 +589,48 @@ export class AuthLock {
       this.storage.set(stateName, provider.state);
     }
 
-    this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain);
+    // transform provider options into auth0-lock options
+    let opts = {
+      auth: {
+        params: {}
+      }
+    };
+    if (Array.isArray(provider.scope) && provider.scope.length) {
+      opts.auth.params.scope = provider.scope.join(provider.scopeDelimiter);
+    }
+    if (provider.state) {
+      opts.auth.params.state = this.storage.get(provider.name + '_state');
+    }
+    if (provider.display === 'popup') {
+      opts.auth.redirect = false;
+    } else if (typeof provider.redirectUri === 'string') {
+      opts.auth.redirect = true;
+      opts.auth.redirectUrl = provider.redirectUri;
+    }
+    if (typeof provider.popupOptions === 'object') {
+      opts.popupOptions = provider.popupOptions;
+    }
+    if (typeof provider.responseType === 'string') {
+      opts.auth.responseType = provider.responseType;
+    }
+    let lockOptions = extend(true, {}, provider.lockOptions, opts);
+
+    this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain, lockOptions);
 
     const openPopup = new Promise((resolve, reject) => {
-      let opts = provider.lockOptions;
-      opts.popupOptions = provider.popupOptions;
-      opts.responseType = provider.responseType;
-      opts.callbackURL = provider.redirectUri;
-      opts.authParams = opts.authParams || {};
-      if (provider.scope) opts.authParams.scope = provider.scope;
-      if (provider.state) opts.authParams.state = this.storage.get(provider.name + '_state');
-
-      this.lock.show(provider.lockOptions, (err, profile, tokenOrCode) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({
-            //NOTE: this is an id token (JWT) and it shouldn't be named access_token
-            access_token: tokenOrCode
-          });
+      this.lock.on('authenticated', authResponse => {
+        if (!lockOptions.auth.redirect) {
+          // hides the lock popup, as it doesn't do so automatically
+          this.lock.hide();
         }
+        resolve({
+          access_token: authResponse.idToken
+        });
       });
+      this.lock.on('authorization_error', err => {
+        reject(err);
+      });
+      this.lock.show();
     });
 
     return openPopup
@@ -1410,11 +1429,12 @@ export class AuthService {
     }
 
     if (this.authentication.updateTokenCallstack.length === 0) {
-      const content = {
+      let content = {
         grant_type: 'refresh_token',
-        refresh_token: this.authentication.getRefreshToken(),
         client_id: this.config.clientId ? this.config.clientId : undefined
       };
+
+      content[this.config.refreshTokenSubmitProp] = this.authentication.getRefreshToken();
 
       this.client.post(this.config.joinBase(this.config.refreshTokenUrl
                                             ? this.config.refreshTokenUrl

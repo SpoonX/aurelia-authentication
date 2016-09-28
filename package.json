@@ -27,27 +27,12 @@
   },
   "jspm": {
     "registry": "npm",
-    "jspmPackage": true,
     "main": "aurelia-authentication",
     "format": "amd",
     "directories": {
       "dist": "dist/amd"
     },
     "dependencies": {
-      "aurelia-api": "^3.0.0-rc5",
-      "aurelia-dependency-injection": "^1.0.0-rc.1.0.0",
-      "aurelia-event-aggregator": "^1.0.0-rc.1.0.0",
-      "aurelia-fetch-client": "^1.0.0-rc.1.0.0",
-      "aurelia-logging": "^1.0.0-rc.1.0.0",
-      "aurelia-metadata": "^1.0.0-rc.1.0.0",
-      "aurelia-pal": "^1.0.0-rc.1.0.0",
-      "aurelia-path": "^1.0.0-rc.1.0.0",
-      "aurelia-router": "^1.0.0-rc.1.0.0",
-      "aurelia-templating-resources": "^1.0.0-rc.1.0.0",
-      "extend": "^3.0.0",
-      "jwt-decode": "^2.0.0"
-    },
-    "peerDependencies": {
       "aurelia-api": "^3.0.0-rc5",
       "aurelia-dependency-injection": "^1.0.0-rc.1.0.0",
       "aurelia-event-aggregator": "^1.0.0-rc.1.0.0",

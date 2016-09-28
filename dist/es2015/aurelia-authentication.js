@@ -192,6 +192,7 @@ export let BaseConfig = class BaseConfig {
     this.autoUpdateToken = true;
     this.clientId = false;
     this.refreshTokenProp = 'refresh_token';
+    this.refreshTokenSubmitProp = 'refresh_token';
     this.refreshTokenName = 'token';
     this.refreshTokenRoot = false;
     this.idTokenProp = 'id_token';
@@ -326,9 +327,7 @@ export let BaseConfig = class BaseConfig {
         clientId: 'your_client_id',
         clientDomain: 'your_domain_url',
         display: 'popup',
-        lockOptions: {
-          popup: true
-        },
+        lockOptions: {},
         responseType: 'token',
         state: randomState
       }
@@ -454,14 +453,12 @@ export let AuthLock = (_dec2 = inject(Storage, BaseConfig), _dec2(_class3 = clas
       name: null,
       state: null,
       scope: null,
-      scopeDelimiter: null,
+      scopeDelimiter: ' ',
       redirectUri: null,
       clientId: null,
       clientDomain: null,
       display: 'popup',
-      lockOptions: {
-        popup: true
-      },
+      lockOptions: {},
       popupOptions: null,
       responseType: 'token'
     };
@@ -480,26 +477,46 @@ export let AuthLock = (_dec2 = inject(Storage, BaseConfig), _dec2(_class3 = clas
       this.storage.set(stateName, provider.state);
     }
 
-    this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain);
+    let opts = {
+      auth: {
+        params: {}
+      }
+    };
+    if (Array.isArray(provider.scope) && provider.scope.length) {
+      opts.auth.params.scope = provider.scope.join(provider.scopeDelimiter);
+    }
+    if (provider.state) {
+      opts.auth.params.state = this.storage.get(provider.name + '_state');
+    }
+    if (provider.display === 'popup') {
+      opts.auth.redirect = false;
+    } else if (typeof provider.redirectUri === 'string') {
+      opts.auth.redirect = true;
+      opts.auth.redirectUrl = provider.redirectUri;
+    }
+    if (typeof provider.popupOptions === 'object') {
+      opts.popupOptions = provider.popupOptions;
+    }
+    if (typeof provider.responseType === 'string') {
+      opts.auth.responseType = provider.responseType;
+    }
+    let lockOptions = extend(true, {}, provider.lockOptions, opts);
+
+    this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain, lockOptions);
 
     const openPopup = new Promise((resolve, reject) => {
-      let opts = provider.lockOptions;
-      opts.popupOptions = provider.popupOptions;
-      opts.responseType = provider.responseType;
-      opts.callbackURL = provider.redirectUri;
-      opts.authParams = opts.authParams || {};
-      if (provider.scope) opts.authParams.scope = provider.scope;
-      if (provider.state) opts.authParams.state = this.storage.get(provider.name + '_state');
-
-      this.lock.show(provider.lockOptions, (err, profile, tokenOrCode) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({
-            access_token: tokenOrCode
-          });
+      this.lock.on('authenticated', authResponse => {
+        if (!lockOptions.auth.redirect) {
+          this.lock.hide();
         }
+        resolve({
+          access_token: authResponse.idToken
+        });
       });
+      this.lock.on('authorization_error', err => {
+        reject(err);
+      });
+      this.lock.show();
     });
 
     return openPopup.then(lockResponse => {
@@ -1093,11 +1110,12 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     }
 
     if (this.authentication.updateTokenCallstack.length === 0) {
-      const content = {
+      let content = {
         grant_type: 'refresh_token',
-        refresh_token: this.authentication.getRefreshToken(),
         client_id: this.config.clientId ? this.config.clientId : undefined
       };
+
+      content[this.config.refreshTokenSubmitProp] = this.authentication.getRefreshToken();
 
       this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(response => {
         this.setResponseObject(response);

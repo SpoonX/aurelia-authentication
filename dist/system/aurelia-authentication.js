@@ -325,6 +325,7 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
           this.autoUpdateToken = true;
           this.clientId = false;
           this.refreshTokenProp = 'refresh_token';
+          this.refreshTokenSubmitProp = 'refresh_token';
           this.refreshTokenName = 'token';
           this.refreshTokenRoot = false;
           this.idTokenProp = 'id_token';
@@ -459,9 +460,7 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
               clientId: 'your_client_id',
               clientDomain: 'your_domain_url',
               display: 'popup',
-              lockOptions: {
-                popup: true
-              },
+              lockOptions: {},
               responseType: 'token',
               state: randomState
             }
@@ -603,14 +602,12 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
             name: null,
             state: null,
             scope: null,
-            scopeDelimiter: null,
+            scopeDelimiter: ' ',
             redirectUri: null,
             clientId: null,
             clientDomain: null,
             display: 'popup',
-            lockOptions: {
-              popup: true
-            },
+            lockOptions: {},
             popupOptions: null,
             responseType: 'token'
           };
@@ -631,26 +628,46 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
             this.storage.set(stateName, provider.state);
           }
 
-          this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain);
+          var opts = {
+            auth: {
+              params: {}
+            }
+          };
+          if (Array.isArray(provider.scope) && provider.scope.length) {
+            opts.auth.params.scope = provider.scope.join(provider.scopeDelimiter);
+          }
+          if (provider.state) {
+            opts.auth.params.state = this.storage.get(provider.name + '_state');
+          }
+          if (provider.display === 'popup') {
+            opts.auth.redirect = false;
+          } else if (typeof provider.redirectUri === 'string') {
+            opts.auth.redirect = true;
+            opts.auth.redirectUrl = provider.redirectUri;
+          }
+          if (_typeof(provider.popupOptions) === 'object') {
+            opts.popupOptions = provider.popupOptions;
+          }
+          if (typeof provider.responseType === 'string') {
+            opts.auth.responseType = provider.responseType;
+          }
+          var lockOptions = extend(true, {}, provider.lockOptions, opts);
+
+          this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain, lockOptions);
 
           var openPopup = new Promise(function (resolve, reject) {
-            var opts = provider.lockOptions;
-            opts.popupOptions = provider.popupOptions;
-            opts.responseType = provider.responseType;
-            opts.callbackURL = provider.redirectUri;
-            opts.authParams = opts.authParams || {};
-            if (provider.scope) opts.authParams.scope = provider.scope;
-            if (provider.state) opts.authParams.state = _this3.storage.get(provider.name + '_state');
-
-            _this3.lock.show(provider.lockOptions, function (err, profile, tokenOrCode) {
-              if (err) {
-                reject(err);
-              } else {
-                resolve({
-                  access_token: tokenOrCode
-                });
+            _this3.lock.on('authenticated', function (authResponse) {
+              if (!lockOptions.auth.redirect) {
+                _this3.lock.hide();
               }
+              resolve({
+                access_token: authResponse.idToken
+              });
             });
+            _this3.lock.on('authorization_error', function (err) {
+              reject(err);
+            });
+            _this3.lock.show();
           });
 
           return openPopup.then(function (lockResponse) {
@@ -1290,9 +1307,10 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
           if (this.authentication.updateTokenCallstack.length === 0) {
             var content = {
               grant_type: 'refresh_token',
-              refresh_token: this.authentication.getRefreshToken(),
               client_id: this.config.clientId ? this.config.clientId : undefined
             };
+
+            content[this.config.refreshTokenSubmitProp] = this.authentication.getRefreshToken();
 
             this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(function (response) {
               _this10.setResponseObject(response);

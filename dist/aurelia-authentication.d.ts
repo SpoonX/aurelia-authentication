@@ -132,6 +132,9 @@ export declare class BaseConfig {
   // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
   refreshTokenProp: any;
   
+  // The proprety name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
+  refreshTokenSubmitProp: any;
+  
   // If the property defined by `refreshTokenProp` is an object:
   // -----------------------------------------------------------
   // This is the property from which to get the token `{ "refreshTokenProp": { "refreshTokenName" : '...' } }`
@@ -541,6 +544,16 @@ export declare class FetchConfig {
  * @param {{}|Function}                                         config
  */
 export declare function configure(aurelia?: any, config?: any): any;
+export declare class AuthFilterValueConverter {
+  
+  /**
+     * route toView predictator on route.config.auth === isAuthenticated
+     * @param  {RouteConfig}  routes            the routes array to convert
+     * @param  {Boolean}      isAuthenticated   authentication status
+     * @return {Boolean}      show/hide element
+     */
+  toView(routes?: any, isAuthenticated?: any): any;
+}
 export declare class AuthenticatedFilterValueConverter {
   constructor(authService?: any);
   
@@ -560,14 +573,4 @@ export declare class AuthenticatedValueConverter {
      * @return {Boolean}  show/hide element
      */
   toView(): any;
-}
-export declare class AuthFilterValueConverter {
-  
-  /**
-     * route toView predictator on route.config.auth === isAuthenticated
-     * @param  {RouteConfig}  routes            the routes array to convert
-     * @param  {Boolean}      isAuthenticated   authentication status
-     * @return {Boolean}      show/hide element
-     */
-  toView(routes?: any, isAuthenticated?: any): any;
 }

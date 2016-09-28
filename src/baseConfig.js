@@ -287,9 +287,7 @@ export class BaseConfig {
       clientId: 'your_client_id',
       clientDomain: 'your_domain_url',
       display: 'popup',
-      lockOptions: {
-        popup: true
-      },
+      lockOptions: {},
       responseType: 'token',
       state: randomState
     }

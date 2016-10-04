@@ -250,7 +250,7 @@ export class Authentication {
    * Authenticate with third-party
    *
    * @param {String}    name        Name of the provider
-   * @param {[{}]}      [userData]  Additional data send to the authenication server
+   * @param {[{}]}      [userData]  Additional data send to the authentication server
    *
    * @return {Promise<any>} The authentication server response
    */

@@ -320,7 +320,7 @@ export class AuthService {
   }
 
   /**
-   * Request new accesss token
+   * Request new access token
    *
    * @returns {Promise<any>} Requests new token. can be called multiple times
    */

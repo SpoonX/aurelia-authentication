@@ -73,6 +73,7 @@ export let Popup = class Popup {
         }
 
         const parser = DOM.createElement('a');
+
         parser.href = event.url;
 
         if (parser.search || parser.hash) {
@@ -150,6 +151,7 @@ const buildPopupWindowOptions = options => {
   }, options);
 
   let parts = [];
+
   Object.keys(extended).map(key => parts.push(key + '=' + extended[key]));
 
   return parts.join(',');
@@ -192,6 +194,7 @@ export let BaseConfig = class BaseConfig {
     this.autoUpdateToken = true;
     this.clientId = false;
     this.refreshTokenProp = 'refresh_token';
+    this.refreshTokenSubmitProp = 'refresh_token';
     this.refreshTokenName = 'token';
     this.refreshTokenRoot = false;
     this.idTokenProp = 'id_token';
@@ -326,9 +329,7 @@ export let BaseConfig = class BaseConfig {
         clientId: 'your_client_id',
         clientDomain: 'your_domain_url',
         display: 'popup',
-        lockOptions: {
-          popup: true
-        },
+        lockOptions: {},
         responseType: 'token',
         state: randomState
       }
@@ -344,14 +345,17 @@ export let BaseConfig = class BaseConfig {
     return join(this.baseUrl, url);
   }
 
-  configure(incomming) {
-    for (let key in incomming) {
-      const value = incomming[key];
-      if (value !== undefined) {
-        if (Array.isArray(value) || typeof value !== 'object' || value === null) {
-          this[key] = value;
-        } else {
-          extend(true, this[key], value);
+  configure(incoming) {
+    for (let key in incoming) {
+      if (incoming.hasOwnProperty(key)) {
+        const value = incoming[key];
+
+        if (value !== undefined) {
+          if (Array.isArray(value) || typeof value !== 'object' || value === null) {
+            this[key] = value;
+          } else {
+            extend(true, this[key], value);
+          }
         }
       }
     }
@@ -361,6 +365,7 @@ export let BaseConfig = class BaseConfig {
     LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
     this._authTokenType = authToken;
     this.authTokenType = authToken;
+
     return authToken;
   }
   get authToken() {
@@ -371,6 +376,7 @@ export let BaseConfig = class BaseConfig {
     LogManager.getLogger('authentication').warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
     this._responseTokenProp = responseTokenProp;
     this.accessTokenProp = responseTokenProp;
+
     return responseTokenProp;
   }
   get responseTokenProp() {
@@ -381,6 +387,7 @@ export let BaseConfig = class BaseConfig {
     LogManager.getLogger('authentication').warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
     this._tokenRoot = tokenRoot;
     this.accessTokenRoot = tokenRoot;
+
     return tokenRoot;
   }
   get tokenRoot() {
@@ -391,6 +398,7 @@ export let BaseConfig = class BaseConfig {
     LogManager.getLogger('authentication').warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
     this._tokenName = tokenName;
     this.accessTokenName = tokenName;
+
     return tokenName;
   }
   get tokenName() {
@@ -400,6 +408,7 @@ export let BaseConfig = class BaseConfig {
   set tokenPrefix(tokenPrefix) {
     LogManager.getLogger('authentication').warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
     this._tokenPrefix = tokenPrefix;
+
     return tokenPrefix;
   }
   get tokenPrefix() {
@@ -408,6 +417,7 @@ export let BaseConfig = class BaseConfig {
 
   get current() {
     LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
+
     return this;
   }
   set current(_) {
@@ -416,6 +426,7 @@ export let BaseConfig = class BaseConfig {
 
   get _current() {
     LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
+
     return this;
   }
   set _current(_) {
@@ -425,6 +436,7 @@ export let BaseConfig = class BaseConfig {
 
 function randomState() {
   let rand = Math.random().toString(36).substr(2);
+
   return encodeURIComponent(rand);
 }
 
@@ -454,14 +466,12 @@ export let AuthLock = (_dec2 = inject(Storage, BaseConfig), _dec2(_class3 = clas
       name: null,
       state: null,
       scope: null,
-      scopeDelimiter: null,
+      scopeDelimiter: ' ',
       redirectUri: null,
       clientId: null,
       clientDomain: null,
       display: 'popup',
-      lockOptions: {
-        popup: true
-      },
+      lockOptions: {},
       popupOptions: null,
       responseType: 'token'
     };
@@ -480,26 +490,47 @@ export let AuthLock = (_dec2 = inject(Storage, BaseConfig), _dec2(_class3 = clas
       this.storage.set(stateName, provider.state);
     }
 
-    this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain);
+    let opts = {
+      auth: {
+        params: {}
+      }
+    };
+
+    if (Array.isArray(provider.scope) && provider.scope.length) {
+      opts.auth.params.scope = provider.scope.join(provider.scopeDelimiter);
+    }
+    if (provider.state) {
+      opts.auth.params.state = this.storage.get(provider.name + '_state');
+    }
+    if (provider.display === 'popup') {
+      opts.auth.redirect = false;
+    } else if (typeof provider.redirectUri === 'string') {
+      opts.auth.redirect = true;
+      opts.auth.redirectUrl = provider.redirectUri;
+    }
+    if (typeof provider.popupOptions === 'object') {
+      opts.popupOptions = provider.popupOptions;
+    }
+    if (typeof provider.responseType === 'string') {
+      opts.auth.responseType = provider.responseType;
+    }
+    let lockOptions = extend(true, {}, provider.lockOptions, opts);
+
+    this.lock = this.lock || new PLATFORM.global.Auth0Lock(provider.clientId, provider.clientDomain, lockOptions);
 
     const openPopup = new Promise((resolve, reject) => {
-      let opts = provider.lockOptions;
-      opts.popupOptions = provider.popupOptions;
-      opts.responseType = provider.responseType;
-      opts.callbackURL = provider.redirectUri;
-      opts.authParams = opts.authParams || {};
-      if (provider.scope) opts.authParams.scope = provider.scope;
-      if (provider.state) opts.authParams.state = this.storage.get(provider.name + '_state');
-
-      this.lock.show(provider.lockOptions, (err, profile, tokenOrCode) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({
-            access_token: tokenOrCode
-          });
+      this.lock.on('authenticated', authResponse => {
+        if (!lockOptions.auth.redirect) {
+          this.lock.hide();
         }
+        resolve({
+          access_token: authResponse.idToken
+        });
       });
+      this.lock.on('authorization_error', err => {
+        reject(err);
+      });
+      this.lock.show();
     });
 
     return openPopup.then(lockResponse => {
@@ -601,6 +632,7 @@ export let OAuth2 = (_dec4 = inject(Storage, Popup, BaseConfig), _dec4(_class5 =
       if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
         return Promise.reject('OAuth 2.0 state parameter mismatch.');
       }
+
       return this.exchangeForToken(oauthData, userData, provider);
     });
   }
@@ -641,6 +673,7 @@ export let OAuth2 = (_dec4 = inject(Storage, Popup, BaseConfig), _dec4(_class5 =
         query[paramName] = paramValue;
       });
     });
+
     return query;
   }
 
@@ -650,9 +683,7 @@ export let OAuth2 = (_dec4 = inject(Storage, Popup, BaseConfig), _dec4(_class5 =
     const popup = this.popup.open(url, provider.name, provider.popupOptions);
     const openPopup = this.config.platform === 'mobile' ? popup.eventListener(provider.postLogoutRedirectUri) : popup.pollPopup();
 
-    return openPopup.then(response => {
-      return response;
-    });
+    return openPopup;
   }
 
   buildLogoutQuery(provider) {
@@ -668,15 +699,16 @@ export let OAuth2 = (_dec4 = inject(Storage, Popup, BaseConfig), _dec4(_class5 =
     if (JSON.parse(authResponse).id_token) {
       query.id_token_hint = JSON.parse(authResponse).id_token;
     }
+
     return query;
   }
 }) || _class5);
 
-const camelCase = function (name) {
-  return name.replace(/([\:\-\_]+(.))/g, function (_, separator, letter, offset) {
+function camelCase(name) {
+  return name.replace(/([:\-_]+(.))/g, function (_, separator, letter, offset) {
     return offset ? letter.toUpperCase() : letter;
   });
-};
+}
 
 export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2, AuthLock), _dec6 = deprecated({ message: 'Use baseConfig.loginRoute instead.' }), _dec7 = deprecated({ message: 'Use baseConfig.loginRedirect instead.' }), _dec8 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.loginUrl) instead.' }), _dec9 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.signupUrl) instead.' }), _dec10 = deprecated({ message: 'Use baseConfig.joinBase(baseConfig.profileUrl) instead.' }), _dec11 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec5(_class6 = (_class7 = class Authentication {
   constructor(storage, config, oAuth1, oAuth2, auth0Lock) {
@@ -720,6 +752,7 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
 
   get responseObject() {
     LogManager.getLogger('authentication').warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
+
     return this.getResponseObject();
   }
 
@@ -730,6 +763,7 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
 
   get hasDataStored() {
     LogManager.getLogger('authentication').warn('Authentication.hasDataStored is deprecated. Use Authentication.responseAnalyzed instead.');
+
     return this.responseAnalyzed;
   }
 
@@ -741,6 +775,7 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
     if (response) {
       this.getDataFromResponse(response);
       this.storage.set(this.config.storageKey, JSON.stringify(response));
+
       return;
     }
     this.accessToken = null;
@@ -755,42 +790,51 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
 
   getAccessToken() {
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
     return this.accessToken;
   }
 
   getRefreshToken() {
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
     return this.refreshToken;
   }
 
   getIdToken() {
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
     return this.idToken;
   }
 
   getPayload() {
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
     return this.payload;
   }
 
   getExp() {
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
     return this.exp;
   }
 
   getTtl() {
     const exp = this.getExp();
+
     return Number.isNaN(exp) ? NaN : exp - Math.round(new Date().getTime() / 1000);
   }
 
   isTokenExpired() {
     const timeLeft = this.getTtl();
+
     return Number.isNaN(timeLeft) ? undefined : timeLeft < 0;
   }
 
   isAuthenticated() {
     const isTokenExpired = this.isTokenExpired();
-    if (isTokenExpired === undefined) return this.accessToken ? true : false;
+
+    if (isTokenExpired === undefined) return !!this.accessToken;
+
     return !isTokenExpired;
   }
 
@@ -820,10 +864,7 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
     this.payload = null;
     try {
       this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
-    } catch (_) {
-      _;
-    }
-
+    } catch (_) {}
     this.exp = typeof this.config.getExpirationDateFromResponse === 'function' ? this.config.getExpirationDateFromResponse(response) : this.payload && parseInt(this.payload.exp, 10) || NaN;
 
     this.responseAnalyzed = true;
@@ -881,6 +922,7 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
     }
 
     let providerLogin;
+
     if (oauthType === 'auth0-lock') {
       providerLogin = this.auth0Lock;
     } else {
@@ -892,15 +934,18 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
 
   logout(name) {
     let rtnValue = Promise.resolve('Not Applicable');
+
     if (this.config.providers[name].oauthType !== '2.0' || !this.config.providers[name].logoutEndpoint) {
       return rtnValue;
     }
+
     return this.oAuth2.close(this.config.providers[name]);
   }
 
   redirect(redirectUrl, defaultRedirectUrl, query) {
     if (redirectUrl === true) {
       LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
+
       return;
     }
 
@@ -938,6 +983,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       }
 
       let wasAuthenticated = this.authenticated;
+
       this.authentication.responseAnalyzed = false;
       this.updateAuthenticated();
 
@@ -957,6 +1003,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     if (oldToken) {
       LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
       let fakeOldResponse = {};
+
       fakeOldResponse[config.accessTokenProp] = oldToken;
       this.setResponseObject(fakeOldResponse);
       authentication.storage.remove(oldStorageKey);
@@ -973,6 +1020,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
 
   get auth() {
     LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
+
     return this.authentication;
   }
 
@@ -1011,6 +1059,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     this.clearTimeout();
 
     let wasAuthenticated = this.authenticated;
+
     this.authenticated = this.authentication.isAuthenticated();
 
     if (this.authenticated && !Number.isNaN(this.authentication.exp)) {
@@ -1029,6 +1078,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
       criteriaOrId = { id: criteriaOrId };
     }
+
     return this.client.find(this.config.joinBase(this.config.profileUrl), criteriaOrId);
   }
 
@@ -1039,6 +1089,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     if (this.config.profileMethod === 'put') {
       return this.client.update(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
     }
+
     return this.client.patch(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
   }
 
@@ -1093,11 +1144,12 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     }
 
     if (this.authentication.updateTokenCallstack.length === 0) {
-      const content = {
+      let content = {
         grant_type: 'refresh_token',
-        refresh_token: this.authentication.getRefreshToken(),
         client_id: this.config.clientId ? this.config.clientId : undefined
       };
+
+      content[this.config.refreshTokenSubmitProp] = this.authentication.getRefreshToken();
 
       this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(response => {
         this.setResponseObject(response);
@@ -1112,52 +1164,56 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
   }
 
   signup(displayNameOrCredentials, emailOrOptions, passwordOrRedirectUri, options, redirectUri) {
-    let content;
+    let normalized = {};
 
-    if (typeof arguments[0] === 'object') {
-      content = arguments[0];
-      options = arguments[1];
-      redirectUri = arguments[2];
+    if (typeof displayNameOrCredentials === 'object') {
+      normalized.credentials = displayNameOrCredentials;
+      normalized.options = emailOrOptions;
+      normalized.redirectUri = passwordOrRedirectUri;
     } else {
-      content = {
+      normalized.credentials = {
         'displayName': displayNameOrCredentials,
         'email': emailOrOptions,
         'password': passwordOrRedirectUri
       };
+      normalized.options = options;
+      normalized.redirectUri = redirectUri;
     }
-    return this.client.post(this.config.joinBase(this.config.signupUrl), content, options).then(response => {
+
+    return this.client.post(this.config.joinBase(this.config.signupUrl), normalized.credentials, normalized.options).then(response => {
       if (this.config.loginOnSignup) {
         this.setResponseObject(response);
       }
-      this.authentication.redirect(redirectUri, this.config.signupRedirect);
+      this.authentication.redirect(normalized.redirectUri, this.config.signupRedirect);
 
       return response;
     });
   }
 
   login(emailOrCredentials, passwordOrOptions, optionsOrRedirectUri, redirectUri) {
-    let content;
+    let normalized = {};
 
-    if (typeof arguments[0] === 'object') {
-      content = arguments[0];
-      optionsOrRedirectUri = arguments[1];
-      redirectUri = arguments[2];
+    if (typeof emailOrCredentials === 'object') {
+      normalized.credentials = emailOrCredentials;
+      normalized.options = passwordOrOptions;
+      normalized.redirectUri = optionsOrRedirectUri;
     } else {
-      content = {
+      normalized.credentials = {
         'email': emailOrCredentials,
         'password': passwordOrOptions
       };
-      optionsOrRedirectUri = optionsOrRedirectUri;
+      normalized.options = optionsOrRedirectUri;
+      normalized.redirectUri = redirectUri;
     }
 
     if (this.config.clientId) {
-      content.client_id = this.config.clientId;
+      normalized.credentials.client_id = this.config.clientId;
     }
 
-    return this.client.post(this.config.joinBase(this.config.loginUrl), content, optionsOrRedirectUri).then(response => {
+    return this.client.post(this.config.joinBase(this.config.loginUrl), normalized.credentials, normalized.options).then(response => {
       this.setResponseObject(response);
 
-      this.authentication.redirect(redirectUri, this.config.loginRedirect);
+      this.authentication.redirect(normalized.redirectUri, this.config.loginRedirect);
 
       return response;
     });
@@ -1179,9 +1235,11 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       if (this.config.providers[name].logoutEndpoint) {
         return this.authentication.logout(name).then(logoutResponse => {
           let stateValue = this.authentication.storage.get(name + '_state');
+
           if (logoutResponse.state !== stateValue) {
             return Promise.reject('OAuth2 response state value differs');
           }
+
           return localLogout(logoutResponse);
         });
       }
@@ -1190,7 +1248,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     }
   }
 
-  authenticate(name, redirectUri, userData = {}) {
+  authenticate(name, redirectUri, userData) {
     return this.authentication.authenticate(name, userData).then(response => {
       this.setResponseObject(response);
 
@@ -1202,6 +1260,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
 
   unlink(name, redirectUri) {
     const unlinkUrl = this.config.joinBase(this.config.unlinkUrl) + name;
+
     return this.client.request(this.config.unlinkMethod, unlinkUrl).then(response => {
       this.authentication.redirect(redirectUri);
 
@@ -1312,6 +1371,7 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
   configure(client) {
     if (Array.isArray(client)) {
       let configuredClients = [];
+
       client.forEach(toConfigure => {
         configuredClients.push(this.configure(toConfigure));
       });
@@ -1321,6 +1381,7 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
 
     if (typeof client === 'string') {
       const endpoint = this.clientConfig.getEndpoint(client);
+
       if (!endpoint) {
         throw new Error(`There is no '${ client || 'default' }' endpoint registered.`);
       }
@@ -1337,12 +1398,12 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
   }
 }) || _class13);
 
-export function configure(aurelia, config) {
+export function configure(frameworkConfig, config) {
   if (!PLATFORM.location.origin) {
     PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
   }
 
-  const baseConfig = aurelia.container.get(BaseConfig);
+  const baseConfig = frameworkConfig.container.get(BaseConfig);
 
   if (typeof config === 'function') {
     config(baseConfig);
@@ -1351,11 +1412,11 @@ export function configure(aurelia, config) {
   }
 
   for (let converter of baseConfig.globalValueConverters) {
-    aurelia.globalResources(`./${ converter }`);
+    frameworkConfig.globalResources(`./${ converter }`);
     LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${ converter }`);
   }
-  const fetchConfig = aurelia.container.get(FetchConfig);
-  const clientConfig = aurelia.container.get(Config);
+  const fetchConfig = frameworkConfig.container.get(FetchConfig);
+  const clientConfig = frameworkConfig.container.get(Config);
 
   if (Array.isArray(baseConfig.configureEndpoints)) {
     baseConfig.configureEndpoints.forEach(endpointToPatch => {
@@ -1368,6 +1429,7 @@ export function configure(aurelia, config) {
   if (baseConfig.endpoint !== null) {
     if (typeof baseConfig.endpoint === 'string') {
       const endpoint = clientConfig.getEndpoint(baseConfig.endpoint);
+
       if (!endpoint) {
         throw new Error(`There is no '${ baseConfig.endpoint || 'default' }' endpoint registered.`);
       }
@@ -1378,7 +1440,7 @@ export function configure(aurelia, config) {
   }
 
   if (!(client instanceof Rest)) {
-    client = new Rest(aurelia.container.get(HttpClient));
+    client = new Rest(frameworkConfig.container.get(HttpClient));
   }
 
   baseConfig.client = client;

@@ -18,7 +18,7 @@ define(['exports', 'aurelia-dependency-injection', './aurelia-authentication'], 
     }
 
     AuthenticatedFilterValueConverter.prototype.toView = function toView(routes) {
-      var isAuthenticated = arguments.length <= 1 || arguments[1] === undefined ? this.authService.authenticated : arguments[1];
+      var isAuthenticated = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.authService.authenticated;
 
       return routes.filter(function (route) {
         return typeof route.config.auth !== 'boolean' || route.config.auth === isAuthenticated;

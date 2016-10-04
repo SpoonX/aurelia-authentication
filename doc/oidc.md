@@ -20,9 +20,9 @@ refer to the response given to this [stackoverflow question](http://stackoverflo
 * oauthType : must be set to '2.0' to connect to an OIDC provider
 * clientId: name of the public client application as defined with the OIDC provider
 * authorizationEndpoint: the URL for the OIDC provider authorization endpoint
-* redirectUri: the URL defined with with the OIDC provider and clientId that will be redirected to upon successful login
+* redirectUri: the URL defined with the OIDC provider and clientId that will be redirected to upon successful login
 * logoutEndpoint: the URL for the OIDC provider logout endpoint
-* postLogoutRedirectUri: similar to the the redirectUri on successful login, the URL for the OIDC provider and clientId that will be redirected to upon successful logout
+* postLogoutRedirectUri: similar to the redirectUri on successful login, the URL for the OIDC provider and clientId that will be redirected to upon successful logout
 * responseType: for an OIDC provider using the implicit flow, should always be set to 'id_token token'
 * scope: in order for the client application to return the display name of the user when calling the profileUrl endpoint, must be set to ['openid email profile']
 * requiredUrlParams: an array of parameters that are required when submitting a request to the authorizationEndpoint. For an OIDC provider, this value should be defined as ['scope', 'nonce', 'resource']

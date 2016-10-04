@@ -15,13 +15,13 @@ export class BaseConfig {
   }
 
   /**
-   * Merge current settings with incomming settings
-   * @param  {Object} incomming Settings object to be merged into the current configuration
+   * Merge current settings with incoming settings
+   * @param  {Object} incoming Settings object to be merged into the current configuration
    */
-  configure(incomming: {}): Config {
-    for (let key in incomming) {
-      if (incomming.hasOwnProperty(key)) {
-        const value = incomming[key];
+  configure(incoming: {}): Config {
+    for (let key in incoming) {
+      if (incoming.hasOwnProperty(key)) {
+        const value = incoming[key];
 
         if (value !== undefined) {
           if (Array.isArray(value) || typeof value !== 'object' || value === null) {
@@ -119,7 +119,7 @@ export class BaseConfig {
   clientId = false;
   // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
   refreshTokenProp = 'refresh_token';
-  // The proprety name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
+  // The property name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
   refreshTokenSubmitProp = 'refresh_token';
 
   // If the property defined by `refreshTokenProp` is an object:
@@ -316,7 +316,7 @@ export class BaseConfig {
    */
   _tokenPrefix = 'aurelia';
 
-  /* deprecated methods and parameteres */
+  /* deprecated methods and parameters */
   /**
    * @param {string} authToken
    * @deprecated
@@ -423,7 +423,7 @@ export class BaseConfig {
  */
 function randomState() {
   let rand = Math.random()
-    .tostring(36)
+    .toString(36)
     .substr(2);
 
   return encodeURIComponent(rand);

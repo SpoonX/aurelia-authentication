@@ -44,6 +44,7 @@ export class AuthLock {
         params: {}
       }
     };
+
     if (Array.isArray(provider.scope) && provider.scope.length) {
       opts.auth.params.scope = provider.scope.join(provider.scopeDelimiter);
     }
@@ -84,9 +85,9 @@ export class AuthLock {
 
     return openPopup
       .then(lockResponse => {
-        if (provider.responseType === 'token' ||
-            provider.responseType === 'id_token%20token' ||
-            provider.responseType === 'token%20id_token'
+        if (provider.responseType === 'token'
+          || provider.responseType === 'id_token%20token'
+          || provider.responseType === 'token%20id_token'
         ) {
           return lockResponse;
         }

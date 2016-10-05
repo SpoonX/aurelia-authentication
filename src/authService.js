@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import {PLATFORM} from 'aurelia-pal';
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
@@ -14,28 +15,28 @@ export class AuthService {
    *
    * @param  {Authentication}
    */
-  authentication;
+  authentication: Authentication;
 
   /**
    * The Config instance that contains the current configuration setting
    *
    * @param  {Config}
    */
-  config;
+  config: Config;
 
   /**
    * The current login status
    *
    * @param  {Boolean}
    */
-  authenticated  = false;
+  authenticated: Boolean  = false;
 
   /**
    * The currently set timeoutID
    *
    * @param  {Number}
    */
-  timeoutID = 0;
+  timeoutID: Number = 0;
 
   /**
    *  Create an AuthService instance
@@ -45,7 +46,7 @@ export class AuthService {
    * @param  {BindingSignaler} bindingSignaler The BindingSignaler instance to be used
    * @param  {EventAggregator} eventAggregator The EventAggregator instance to be used
    */
-  constructor(authentication, config, bindingSignaler, eventAggregator) {
+  constructor(authentication: Authentication, config: BaseConfig, bindingSignaler: BindingSignaler, eventAggregator: EventAggregator) {
     this.authentication  = authentication;
     this.config          = config;
     this.bindingSignaler = bindingSignaler;
@@ -60,6 +61,7 @@ export class AuthService {
     if (oldToken) {
       LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
       let fakeOldResponse = {};
+
       fakeOldResponse[config.accessTokenProp] = oldToken;
       this.setResponseObject(fakeOldResponse);
       authentication.storage.remove(oldStorageKey);
@@ -75,9 +77,9 @@ export class AuthService {
   /**
    * The handler used for storage events. Detects and handles authentication changes in other tabs/windows
    *
-   * @param {StorageEvent}
+   * @param {StorageEvent} event StorageEvent
    */
-  storageEventHandler = event => {
+  storageEventHandler = (event: StorageEvent) => {
     if (event.key !== this.config.storageKey) {
       return;
     }
@@ -93,6 +95,7 @@ export class AuthService {
     }
 
     let wasAuthenticated = this.authenticated;
+
     this.authentication.responseAnalyzed = false;
     this.updateAuthenticated();
 
@@ -101,13 +104,12 @@ export class AuthService {
     }
   }
 
-
   /**
    * Getter: The configured client for all aurelia-authentication requests
    *
    * @return {HttpClient}
    */
-  get client() {
+  get client(): HttpClient {
     return this.config.client;
   }
 
@@ -117,8 +119,9 @@ export class AuthService {
    * @return {boolean}
    * @deprecated
    */
-  get auth() {
+  get auth(): Authentication {
     LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
+
     return this.authentication;
   }
 
@@ -127,7 +130,7 @@ export class AuthService {
    *
    * @param  {Number} ttl  Timeout time in ms
    */
-  setTimeout(ttl) {
+  setTimeout(ttl: Number) {
     this.clearTimeout();
 
     this.timeoutID = PLATFORM.global.setTimeout(() => {
@@ -160,9 +163,9 @@ export class AuthService {
   /**
    * Stores and analyses the servers responseObject. Sets login status and timeout
    *
-   * @param {Object} response The servers response as GOJO
+   * @param {{}} response The servers response as object
    */
-  setResponseObject(response) {
+  setResponseObject(response: {}) {
     this.authentication.setResponseObject(response);
 
     this.updateAuthenticated();
@@ -175,6 +178,7 @@ export class AuthService {
     this.clearTimeout();
 
     let wasAuthenticated = this.authenticated;
+
     this.authenticated = this.authentication.isAuthenticated();
 
     if (this.authenticated && !Number.isNaN(this.authentication.exp)) {
@@ -192,32 +196,35 @@ export class AuthService {
   /**
    * Get current user profile from server
    *
-   * @param {[{}|number|string]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
+   * @param {({}|Number|String)} [criteriaOrId] (optional) An object or a Number|String converted to {id: criteriaOrId}
+   * @returns {Promise<any>} The server response
    *
-   * @return {Promise<response>}
+   * @memberOf AuthService
    */
-  getMe(criteriaOrId) {
+  getMe(criteriaOrId?: {}|Number|String): Promise<any> {
     if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
       criteriaOrId = {id: criteriaOrId};
     }
+
     return this.client.find(this.config.joinBase(this.config.profileUrl), criteriaOrId);
   }
 
   /**
    * Send current user profile update to server
-
-   * @param {any}                 Request body with data.
-   * @param {[{}|Number|String]}  [criteriaOrId object or a Number|String converted to {id: criteriaOrId}]
    *
-   * @return {Promise<response>}
+   * @param {{}}                body           Request body with data.
+   * @param {{}|Number|String}  [criteriaOrId] (optional) An object or a Number|String converted to {id: criteriaOrId}
+   *
+   * @return {Promise<any>} The server response
    */
-  updateMe(body, criteriaOrId) {
+  updateMe(body: {}, criteriaOrId?: {}|Number|String): Promise<any> {
     if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
-      criteriaOrId = { id: criteriaOrId };
+      criteriaOrId = {id: criteriaOrId};
     }
     if (this.config.profileMethod === 'put') {
       return this.client.update(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
     }
+
     return this.client.patch(this.config.joinBase(this.config.profileUrl), criteriaOrId, body);
   }
 
@@ -226,12 +233,12 @@ export class AuthService {
    *
    * @returns {String} Current accessToken
    */
-  getAccessToken() {
+  getAccessToken(): String {
     return this.authentication.getAccessToken();
   }
 
   @deprecated({message: 'Use .getAccessToken() instead.'})
-  getCurrentToken() {
+  getCurrentToken(): String {
     return this.getAccessToken();
   }
 
@@ -240,7 +247,7 @@ export class AuthService {
    *
    * @returns {String} Current refreshToken
    */
-  getRefreshToken() {
+  getRefreshToken(): String {
     return this.authentication.getRefreshToken();
   }
 
@@ -249,7 +256,7 @@ export class AuthService {
    *
    * @returns {String} Current idToken
    */
-  getIdToken() {
+  getIdToken(): String {
     return this.authentication.getIdToken();
   }
 
@@ -258,7 +265,7 @@ export class AuthService {
   *
   * @returns {Boolean} For Non-JWT and unexpired JWT: true, else: false
   */
-  isAuthenticated() {
+  isAuthenticated(): Boolean {
     this.authentication.responseAnalyzed = false;
 
     let authenticated = this.authentication.isAuthenticated();
@@ -267,7 +274,8 @@ export class AuthService {
     if (!authenticated
       && this.config.autoUpdateToken
       && this.authentication.getAccessToken()
-      && this.authentication.getRefreshToken()) {
+      && this.authentication.getRefreshToken()
+    ) {
       this.updateToken();
       authenticated = true;
     }
@@ -280,7 +288,7 @@ export class AuthService {
    *
    * @returns {Number} Exp for JWT tokens, NaN for all other tokens
    */
-  getExp() {
+  getExp(): Number {
     return this.authentication.getExp();
   }
 
@@ -289,7 +297,7 @@ export class AuthService {
    *
    * @returns {Number} Ttl for JWT tokens, NaN for all other tokens
    */
-  getTtl() {
+  getTtl(): Number {
     return this.authentication.getTtl();
   }
 
@@ -298,25 +306,25 @@ export class AuthService {
   *
   * @returns {Boolean} Returns (ttl > 0)? for JWT, undefined other tokens
   */
-  isTokenExpired() {
+  isTokenExpired(): Boolean {
     return this.authentication.isTokenExpired();
   }
 
   /**
   * Get payload from tokens
   *
-  * @returns {Object} Payload for JWT, else null
+  * @returns {{}} Payload for JWT, else null
   */
-  getTokenPayload() {
+  getTokenPayload(): {} {
     return this.authentication.getPayload();
   }
 
   /**
-   * Request new accesss token
+   * Request new access token
    *
-   * @returns {Promise<Response>} Requests new token. can be called multiple times
+   * @returns {Promise<any>} Requests new token. can be called multiple times
    */
-  updateToken() {
+  updateToken(): Promise<any> {
     if (!this.authentication.getRefreshToken()) {
       return Promise.reject(new Error('refreshToken not set'));
     }
@@ -324,7 +332,7 @@ export class AuthService {
     if (this.authentication.updateTokenCallstack.length === 0) {
       let content = {
         grant_type: 'refresh_token',
-        client_id: this.config.clientId ? this.config.clientId : undefined
+        client_id : this.config.clientId ? this.config.clientId : undefined
       };
 
       content[this.config.refreshTokenSubmitProp] = this.authentication.getRefreshToken();
@@ -354,35 +362,38 @@ export class AuthService {
    * @param {[{}]}        options                  [options]
    * @param {[String]}    redirectUri              [optional redirectUri overwrite]
    *
-   * @return {Promise<Object>|Promise<Error>}     Server response as Object
+   * @return {Promise<any>} Server response as Object
    */
-  signup(displayNameOrCredentials, emailOrOptions, passwordOrRedirectUri, options, redirectUri) {
-    let content;
+  signup(displayNameOrCredentials: String|{}, emailOrOptions?: String|{}, passwordOrRedirectUri?: String, options?: {}, redirectUri?: String): Promise<any> {
+    let normalized = {};
 
-    if (typeof arguments[0] === 'object') {
-      content     = arguments[0];
-      options     = arguments[1];
-      redirectUri = arguments[2];
+    if (typeof displayNameOrCredentials === 'object') {
+      normalized.credentials = displayNameOrCredentials;
+      normalized.options     = emailOrOptions;
+      normalized.redirectUri = passwordOrRedirectUri;
     } else {
-      content = {
+      normalized.credentials = {
         'displayName': displayNameOrCredentials,
-        'email': emailOrOptions,
-        'password': passwordOrRedirectUri
+        'email'      : emailOrOptions,
+        'password'   : passwordOrRedirectUri
       };
+      normalized.options     = options;
+      normalized.redirectUri = redirectUri;
     }
-    return this.client.post(this.config.joinBase(this.config.signupUrl), content, options)
+
+    return this.client.post(this.config.joinBase(this.config.signupUrl), normalized.credentials, normalized.options)
       .then(response => {
         if (this.config.loginOnSignup) {
           this.setResponseObject(response);
         }
-        this.authentication.redirect(redirectUri, this.config.signupRedirect);
+        this.authentication.redirect(normalized.redirectUri, this.config.signupRedirect);
 
         return response;
       });
   }
 
   /**
-   * login locally. Redirect depending on config
+   * Login locally. Redirect depending on config
    *
    * @param {[String]|{}} emailOrCredentials      email | object with signup data.
    * @param {[String]}    [passwordOrOptions]     [password | options for post request]
@@ -391,45 +402,46 @@ export class AuthService {
    *
    * @return {Promise<Object>|Promise<Error>}    Server response as Object
    */
-  login(emailOrCredentials, passwordOrOptions, optionsOrRedirectUri, redirectUri) {
-    let content;
+  login(emailOrCredentials: String|{}, passwordOrOptions?: String, optionsOrRedirectUri?: {}, redirectUri?: String): Promise<any> {
+    let normalized = {};
 
-    if (typeof arguments[0] === 'object') {
-      content              = arguments[0];
-      optionsOrRedirectUri = arguments[1];
-      redirectUri          = arguments[2];
+    if (typeof emailOrCredentials === 'object') {
+      normalized.credentials = emailOrCredentials;
+      normalized.options     = passwordOrOptions;
+      normalized.redirectUri = optionsOrRedirectUri;
     } else {
-      content = {
-        'email': emailOrCredentials,
+      normalized.credentials = {
+        'email'   : emailOrCredentials,
         'password': passwordOrOptions
       };
-      optionsOrRedirectUri = optionsOrRedirectUri;
+      normalized.options     = optionsOrRedirectUri;
+      normalized.redirectUri = redirectUri;
     }
 
     if (this.config.clientId) {
-      content.client_id = this.config.clientId;
+      normalized.credentials.client_id = this.config.clientId;
     }
 
-    return this.client.post(this.config.joinBase(this.config.loginUrl), content, optionsOrRedirectUri)
+    return this.client.post(this.config.joinBase(this.config.loginUrl), normalized.credentials, normalized.options)
       .then(response => {
         this.setResponseObject(response);
 
-        this.authentication.redirect(redirectUri, this.config.loginRedirect);
+        this.authentication.redirect(normalized.redirectUri, this.config.loginRedirect);
 
         return response;
       });
   }
 
   /**
-   * logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
+   * Logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
    *
    * @param {[String]}    [redirectUri]                     [optional redirectUri overwrite]
    * @param {[String]}    [query]                           [optional query]
    * @param {[String]}    [name]                            [optional name Name of the provider]
    *
-   * @return {Promise<>|Promise<Object>|Promise<Error>}     Server response as Object
+   * @return {Promise<any>}     Server response as Object
    */
-  logout(redirectUri, query, name) {
+  logout(redirectUri?: String, query?: String, name?: String): Promise<any> {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
 
@@ -446,16 +458,18 @@ export class AuthService {
         return this.authentication.logout(name)
           .then(logoutResponse => {
             let stateValue = this.authentication.storage.get(name + '_state');
+
             if (logoutResponse.state !== stateValue) {
               return Promise.reject('OAuth2 response state value differs');
             }
+
             return localLogout(logoutResponse);
           });
       }
     } else {
-      return (this.config.logoutUrl
+      return this.config.logoutUrl
         ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout)
-        : localLogout());
+        : localLogout();
     }
   }
 
@@ -466,9 +480,9 @@ export class AuthService {
    * @param {[String]}  [redirectUri] [optional redirectUri overwrite]
    * @param {[{}]}      [userData]    [optional userData for the local authentication server]
    *
-   * @return {Promise<Object>|Promise<Error>}     Server response as Object
+   * @return {Promise<any>} Server response as Object
    */
-  authenticate(name, redirectUri, userData = {}) {
+  authenticate(name: String, redirectUri?: String, userData?: {}): Promise<any> {
     return this.authentication.authenticate(name, userData)
       .then(response => {
         this.setResponseObject(response);
@@ -482,12 +496,14 @@ export class AuthService {
   /**
    * Unlink third-party
    *
-   * @param {String}      name                  Name of the provider
+   * @param {String}    name          Name of the provider
+   * @param {[String]}  [redirectUri] [optional redirectUri overwrite]
    *
-   * @return {Promise<Object>|Promise<Error>}  Server response as Object
+   * @return {Promise<any>}  Server response as Object
    */
-  unlink(name, redirectUri) {
+  unlink(name: String, redirectUri?: String): Promise<any> {
     const unlinkUrl = this.config.joinBase(this.config.unlinkUrl) + name;
+
     return this.client.request(this.config.unlinkMethod, unlinkUrl)
       .then(response => {
         this.authentication.redirect(redirectUri);

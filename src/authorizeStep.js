@@ -5,7 +5,7 @@ import {AuthService} from './authService';
 
 @inject(AuthService)
 export class AuthorizeStep {
-  constructor(authService) {
+  constructor(authService: AuthService) {
     LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticateStep instead.');
 
     this.authService = authService;
@@ -20,7 +20,7 @@ export class AuthorizeStep {
         return next.cancel(new Redirect(loginRoute));
       }
     } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
-      return next.cancel(new Redirect( this.authService.config.loginRedirect ));
+      return next.cancel(new Redirect(this.authService.config.loginRedirect));
     }
 
     return next();

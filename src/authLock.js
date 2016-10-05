@@ -6,25 +6,25 @@ import {BaseConfig} from './baseConfig';
 
 @inject(Storage, BaseConfig)
 export class AuthLock {
-  constructor(storage, config) {
-    this.storage      = storage;
-    this.config       = config;
-    this.defaults     = {
-      name: null,
-      state: null,
-      scope: null,
+  constructor(storage: Storage, config: BaseConfig) {
+    this.storage  = storage;
+    this.config   = config;
+    this.defaults = {
+      name          : null,
+      state         : null,
+      scope         : null,
       scopeDelimiter: ' ',
-      redirectUri: null,
-      clientId: null,
-      clientDomain: null,
-      display: 'popup',
-      lockOptions: {},
-      popupOptions: null,
-      responseType: 'token'
+      redirectUri   : null,
+      clientId      : null,
+      clientDomain  : null,
+      display       : 'popup',
+      lockOptions   : {},
+      popupOptions  : null,
+      responseType  : 'token'
     };
   }
 
-  open(options, userData) {
+  open(options: {}, userData?: {}): Promise<any> {
     // check pre-conditions
     if (typeof PLATFORM.global.Auth0Lock !== 'function') {
       throw new Error('Auth0Lock was not found in global scope. Please load it before using this provider.');

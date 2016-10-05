@@ -4,7 +4,7 @@ import {AuthService} from './authService';
 
 @inject(AuthService)
 export class AuthenticateStep {
-  constructor(authService) {
+  constructor(authService: AuthService) {
     this.authService = authService;
   }
 
@@ -17,7 +17,7 @@ export class AuthenticateStep {
         return next.cancel(new Redirect(loginRoute));
       }
     } else if (isLoggedIn && routingContext.getAllInstructions().some(route => route.fragment === loginRoute)) {
-      return next.cancel(new Redirect( this.authService.config.loginRedirect ));
+      return next.cancel(new Redirect(this.authService.config.loginRedirect));
     }
 
     return next();

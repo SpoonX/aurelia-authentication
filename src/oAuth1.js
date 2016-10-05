@@ -7,20 +7,20 @@ import {BaseConfig} from './baseConfig';
 
 @inject(Storage, Popup, BaseConfig)
 export class OAuth1 {
-  constructor(storage, popup, config) {
+  constructor(storage: Storage, popup: Popup, config: BaseConfig) {
     this.storage  = storage;
     this.config   = config;
     this.popup    = popup;
     this.defaults = {
-      url: null,
-      name: null,
-      popupOptions: null,
-      redirectUri: null,
+      url                  : null,
+      name                 : null,
+      popupOptions         : null,
+      redirectUri          : null,
       authorizationEndpoint: null
     };
   }
 
-  open(options, userData) {
+  open(options: {}, userData: {}): Promise<any> {
     const provider  = extend(true, {}, this.defaults, options);
     const serverUrl = this.config.joinBase(provider.url);
 
@@ -46,7 +46,7 @@ export class OAuth1 {
       });
   }
 
-  exchangeForToken(oauthData, userData, provider) {
+  exchangeForToken(oauthData: {}, userData: {}, provider: string): Promise<any> {
     const data        = extend(true, {}, userData, oauthData);
     const serverUrl   = this.config.joinBase(provider.url);
     const credentials = this.config.withCredentials ? 'include' : 'same-origin';

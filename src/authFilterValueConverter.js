@@ -1,3 +1,5 @@
+import {RouteConfig} from 'aurelia-router';
+
 export class AuthFilterValueConverter {
   /**
    * route toView predictator on route.config.auth === isAuthenticated

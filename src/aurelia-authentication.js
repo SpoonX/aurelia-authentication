@@ -4,6 +4,7 @@ import {Config, Rest} from 'aurelia-api';
 import {BaseConfig} from './baseConfig';
 import {FetchConfig} from './fetchClientConfig';
 import * as LogManager from 'aurelia-logging';
+import {Container} from 'aurelia-dependency-injection';
 
 // added for bundling
 import {AuthFilterValueConverter} from './authFilterValueConverter'; // eslint-disable-line no-unused-vars

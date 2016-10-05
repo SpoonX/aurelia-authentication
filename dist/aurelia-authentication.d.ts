@@ -1,11 +1,11 @@
 import * as LogManager from 'aurelia-logging';
 import {PLATFORM,DOM} from 'aurelia-pal';
 import {parseQueryString,join,buildQueryString} from 'aurelia-path';
-import {inject} from 'aurelia-dependency-injection';
+import {inject,Container} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {BindingSignaler} from 'aurelia-templating-resources';
-import {Redirect} from 'aurelia-router';
+import {Redirect,RouteConfig} from 'aurelia-router';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Config,Rest} from 'aurelia-api';
 
@@ -657,7 +657,7 @@ export declare class AuthenticatedFilterValueConverter {
      * @param  {[Boolean]}    [isAuthenticated] optional isAuthenticated value. default: this.authService.authenticated
      * @return {Boolean}      show/hide element
      */
-  toView(routes: RouteConfig, isAuthenticated?: Boolean): Booelan;
+  toView(routes: RouteConfig, isAuthenticated?: Boolean): Boolean;
 }
 export declare class AuthenticatedValueConverter {
   constructor(authService?: any);

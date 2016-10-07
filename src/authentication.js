@@ -186,9 +186,9 @@ export class Authentication {
     } catch (_) {} // eslint-disable-line no-empty
 
     // get exp either with from jwt or with supplied function
-    this.exp = typeof this.config.getExpirationDateFromResponse === 'function'
-            ? this.config.getExpirationDateFromResponse(response)
-            : (this.payload && parseInt(this.payload.exp, 10)) ||  NaN;
+    this.exp = parseInt((typeof this.config.getExpirationDateFromResponse === 'function'
+                        ? this.config.getExpirationDateFromResponse(response)
+                        : this.payload && this.payload.exp), 10) || NaN;
 
     this.responseAnalyzed = true;
 

@@ -80,7 +80,7 @@ export class AuthService {
    * @param {StorageEvent} event StorageEvent
    */
   storageEventHandler = (event: StorageEvent) => {
-    if (event.key !== this.config.storageKey) {
+    if (event.key !== this.config.storageKey || event.newValue === event.oldValue) {
       return;
     }
 

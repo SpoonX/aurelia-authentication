@@ -99,9 +99,14 @@ export class AuthService {
     this.authentication.responseAnalyzed = false;
     this.updateAuthenticated();
 
-    if (this.config.storageChangedRedirect && wasAuthenticated !== this.authenticated) {
-      PLATFORM.location.assign(this.config.storageChangedRedirect);
+    if (wasAuthenticated === this.authenticated) {
+      return;
     }
+
+    if (this.config.storageChangedRedirect) {
+      PLATFORM.location.href = this.config.storageChangedRedirect;
+    }
+    PLATFORM.location.reload();
   }
 
   /**

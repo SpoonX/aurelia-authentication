@@ -73,6 +73,8 @@ gulp.task('prepare-release', function(callback) {
     'build',
     'lint',
     'bump-version',
+    'update-package-json',
+    'update-bower-json',
     //'doc',
     'changelog',
     callback

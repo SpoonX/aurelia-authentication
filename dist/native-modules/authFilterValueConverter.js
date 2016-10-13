@@ -1,5 +1,7 @@
 
 
+import { RouteConfig } from 'aurelia-router';
+
 export var AuthFilterValueConverter = function () {
   function AuthFilterValueConverter() {
     

@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-dependency-injection', './aurelia-authentication'], function (exports, _aureliaDependencyInjection, _aureliaAuthentication) {
+define(['exports', 'aurelia-dependency-injection', './aurelia-authentication', 'aurelia-router'], function (exports, _aureliaDependencyInjection, _aureliaAuthentication, _aureliaRouter) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {

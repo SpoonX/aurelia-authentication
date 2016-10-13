@@ -7,7 +7,7 @@ exports.FetchConfig = exports.AuthorizeStep = exports.AuthenticateStep = exports
 
 var _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _class5, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _class6, _desc, _value, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class11, _dec15, _class12, _dec16, _class13;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -1077,7 +1077,7 @@ var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjectio
     this.timeoutID = 0;
 
     this.storageEventHandler = function (event) {
-      if (event.key !== _this8.config.storageKey) {
+      if (event.key !== _this8.config.storageKey || event.newValue === event.oldValue) {
         return;
       }
 
@@ -1094,9 +1094,14 @@ var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjectio
       _this8.authentication.responseAnalyzed = false;
       _this8.updateAuthenticated();
 
-      if (_this8.config.storageChangedRedirect && wasAuthenticated !== _this8.authenticated) {
-        _aureliaPal.PLATFORM.location.assign(_this8.config.storageChangedRedirect);
+      if (wasAuthenticated === _this8.authenticated) {
+        return;
       }
+
+      if (_this8.config.storageChangedRedirect) {
+        _aureliaPal.PLATFORM.location.href = _this8.config.storageChangedRedirect;
+      }
+      _aureliaPal.PLATFORM.location.reload();
     };
 
     this.authentication = authentication;

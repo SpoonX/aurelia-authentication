@@ -123,6 +123,8 @@ platform = 'browser';
 storage = 'localStorage';
 // The key used for storing the authentication response locally
 storageKey = 'aurelia_authentication';
+// full page reload if authorization changed in another tab
+storageChangedReload = false;
 // optional function to extract the expiration date. takes the server response as parameter
 // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in * 1000;
 getExpirationDateFromResponse = null;

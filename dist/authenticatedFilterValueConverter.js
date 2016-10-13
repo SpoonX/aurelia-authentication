@@ -1,5 +1,6 @@
 import {inject} from 'aurelia-dependency-injection';
 import {AuthService} from './aurelia-authentication';
+import {RouteConfig} from 'aurelia-router';
 
 @inject(AuthService)
 export class AuthenticatedFilterValueConverter {
@@ -13,7 +14,7 @@ export class AuthenticatedFilterValueConverter {
    * @param  {[Boolean]}    [isAuthenticated] optional isAuthenticated value. default: this.authService.authenticated
    * @return {Boolean}      show/hide element
    */
-  toView(routes: RouteConfig, isAuthenticated: Boolean = this.authService.authenticated): Booelan {
+  toView(routes: RouteConfig, isAuthenticated: Boolean = this.authService.authenticated): Boolean {
     return routes.filter(route => typeof route.config.auth !== 'boolean' || route.config.auth === isAuthenticated);
   }
 }

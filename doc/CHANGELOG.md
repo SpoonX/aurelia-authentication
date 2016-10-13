@@ -1,3 +1,18 @@
+<a name="3.0.1"></a>
+## [3.0.1](https://github.com/spoonx/aurelia-authentication/compare/3.0.0...v3.0.1) (2016-10-13)
+
+
+### Bug Fixes
+
+* **authServive:** fix ie11 storage event loop ([b9ce956](https://github.com/spoonx/aurelia-authentication/commit/b9ce956))
+
+
+### Features
+
+* **authService:** ensure page reload after storage events ([7125cc5](https://github.com/spoonx/aurelia-authentication/commit/7125cc5))
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/spoonx/aurelia-authentication/compare/3.0.0-rc10...v3.0.0) (2016-10-05)
 

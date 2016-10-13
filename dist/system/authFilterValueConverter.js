@@ -1,14 +1,16 @@
 'use strict';
 
-System.register([], function (_export, _context) {
+System.register(['aurelia-router'], function (_export, _context) {
   "use strict";
 
-  var AuthFilterValueConverter;
+  var RouteConfig, AuthFilterValueConverter;
 
   
 
   return {
-    setters: [],
+    setters: [function (_aureliaRouter) {
+      RouteConfig = _aureliaRouter.RouteConfig;
+    }],
     execute: function () {
       _export('AuthFilterValueConverter', AuthFilterValueConverter = function () {
         function AuthFilterValueConverter() {

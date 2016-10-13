@@ -1,9 +1,9 @@
 'use strict';
 
-System.register(['aurelia-dependency-injection', './aurelia-authentication'], function (_export, _context) {
+System.register(['aurelia-dependency-injection', './aurelia-authentication', 'aurelia-router'], function (_export, _context) {
   "use strict";
 
-  var inject, AuthService, _dec, _class, AuthenticatedFilterValueConverter;
+  var inject, AuthService, RouteConfig, _dec, _class, AuthenticatedFilterValueConverter;
 
   
 
@@ -12,6 +12,8 @@ System.register(['aurelia-dependency-injection', './aurelia-authentication'], fu
       inject = _aureliaDependencyInjection.inject;
     }, function (_aureliaAuthentication) {
       AuthService = _aureliaAuthentication.AuthService;
+    }, function (_aureliaRouter) {
+      RouteConfig = _aureliaRouter.RouteConfig;
     }],
     execute: function () {
       _export('AuthenticatedFilterValueConverter', AuthenticatedFilterValueConverter = (_dec = inject(AuthService), _dec(_class = function () {

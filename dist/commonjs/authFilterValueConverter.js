@@ -3,6 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.AuthFilterValueConverter = undefined;
+
+var _aureliaRouter = require('aurelia-router');
 
 
 

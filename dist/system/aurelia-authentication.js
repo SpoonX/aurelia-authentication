@@ -3,7 +3,7 @@
 System.register(["./authFilterValueConverter", "./authenticatedValueConverter", "./authenticatedFilterValueConverter", "extend", "aurelia-logging", "jwt-decode", "aurelia-pal", "aurelia-path", "aurelia-dependency-injection", "aurelia-metadata", "aurelia-event-aggregator", "aurelia-templating-resources", "aurelia-router", "aurelia-fetch-client", "aurelia-api"], function (_export, _context) {
   "use strict";
 
-  var AuthFilterValueConverter, AuthenticatedValueConverter, AuthenticatedFilterValueConverter, extend, LogManager, jwtDecode, PLATFORM, DOM, parseQueryString, join, buildQueryString, inject, deprecated, EventAggregator, BindingSignaler, Redirect, HttpClient, Config, Rest, _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _class5, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _class6, _desc, _value, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class11, _dec15, _class12, _dec16, _class13, _typeof, _createClass, Popup, buildPopupWindowOptions, parseUrl, BaseConfig, Storage, AuthLock, OAuth1, OAuth2, Authentication, AuthService, AuthenticateStep, AuthorizeStep, FetchConfig;
+  var AuthFilterValueConverter, AuthenticatedValueConverter, AuthenticatedFilterValueConverter, extend, LogManager, jwtDecode, PLATFORM, DOM, parseQueryString, join, buildQueryString, inject, Container, deprecated, EventAggregator, BindingSignaler, Redirect, HttpClient, Config, Rest, _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _class5, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _class6, _desc, _value, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class11, _dec15, _class12, _dec16, _class13, _typeof, _createClass, Popup, buildPopupWindowOptions, parseUrl, BaseConfig, Storage, AuthLock, OAuth1, OAuth2, Authentication, AuthService, AuthenticateStep, AuthorizeStep, FetchConfig;
 
   function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
     var desc = {};
@@ -133,6 +133,7 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
       buildQueryString = _aureliaPath.buildQueryString;
     }, function (_aureliaDependencyInjection) {
       inject = _aureliaDependencyInjection.inject;
+      Container = _aureliaDependencyInjection.Container;
     }, function (_aureliaMetadata) {
       deprecated = _aureliaMetadata.deprecated;
     }, function (_aureliaEventAggregator) {
@@ -151,7 +152,7 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
       _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
         return typeof obj;
       } : function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
       };
 
       _createClass = function () {
@@ -1171,7 +1172,7 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
           this.timeoutID = 0;
 
           this.storageEventHandler = function (event) {
-            if (event.key !== _this8.config.storageKey) {
+            if (event.key !== _this8.config.storageKey || event.newValue === event.oldValue) {
               return;
             }
 
@@ -1188,9 +1189,14 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
             _this8.authentication.responseAnalyzed = false;
             _this8.updateAuthenticated();
 
-            if (_this8.config.storageChangedRedirect && wasAuthenticated !== _this8.authenticated) {
-              PLATFORM.location.assign(_this8.config.storageChangedRedirect);
+            if (wasAuthenticated === _this8.authenticated) {
+              return;
             }
+
+            if (_this8.config.storageChangedRedirect) {
+              PLATFORM.location.href = _this8.config.storageChangedRedirect;
+            }
+            PLATFORM.location.reload();
           };
 
           this.authentication = authentication;

@@ -5,6 +5,7 @@ import {deprecated} from 'aurelia-metadata';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {BindingSignaler} from 'aurelia-templating-resources';
 import * as LogManager from 'aurelia-logging';
+import {Rest} from 'aurelia-api';
 import {Authentication} from './authentication';
 import {BaseConfig} from './baseConfig';
 
@@ -18,11 +19,11 @@ export class AuthService {
   authentication: Authentication;
 
   /**
-   * The Config instance that contains the current configuration setting
+   * The BaseConfig instance that contains the current configuration setting
    *
-   * @param  {Config}
+   * @param  {BaseConfig}
    */
-  config: Config;
+  config: BaseConfig;
 
   /**
    * The current login status
@@ -110,11 +111,11 @@ export class AuthService {
   }
 
   /**
-   * Getter: The configured client for all aurelia-authentication requests
+   * Getter: The configured Rest client for all aurelia-authentication requests
    *
-   * @return {HttpClient}
+   * @return {Rest}
    */
-  get client(): HttpClient {
+  get client(): Rest {
     return this.config.client;
   }
 

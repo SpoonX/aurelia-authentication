@@ -107,7 +107,10 @@ export class AuthService {
     if (this.config.storageChangedRedirect) {
       PLATFORM.location.href = this.config.storageChangedRedirect;
     }
-    PLATFORM.location.reload();
+
+    if (this.config.storageChangedReload) {
+      PLATFORM.location.reload();
+    }
   }
 
   /**

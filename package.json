@@ -25,10 +25,9 @@
   "scripts": {
     "test": "gulp test",
     "build": "gulp build",
-    "gitpublish": "git add -A dist doc/CHANGELOG.md bower.json && git push && git push --tags",
     "preversion": "npm test",
-    "version": "npm run build && gulp prepare-package",
-    "postpublish": "npm run gitpublish"
+    "version": "npm run build && gulp prepare-package && git add -A dist doc/CHANGELOG.md bower.json",
+    "postpublish": "git push && git push --tags"
   },
   "jspm": {
     "registry": "npm",

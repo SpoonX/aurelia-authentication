@@ -23,7 +23,11 @@
     "url": "https://github.com/spoonx/aurelia-authentication"
   },
   "scripts": {
-    "test": "./node_modules/.bin/gulp test"
+    "test": "gulp test",
+    "build": "gulp build",
+    "preversion": "npm test",
+    "version": "npm run build && gulp prepare-package && git add -A dist doc/CHANGELOG.md bower.json",
+    "postpublish": "git push && git push --tags"
   },
   "jspm": {
     "registry": "npm",
@@ -84,6 +88,7 @@
     "jwt-decode": "^2.0.0"
   },
   "devDependencies": {
+    "gulp-json-format": "^1.0.0",
     "spoonx-tools": "^0.3.0"
   },
   "aurelia": {

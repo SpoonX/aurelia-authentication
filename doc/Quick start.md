@@ -36,7 +36,8 @@ export default {
     profileUrl: 'me',
     unlinkUrl: 'me/unlink',
     loginOnSignup: false,
-    expiredRedirect: 1, // redirect to logoutRedirect after token expiration
+    storageChangedReload: true,    // ensure secondary tab reloading after auth status changes
+    expiredRedirect: 1,            // redirect to logoutRedirect after token expiration
     providers: {
         google: {
           url: 'google',

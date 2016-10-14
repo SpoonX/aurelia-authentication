@@ -28,16 +28,16 @@ export class AuthService {
   /**
    * The current login status
    *
-   * @param  {Boolean}
+   * @param  {boolean}
    */
-  authenticated: Boolean  = false;
+  authenticated: boolean  = false;
 
   /**
    * The currently set timeoutID
    *
-   * @param  {Number}
+   * @param  {number}
    */
-  timeoutID: Number = 0;
+  timeoutID: number = 0;
 
   /**
    *  Create an AuthService instance
@@ -137,9 +137,9 @@ export class AuthService {
   /**
    * Sets the login timeout
    *
-   * @param  {Number} ttl  Timeout time in ms
+   * @param  {number} ttl  Timeout time in ms
    */
-  setTimeout(ttl: Number) {
+  setTimeout(ttl: number) {
     this.clearTimeout();
 
     this.timeoutID = PLATFORM.global.setTimeout(() => {
@@ -205,12 +205,12 @@ export class AuthService {
   /**
    * Get current user profile from server
    *
-   * @param {({}|Number|String)} [criteriaOrId] (optional) An object or a Number|String converted to {id: criteriaOrId}
+   * @param {({}|number|string)} [criteriaOrId] (optional) An object or a number|string converted to {id: criteriaOrId}
    * @returns {Promise<any>} The server response
    *
    * @memberOf AuthService
    */
-  getMe(criteriaOrId?: {}|Number|String): Promise<any> {
+  getMe(criteriaOrId?: {}|number|string): Promise<any> {
     if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
       criteriaOrId = {id: criteriaOrId};
     }
@@ -222,11 +222,11 @@ export class AuthService {
    * Send current user profile update to server
    *
    * @param {{}}                body           Request body with data.
-   * @param {{}|Number|String}  [criteriaOrId] (optional) An object or a Number|String converted to {id: criteriaOrId}
+   * @param {{}|number|string}  [criteriaOrId] (optional) An object or a number|string converted to {id: criteriaOrId}
    *
    * @return {Promise<any>} The server response
    */
-  updateMe(body: {}, criteriaOrId?: {}|Number|String): Promise<any> {
+  updateMe(body: {}, criteriaOrId?: {}|number|string): Promise<any> {
     if (typeof criteriaOrId === 'string' || typeof criteriaOrId === 'number') {
       criteriaOrId = {id: criteriaOrId};
     }
@@ -240,41 +240,41 @@ export class AuthService {
   /**
    * Get accessToken from storage
    *
-   * @returns {String} Current accessToken
+   * @returns {string} Current accessToken
    */
-  getAccessToken(): String {
+  getAccessToken(): string {
     return this.authentication.getAccessToken();
   }
 
   @deprecated({message: 'Use .getAccessToken() instead.'})
-  getCurrentToken(): String {
+  getCurrentToken(): string {
     return this.getAccessToken();
   }
 
   /**
    * Get refreshToken from storage
    *
-   * @returns {String} Current refreshToken
+   * @returns {string} Current refreshToken
    */
-  getRefreshToken(): String {
+  getRefreshToken(): string {
     return this.authentication.getRefreshToken();
   }
 
   /**
    * Get idToken from storage
    *
-   * @returns {String} Current idToken
+   * @returns {string} Current idToken
    */
-  getIdToken(): String {
+  getIdToken(): string {
     return this.authentication.getIdToken();
   }
 
  /**
   * Gets authentication status from storage
   *
-  * @returns {Boolean} For Non-JWT and unexpired JWT: true, else: false
+  * @returns {boolean} For Non-JWT and unexpired JWT: true, else: false
   */
-  isAuthenticated(): Boolean {
+  isAuthenticated(): boolean {
     this.authentication.responseAnalyzed = false;
 
     let authenticated = this.authentication.isAuthenticated();
@@ -295,27 +295,27 @@ export class AuthService {
   /**
    * Gets exp in milliseconds
    *
-   * @returns {Number} Exp for JWT tokens, NaN for all other tokens
+   * @returns {number} Exp for JWT tokens, NaN for all other tokens
    */
-  getExp(): Number {
+  getExp(): number {
     return this.authentication.getExp();
   }
 
   /**
    * Gets ttl in seconds
    *
-   * @returns {Number} Ttl for JWT tokens, NaN for all other tokens
+   * @returns {number} Ttl for JWT tokens, NaN for all other tokens
    */
-  getTtl(): Number {
+  getTtl(): number {
     return this.authentication.getTtl();
   }
 
  /**
   * Gets exp from token payload and compares to current time
   *
-  * @returns {Boolean} Returns (ttl > 0)? for JWT, undefined other tokens
+  * @returns {boolean} Returns (ttl > 0)? for JWT, undefined other tokens
   */
-  isTokenExpired(): Boolean {
+  isTokenExpired(): boolean {
     return this.authentication.isTokenExpired();
   }
 
@@ -365,15 +365,15 @@ export class AuthService {
   /**
    * Signup locally. Login and redirect depending on config
    *
-   * @param {String|{}}   displayNameOrCredentials displayName | object with signup data.
-   * @param {[String]|{}} emailOrOptions           [email | options for post request]
-   * @param {[String]}    passwordOrRedirectUri    [password | optional redirectUri overwrite]
+   * @param {string|{}}   displayNameOrCredentials displayName | object with signup data.
+   * @param {[string]|{}} emailOrOptions           [email | options for post request]
+   * @param {[string]}    passwordOrRedirectUri    [password | optional redirectUri overwrite]
    * @param {[{}]}        options                  [options]
-   * @param {[String]}    redirectUri              [optional redirectUri overwrite]
+   * @param {[string]}    redirectUri              [optional redirectUri overwrite]
    *
    * @return {Promise<any>} Server response as Object
    */
-  signup(displayNameOrCredentials: String|{}, emailOrOptions?: String|{}, passwordOrRedirectUri?: String, options?: {}, redirectUri?: String): Promise<any> {
+  signup(displayNameOrCredentials: string|{}, emailOrOptions?: string|{}, passwordOrRedirectUri?: string, options?: {}, redirectUri?: string): Promise<any> {
     let normalized = {};
 
     if (typeof displayNameOrCredentials === 'object') {
@@ -404,14 +404,14 @@ export class AuthService {
   /**
    * Login locally. Redirect depending on config
    *
-   * @param {[String]|{}} emailOrCredentials      email | object with signup data.
-   * @param {[String]}    [passwordOrOptions]     [password | options for post request]
+   * @param {[string]|{}} emailOrCredentials      email | object with signup data.
+   * @param {[string]}    [passwordOrOptions]     [password | options for post request]
    * @param {[{}]}        [optionsOrRedirectUri]  [options | redirectUri overwrite]]
-   * @param {[String]}    [redirectUri]           [optional redirectUri overwrite]
+   * @param {[string]}    [redirectUri]           [optional redirectUri overwrite]
    *
    * @return {Promise<Object>|Promise<Error>}    Server response as Object
    */
-  login(emailOrCredentials: String|{}, passwordOrOptions?: String, optionsOrRedirectUri?: {}, redirectUri?: String): Promise<any> {
+  login(emailOrCredentials: string|{}, passwordOrOptions?: string, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any> {
     let normalized = {};
 
     if (typeof emailOrCredentials === 'object') {
@@ -444,13 +444,13 @@ export class AuthService {
   /**
    * Logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
    *
-   * @param {[String]}    [redirectUri]                     [optional redirectUri overwrite]
-   * @param {[String]}    [query]                           [optional query]
-   * @param {[String]}    [name]                            [optional name Name of the provider]
+   * @param {[string]}    [redirectUri]                     [optional redirectUri overwrite]
+   * @param {[string]}    [query]                           [optional query]
+   * @param {[string]}    [name]                            [optional name Name of the provider]
    *
    * @return {Promise<any>}     Server response as Object
    */
-  logout(redirectUri?: String, query?: String, name?: String): Promise<any> {
+  logout(redirectUri?: string, query?: string, name?: string): Promise<any> {
     let localLogout = response => new Promise(resolve => {
       this.setResponseObject(null);
 
@@ -485,13 +485,13 @@ export class AuthService {
   /**
    * Authenticate with third-party and redirect to redirectUri (if set) or redirectUri of config
    *
-   * @param {String}    name          Name of the provider
-   * @param {[String]}  [redirectUri] [optional redirectUri overwrite]
+   * @param {string}    name          Name of the provider
+   * @param {[string]}  [redirectUri] [optional redirectUri overwrite]
    * @param {[{}]}      [userData]    [optional userData for the local authentication server]
    *
    * @return {Promise<any>} Server response as Object
    */
-  authenticate(name: String, redirectUri?: String, userData?: {}): Promise<any> {
+  authenticate(name: string, redirectUri?: string, userData?: {}): Promise<any> {
     return this.authentication.authenticate(name, userData)
       .then(response => {
         this.setResponseObject(response);
@@ -505,12 +505,12 @@ export class AuthService {
   /**
    * Unlink third-party
    *
-   * @param {String}    name          Name of the provider
-   * @param {[String]}  [redirectUri] [optional redirectUri overwrite]
+   * @param {string}    name          Name of the provider
+   * @param {[string]}  [redirectUri] [optional redirectUri overwrite]
    *
    * @return {Promise<any>}  Server response as Object
    */
-  unlink(name: String, redirectUri?: String): Promise<any> {
+  unlink(name: string, redirectUri?: string): Promise<any> {
     const unlinkUrl = this.config.joinBase(this.config.unlinkUrl) + name;
 
     return this.client.request(this.config.unlinkMethod, unlinkUrl)

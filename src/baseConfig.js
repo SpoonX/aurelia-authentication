@@ -419,7 +419,7 @@ export class BaseConfig {
 /**
  * RandomState
  *
- * @returns {Number}
+ * @returns {number}
  */
 function randomState() {
   let rand = Math.random()

@@ -123,14 +123,14 @@ export class Authentication {
     return this.payload;
   }
 
-  getExp(): Number {
+  getExp(): number {
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
 
     return this.exp;
   }
 
  /* get status from data */
-  getTtl(): Number {
+  getTtl(): number {
     const exp = this.getExp();
 
     return  Number.isNaN(exp) ? NaN : exp - Math.round(new Date().getTime() / 1000);
@@ -245,7 +245,7 @@ export class Authentication {
   /**
    * Authenticate with third-party
    *
-   * @param {String}    name        Name of the provider
+   * @param {string}    name        Name of the provider
    * @param {[{}]}      [userData]  Additional data send to the authentication server
    *
    * @return {Promise<any>} The authentication server response

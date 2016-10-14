@@ -27,7 +27,7 @@
     "build": "gulp build",
     "preversion": "npm test",
     "version": "npm run build && gulp prepare-package && git add -A dist doc/CHANGELOG.md bower.json",
-    "postpublish": "git push && git push --tags"
+    "postpublish": "git push upstream && git push --tags upstream"
   },
   "jspm": {
     "registry": "npm",

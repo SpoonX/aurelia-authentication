@@ -7,8 +7,9 @@ Set your custom configuration. You can find all options and the default values i
 ```js
 /* authConfig.js */
 export default {
-    endpoint: 'auth',             // use 'auth' endpoint for the auth server
-    configureEndpoints: ['auth']  // add Authorization header to 'auth' endpoint
+    endpoint: 'auth',              // use 'auth' endpoint for the auth server
+    configureEndpoints: ['auth'],  // add Authorization header to 'auth' endpoint
+    storageChangedReload: true,    // ensure secondary tab reloading after auth status changes
     facebook: {
         clientId: 'your client id' // set your third-party providers client ids
     }

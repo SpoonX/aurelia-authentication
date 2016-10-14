@@ -6,7 +6,7 @@ import * as LogManager from 'aurelia-logging';
 import jwtDecode from 'jwt-decode';
 import {PLATFORM,DOM} from 'aurelia-pal';
 import {parseQueryString,join,buildQueryString} from 'aurelia-path';
-import {inject} from 'aurelia-dependency-injection';
+import {inject,Container} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {BindingSignaler} from 'aurelia-templating-resources';
@@ -1306,7 +1306,7 @@ export class AuthService {
    * @param {StorageEvent} event StorageEvent
    */
   storageEventHandler = (event: StorageEvent) => {
-    if (event.key !== this.config.storageKey) {
+    if (event.key !== this.config.storageKey || event.newValue === event.oldValue) {
       return;
     }
 
@@ -1325,9 +1325,14 @@ export class AuthService {
     this.authentication.responseAnalyzed = false;
     this.updateAuthenticated();
 
-    if (this.config.storageChangedRedirect && wasAuthenticated !== this.authenticated) {
-      PLATFORM.location.assign(this.config.storageChangedRedirect);
+    if (wasAuthenticated === this.authenticated) {
+      return;
     }
+
+    if (this.config.storageChangedRedirect) {
+      PLATFORM.location.href = this.config.storageChangedRedirect;
+    }
+    PLATFORM.location.reload();
   }
 
   /**

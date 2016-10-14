@@ -146,7 +146,7 @@ export class AuthService {
       if (this.config.autoUpdateToken
         && this.authentication.getAccessToken()
         && this.authentication.getRefreshToken()) {
-        this.updateToken();
+        this.updateToken().catch(error => LogManager.getLogger('authentication').warn(error.message));
 
         return;
       }
@@ -285,7 +285,7 @@ export class AuthService {
       && this.authentication.getAccessToken()
       && this.authentication.getRefreshToken()
     ) {
-      this.updateToken();
+      this.updateToken().catch(error => LogManager.getLogger('authentication').warn(error.message));
       authenticated = true;
     }
 
@@ -353,9 +353,9 @@ export class AuthService {
           this.setResponseObject(response);
           this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
         })
-        .catch(err => {
+        .catch(error => {
           this.setResponseObject(null);
-          this.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
+          this.authentication.resolveUpdateTokenCallstack(Promise.reject(error));
         });
     }
 

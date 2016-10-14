@@ -6,6 +6,41 @@ import {AuthService} from 'aurelia-authentication';
 
 ----------
 
+## Binding signals
+
+----------
+
+### authentication-change
+
+Whenever the authentication status changes, a binding signal 'authentication-change' is emitted.
+
+Example:
+
+```html
+<div>Time: ${logTime | timeConverter & signal:'authentication-change'}</div>
+```
+
+----------
+
+## EventAggregator
+
+----------
+
+### authentication-change
+
+Whenever the authentication status changes, the new status is published with the EventAggregator on the 'authentication-change' channel. 
+
+Example:
+
+```js
+  this.eventAggregator.subscribe('authentication-change', authenticated => {
+    // your code
+  });
+```
+
+----------
+
+
 ## Properties
 
 ----------

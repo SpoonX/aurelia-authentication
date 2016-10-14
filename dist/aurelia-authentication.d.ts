@@ -174,15 +174,15 @@ export declare class BaseConfig {
   // full page reload if authorization changed in another tab (recommended to set it to 'true')
   storageChangedReload: any;
   
-  // optional function to extract the expiration date. takes the server response as parameter
+  // optional function to extract the expiration date. Takes the server response as parameter and returns number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch)
   // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in * 1000;
   getExpirationDateFromResponse: any;
   
-  // optional function to extract the access token from the response. takes the server response as parameter
+  // optional function to extract the access token from the response. Takes the server response as parameter and returns a token
   // eg: getAccessTokenFromResponse = serverResponse => serverResponse.data[0].access_token;
   getAccessTokenFromResponse: any;
   
-  // optional function to extract the refresh token from the response. takes the server response as parameter
+  // optional function to extract the refresh token from the response. Takes the server response as parameter and returns a token
   // eg: getRefreshTokenFromResponse = serverResponse => serverResponse.data[0].refresh_token;
   getRefreshTokenFromResponse: any;
   

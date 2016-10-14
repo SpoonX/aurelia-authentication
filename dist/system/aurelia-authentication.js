@@ -994,11 +994,7 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
         };
 
         Authentication.prototype.isAuthenticated = function isAuthenticated() {
-          var isTokenExpired = this.isTokenExpired();
-
-          if (isTokenExpired === undefined) return !!this.accessToken;
-
-          return !isTokenExpired;
+          return !!this.accessToken && !this.isTokenExpired();
         };
 
         Authentication.prototype.getDataFromResponse = function getDataFromResponse(response) {
@@ -1028,7 +1024,7 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
           try {
             this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
           } catch (_) {}
-          this.exp = typeof this.config.getExpirationDateFromResponse === 'function' ? this.config.getExpirationDateFromResponse(response) : this.payload && parseInt(this.payload.exp, 10) || NaN;
+          this.exp = parseInt(typeof this.config.getExpirationDateFromResponse === 'function' ? this.config.getExpirationDateFromResponse(response) : this.payload && this.payload.exp, 10) || NaN;
 
           this.responseAnalyzed = true;
 
@@ -1232,7 +1228,9 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
 
           this.timeoutID = PLATFORM.global.setTimeout(function () {
             if (_this9.config.autoUpdateToken && _this9.authentication.getAccessToken() && _this9.authentication.getRefreshToken()) {
-              _this9.updateToken();
+              _this9.updateToken().catch(function (error) {
+                return LogManager.getLogger('authentication').warn(error.message);
+              });
 
               return;
             }
@@ -1318,7 +1316,9 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
           var authenticated = this.authentication.isAuthenticated();
 
           if (!authenticated && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-            this.updateToken();
+            this.updateToken().catch(function (error) {
+              return LogManager.getLogger('authentication').warn(error.message);
+            });
             authenticated = true;
           }
 
@@ -1359,9 +1359,9 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
             this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(function (response) {
               _this10.setResponseObject(response);
               _this10.authentication.resolveUpdateTokenCallstack(_this10.isAuthenticated());
-            }).catch(function (err) {
+            }).catch(function (error) {
               _this10.setResponseObject(null);
-              _this10.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
+              _this10.authentication.resolveUpdateTokenCallstack(Promise.reject(error));
             });
           }
 

@@ -281,22 +281,22 @@ export class BaseConfig {
   storage = 'localStorage';
   // The key used for storing the authentication response locally
   storageKey = 'aurelia_authentication';
-// full page reload if authorization changed in another tab (recommended to set it to 'true')
+  // full page reload if authorization changed in another tab (recommended to set it to 'true')
   storageChangedReload = false;
-  // optional function to extract the expiration date. takes the server response as parameter
+  // optional function to extract the expiration date. Takes the server response as parameter and returns number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch)
   // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in * 1000;
   getExpirationDateFromResponse = null;
-  // optional function to extract the access token from the response. takes the server response as parameter
+  // optional function to extract the access token from the response. Takes the server response as parameter and returns a token
   // eg: getAccessTokenFromResponse = serverResponse => serverResponse.data[0].access_token;
   getAccessTokenFromResponse = null;
-  // optional function to extract the refresh token from the response. takes the server response as parameter
+  // optional function to extract the refresh token from the response. Takes the server response as parameter and returns a token
   // eg: getRefreshTokenFromResponse = serverResponse => serverResponse.data[0].refresh_token;
   getRefreshTokenFromResponse = null;
 
   // List of value-converters to make global
   globalValueConverters = ['authFilterValueConverter'];
 
-//OAuth provider specific related configuration
+  //OAuth provider specific related configuration
   // ============================================
   providers = {
     facebook: {
@@ -1053,11 +1053,7 @@ export class Authentication {
   }
 
   isAuthenticated(): boolean {
-    const isTokenExpired = this.isTokenExpired();
-
-    if (isTokenExpired === undefined) return !!this.accessToken;
-
-    return !isTokenExpired;
+    return !!this.accessToken && !this.isTokenExpired();
   }
 
   /* get and set from response */
@@ -1096,9 +1092,9 @@ export class Authentication {
     } catch (_) {} // eslint-disable-line no-empty
 
     // get exp either with from jwt or with supplied function
-    this.exp = typeof this.config.getExpirationDateFromResponse === 'function'
-            ? this.config.getExpirationDateFromResponse(response)
-            : (this.payload && parseInt(this.payload.exp, 10)) ||  NaN;
+    this.exp = parseInt((typeof this.config.getExpirationDateFromResponse === 'function'
+                        ? this.config.getExpirationDateFromResponse(response)
+                        : this.payload && this.payload.exp), 10) || NaN;
 
     this.responseAnalyzed = true;
 
@@ -1373,7 +1369,7 @@ export class AuthService {
       if (this.config.autoUpdateToken
         && this.authentication.getAccessToken()
         && this.authentication.getRefreshToken()) {
-        this.updateToken();
+        this.updateToken().catch(error => LogManager.getLogger('authentication').warn(error.message));
 
         return;
       }
@@ -1512,7 +1508,7 @@ export class AuthService {
       && this.authentication.getAccessToken()
       && this.authentication.getRefreshToken()
     ) {
-      this.updateToken();
+      this.updateToken().catch(error => LogManager.getLogger('authentication').warn(error.message));
       authenticated = true;
     }
 
@@ -1580,9 +1576,9 @@ export class AuthService {
           this.setResponseObject(response);
           this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
         })
-        .catch(err => {
+        .catch(error => {
           this.setResponseObject(null);
-          this.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
+          this.authentication.resolveUpdateTokenCallstack(Promise.reject(error));
         });
     }
 

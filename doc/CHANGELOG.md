@@ -1,3 +1,14 @@
+<a name="3.0.3"></a>
+## [3.0.3](https://github.com/spoonx/aurelia-authentication/compare/v3.0.2...v3.0.3) (2016-10-14)
+
+
+### Bug Fixes
+
+* **baseConfig:** explain getExpirationDateFromResponse and ensure format ([ee30ce4](https://github.com/spoonx/aurelia-authentication/commit/ee30ce4))
+* **isAuthenticated:** always check access_token existence ([72fb377](https://github.com/spoonx/aurelia-authentication/commit/72fb377))
+
+
+
 <a name="3.0.2"></a>
 ## [3.0.2](https://github.com/spoonx/aurelia-authentication/compare/v3.0.1...v3.0.2) (2016-10-14)
 

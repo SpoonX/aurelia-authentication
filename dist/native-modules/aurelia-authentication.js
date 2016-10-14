@@ -872,11 +872,7 @@ export var Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
   };
 
   Authentication.prototype.isAuthenticated = function isAuthenticated() {
-    var isTokenExpired = this.isTokenExpired();
-
-    if (isTokenExpired === undefined) return !!this.accessToken;
-
-    return !isTokenExpired;
+    return !!this.accessToken && !this.isTokenExpired();
   };
 
   Authentication.prototype.getDataFromResponse = function getDataFromResponse(response) {
@@ -906,7 +902,7 @@ export var Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
     try {
       this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
     } catch (_) {}
-    this.exp = typeof this.config.getExpirationDateFromResponse === 'function' ? this.config.getExpirationDateFromResponse(response) : this.payload && parseInt(this.payload.exp, 10) || NaN;
+    this.exp = parseInt(typeof this.config.getExpirationDateFromResponse === 'function' ? this.config.getExpirationDateFromResponse(response) : this.payload && this.payload.exp, 10) || NaN;
 
     this.responseAnalyzed = true;
 
@@ -1108,7 +1104,9 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
 
     this.timeoutID = PLATFORM.global.setTimeout(function () {
       if (_this9.config.autoUpdateToken && _this9.authentication.getAccessToken() && _this9.authentication.getRefreshToken()) {
-        _this9.updateToken();
+        _this9.updateToken().catch(function (error) {
+          return LogManager.getLogger('authentication').warn(error.message);
+        });
 
         return;
       }
@@ -1194,7 +1192,9 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     var authenticated = this.authentication.isAuthenticated();
 
     if (!authenticated && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-      this.updateToken();
+      this.updateToken().catch(function (error) {
+        return LogManager.getLogger('authentication').warn(error.message);
+      });
       authenticated = true;
     }
 
@@ -1235,9 +1235,9 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(function (response) {
         _this10.setResponseObject(response);
         _this10.authentication.resolveUpdateTokenCallstack(_this10.isAuthenticated());
-      }).catch(function (err) {
+      }).catch(function (error) {
         _this10.setResponseObject(null);
-        _this10.authentication.resolveUpdateTokenCallstack(Promise.reject(err));
+        _this10.authentication.resolveUpdateTokenCallstack(Promise.reject(error));
       });
     }
 

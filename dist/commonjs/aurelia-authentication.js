@@ -43,11 +43,11 @@ var _aureliaEventAggregator = require("aurelia-event-aggregator");
 
 var _aureliaTemplatingResources = require("aurelia-templating-resources");
 
+var _aureliaApi = require("aurelia-api");
+
 var _aureliaRouter = require("aurelia-router");
 
 var _aureliaFetchClient = require("aurelia-fetch-client");
-
-var _aureliaApi = require("aurelia-api");
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -256,6 +256,7 @@ var BaseConfig = exports.BaseConfig = function () {
     this.platform = 'browser';
     this.storage = 'localStorage';
     this.storageKey = 'aurelia_authentication';
+    this.storageChangedReload = false;
     this.getExpirationDateFromResponse = null;
     this.getAccessTokenFromResponse = null;
     this.getRefreshTokenFromResponse = null;
@@ -1101,7 +1102,10 @@ var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjectio
       if (_this8.config.storageChangedRedirect) {
         _aureliaPal.PLATFORM.location.href = _this8.config.storageChangedRedirect;
       }
-      _aureliaPal.PLATFORM.location.reload();
+
+      if (_this8.config.storageChangedReload) {
+        _aureliaPal.PLATFORM.location.reload();
+      }
     };
 
     this.authentication = authentication;

@@ -6,13 +6,13 @@ import * as LogManager from 'aurelia-logging';
 import jwtDecode from 'jwt-decode';
 import {PLATFORM,DOM} from 'aurelia-pal';
 import {parseQueryString,join,buildQueryString} from 'aurelia-path';
-import {inject} from 'aurelia-dependency-injection';
+import {inject,Container} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {BindingSignaler} from 'aurelia-templating-resources';
+import {Rest,Config} from 'aurelia-api';
 import {Redirect} from 'aurelia-router';
 import {HttpClient} from 'aurelia-fetch-client';
-import {Config,Rest} from 'aurelia-api';
 
 export class Popup {
   constructor() {
@@ -281,6 +281,8 @@ export class BaseConfig {
   storage = 'localStorage';
   // The key used for storing the authentication response locally
   storageKey = 'aurelia_authentication';
+// full page reload if authorization changed in another tab (recommended to set it to 'true')
+  storageChangedReload = false;
   // optional function to extract the expiration date. takes the server response as parameter
   // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in * 1000;
   getExpirationDateFromResponse = null;
@@ -1244,11 +1246,11 @@ export class AuthService {
   authentication: Authentication;
 
   /**
-   * The Config instance that contains the current configuration setting
+   * The BaseConfig instance that contains the current configuration setting
    *
-   * @param  {Config}
+   * @param  {BaseConfig}
    */
-  config: Config;
+  config: BaseConfig;
 
   /**
    * The current login status
@@ -1306,7 +1308,7 @@ export class AuthService {
    * @param {StorageEvent} event StorageEvent
    */
   storageEventHandler = (event: StorageEvent) => {
-    if (event.key !== this.config.storageKey) {
+    if (event.key !== this.config.storageKey || event.newValue === event.oldValue) {
       return;
     }
 
@@ -1325,17 +1327,25 @@ export class AuthService {
     this.authentication.responseAnalyzed = false;
     this.updateAuthenticated();
 
-    if (this.config.storageChangedRedirect && wasAuthenticated !== this.authenticated) {
-      PLATFORM.location.assign(this.config.storageChangedRedirect);
+    if (wasAuthenticated === this.authenticated) {
+      return;
+    }
+
+    if (this.config.storageChangedRedirect) {
+      PLATFORM.location.href = this.config.storageChangedRedirect;
+    }
+
+    if (this.config.storageChangedReload) {
+      PLATFORM.location.reload();
     }
   }
 
   /**
-   * Getter: The configured client for all aurelia-authentication requests
+   * Getter: The configured Rest client for all aurelia-authentication requests
    *
-   * @return {HttpClient}
+   * @return {Rest}
    */
-  get client(): HttpClient {
+  get client(): Rest {
     return this.config.client;
   }
 

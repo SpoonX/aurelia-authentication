@@ -11,6 +11,8 @@ var _aureliaDependencyInjection = require('aurelia-dependency-injection');
 
 var _aureliaAuthentication = require('./aurelia-authentication');
 
+var _aureliaRouter = require('aurelia-router');
+
 
 
 var AuthenticatedFilterValueConverter = exports.AuthenticatedFilterValueConverter = (_dec = (0, _aureliaDependencyInjection.inject)(_aureliaAuthentication.AuthService), _dec(_class = function () {

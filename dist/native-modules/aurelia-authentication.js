@@ -1,6 +1,6 @@
 var _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _class5, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _class6, _desc, _value, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class11, _dec15, _class12, _dec16, _class13;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -43,13 +43,13 @@ import * as LogManager from 'aurelia-logging';
 import jwtDecode from 'jwt-decode';
 import { PLATFORM, DOM } from 'aurelia-pal';
 import { parseQueryString, join, buildQueryString } from 'aurelia-path';
-import { inject } from 'aurelia-dependency-injection';
+import { inject, Container } from 'aurelia-dependency-injection';
 import { deprecated } from 'aurelia-metadata';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { BindingSignaler } from 'aurelia-templating-resources';
+import { Rest, Config } from 'aurelia-api';
 import { Redirect } from 'aurelia-router';
 import { HttpClient } from 'aurelia-fetch-client';
-import { Config, Rest } from 'aurelia-api';
 
 export var Popup = function () {
   function Popup() {
@@ -223,6 +223,7 @@ export var BaseConfig = function () {
     this.platform = 'browser';
     this.storage = 'localStorage';
     this.storageKey = 'aurelia_authentication';
+    this.storageChangedReload = false;
     this.getExpirationDateFromResponse = null;
     this.getAccessTokenFromResponse = null;
     this.getRefreshTokenFromResponse = null;
@@ -1048,7 +1049,7 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     this.timeoutID = 0;
 
     this.storageEventHandler = function (event) {
-      if (event.key !== _this8.config.storageKey) {
+      if (event.key !== _this8.config.storageKey || event.newValue === event.oldValue) {
         return;
       }
 
@@ -1065,8 +1066,16 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       _this8.authentication.responseAnalyzed = false;
       _this8.updateAuthenticated();
 
-      if (_this8.config.storageChangedRedirect && wasAuthenticated !== _this8.authenticated) {
-        PLATFORM.location.assign(_this8.config.storageChangedRedirect);
+      if (wasAuthenticated === _this8.authenticated) {
+        return;
+      }
+
+      if (_this8.config.storageChangedRedirect) {
+        PLATFORM.location.href = _this8.config.storageChangedRedirect;
+      }
+
+      if (_this8.config.storageChangedReload) {
+        PLATFORM.location.reload();
       }
     };
 

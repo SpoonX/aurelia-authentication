@@ -1,4 +1,4 @@
-define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter", "./authenticatedFilterValueConverter", "extend", "aurelia-logging", "jwt-decode", "aurelia-pal", "aurelia-path", "aurelia-dependency-injection", "aurelia-metadata", "aurelia-event-aggregator", "aurelia-templating-resources", "aurelia-router", "aurelia-fetch-client", "aurelia-api"], function (exports, _authFilterValueConverter, _authenticatedValueConverter, _authenticatedFilterValueConverter, _extend, _aureliaLogging, _jwtDecode, _aureliaPal, _aureliaPath, _aureliaDependencyInjection, _aureliaMetadata, _aureliaEventAggregator, _aureliaTemplatingResources, _aureliaRouter, _aureliaFetchClient, _aureliaApi) {
+define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter", "./authenticatedFilterValueConverter", "extend", "aurelia-logging", "jwt-decode", "aurelia-pal", "aurelia-path", "aurelia-dependency-injection", "aurelia-metadata", "aurelia-event-aggregator", "aurelia-templating-resources", "aurelia-api", "aurelia-router", "aurelia-fetch-client"], function (exports, _authFilterValueConverter, _authenticatedValueConverter, _authenticatedFilterValueConverter, _extend, _aureliaLogging, _jwtDecode, _aureliaPal, _aureliaPath, _aureliaDependencyInjection, _aureliaMetadata, _aureliaEventAggregator, _aureliaTemplatingResources, _aureliaApi, _aureliaRouter, _aureliaFetchClient) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -70,7 +70,7 @@ define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter"
   var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
     return typeof obj;
   } : function (obj) {
-    return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+    return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
   };
 
   var _createClass = function () {
@@ -265,6 +265,7 @@ define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter"
       this.platform = 'browser';
       this.storage = 'localStorage';
       this.storageKey = 'aurelia_authentication';
+      this.storageChangedReload = false;
       this.getExpirationDateFromResponse = null;
       this.getAccessTokenFromResponse = null;
       this.getRefreshTokenFromResponse = null;
@@ -1086,7 +1087,7 @@ define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter"
       this.timeoutID = 0;
 
       this.storageEventHandler = function (event) {
-        if (event.key !== _this8.config.storageKey) {
+        if (event.key !== _this8.config.storageKey || event.newValue === event.oldValue) {
           return;
         }
 
@@ -1103,8 +1104,16 @@ define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter"
         _this8.authentication.responseAnalyzed = false;
         _this8.updateAuthenticated();
 
-        if (_this8.config.storageChangedRedirect && wasAuthenticated !== _this8.authenticated) {
-          _aureliaPal.PLATFORM.location.assign(_this8.config.storageChangedRedirect);
+        if (wasAuthenticated === _this8.authenticated) {
+          return;
+        }
+
+        if (_this8.config.storageChangedRedirect) {
+          _aureliaPal.PLATFORM.location.href = _this8.config.storageChangedRedirect;
+        }
+
+        if (_this8.config.storageChangedReload) {
+          _aureliaPal.PLATFORM.location.reload();
         }
       };
 

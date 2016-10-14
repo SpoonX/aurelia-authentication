@@ -37,13 +37,13 @@ import * as LogManager from 'aurelia-logging';
 import jwtDecode from 'jwt-decode';
 import { PLATFORM, DOM } from 'aurelia-pal';
 import { parseQueryString, join, buildQueryString } from 'aurelia-path';
-import { inject } from 'aurelia-dependency-injection';
+import { inject, Container } from 'aurelia-dependency-injection';
 import { deprecated } from 'aurelia-metadata';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { BindingSignaler } from 'aurelia-templating-resources';
+import { Rest, Config } from 'aurelia-api';
 import { Redirect } from 'aurelia-router';
 import { HttpClient } from 'aurelia-fetch-client';
-import { Config, Rest } from 'aurelia-api';
 
 export let Popup = class Popup {
   constructor() {
@@ -205,6 +205,7 @@ export let BaseConfig = class BaseConfig {
     this.platform = 'browser';
     this.storage = 'localStorage';
     this.storageKey = 'aurelia_authentication';
+    this.storageChangedReload = false;
     this.getExpirationDateFromResponse = null;
     this.getAccessTokenFromResponse = null;
     this.getRefreshTokenFromResponse = null;
@@ -970,7 +971,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     this.timeoutID = 0;
 
     this.storageEventHandler = event => {
-      if (event.key !== this.config.storageKey) {
+      if (event.key !== this.config.storageKey || event.newValue === event.oldValue) {
         return;
       }
 
@@ -987,8 +988,16 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       this.authentication.responseAnalyzed = false;
       this.updateAuthenticated();
 
-      if (this.config.storageChangedRedirect && wasAuthenticated !== this.authenticated) {
-        PLATFORM.location.assign(this.config.storageChangedRedirect);
+      if (wasAuthenticated === this.authenticated) {
+        return;
+      }
+
+      if (this.config.storageChangedRedirect) {
+        PLATFORM.location.href = this.config.storageChangedRedirect;
+      }
+
+      if (this.config.storageChangedReload) {
+        PLATFORM.location.reload();
       }
     };
 

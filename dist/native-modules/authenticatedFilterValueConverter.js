@@ -4,6 +4,7 @@ var _dec, _class;
 
 import { inject } from 'aurelia-dependency-injection';
 import { AuthService } from './aurelia-authentication';
+import { RouteConfig } from 'aurelia-router';
 
 export var AuthenticatedFilterValueConverter = (_dec = inject(AuthService), _dec(_class = function () {
   function AuthenticatedFilterValueConverter(authService) {

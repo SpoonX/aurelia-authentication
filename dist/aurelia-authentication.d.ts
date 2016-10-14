@@ -5,9 +5,9 @@ import {inject,Container} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {BindingSignaler} from 'aurelia-templating-resources';
+import {Rest,Config} from 'aurelia-api';
 import {Redirect,RouteConfig} from 'aurelia-router';
 import {HttpClient} from 'aurelia-fetch-client';
-import {Config,Rest} from 'aurelia-api';
 
 export declare class Popup {
   constructor();
@@ -170,6 +170,9 @@ export declare class BaseConfig {
   
   // The key used for storing the authentication response locally
   storageKey: any;
+  
+  // full page reload if authorization changed in another tab (recommended to set it to 'true')
+  storageChangedReload: any;
   
   // optional function to extract the expiration date. takes the server response as parameter
   // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in * 1000;
@@ -381,11 +384,11 @@ export declare class AuthService {
   authentication: Authentication;
   
   /**
-     * The Config instance that contains the current configuration setting
+     * The BaseConfig instance that contains the current configuration setting
      *
-     * @param  {Config}
+     * @param  {BaseConfig}
      */
-  config: Config;
+  config: BaseConfig;
   
   /**
      * The current login status
@@ -419,11 +422,11 @@ export declare class AuthService {
   storageEventHandler: any;
   
   /**
-     * Getter: The configured client for all aurelia-authentication requests
+     * Getter: The configured Rest client for all aurelia-authentication requests
      *
-     * @return {HttpClient}
+     * @return {Rest}
      */
-  client: HttpClient;
+  client: Rest;
   
   /**
      * Getter: The authentication class instance

@@ -47,9 +47,9 @@ import { inject, Container } from 'aurelia-dependency-injection';
 import { deprecated } from 'aurelia-metadata';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { BindingSignaler } from 'aurelia-templating-resources';
+import { Rest, Config } from 'aurelia-api';
 import { Redirect } from 'aurelia-router';
 import { HttpClient } from 'aurelia-fetch-client';
-import { Config, Rest } from 'aurelia-api';
 
 export var Popup = function () {
   function Popup() {
@@ -223,6 +223,7 @@ export var BaseConfig = function () {
     this.platform = 'browser';
     this.storage = 'localStorage';
     this.storageKey = 'aurelia_authentication';
+    this.storageChangedReload = false;
     this.getExpirationDateFromResponse = null;
     this.getAccessTokenFromResponse = null;
     this.getRefreshTokenFromResponse = null;
@@ -1072,7 +1073,10 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       if (_this8.config.storageChangedRedirect) {
         PLATFORM.location.href = _this8.config.storageChangedRedirect;
       }
-      PLATFORM.location.reload();
+
+      if (_this8.config.storageChangedReload) {
+        PLATFORM.location.reload();
+      }
     };
 
     this.authentication = authentication;

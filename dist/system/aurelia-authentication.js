@@ -1,9 +1,9 @@
 "use strict";
 
-System.register(["./authFilterValueConverter", "./authenticatedValueConverter", "./authenticatedFilterValueConverter", "extend", "aurelia-logging", "jwt-decode", "aurelia-pal", "aurelia-path", "aurelia-dependency-injection", "aurelia-metadata", "aurelia-event-aggregator", "aurelia-templating-resources", "aurelia-router", "aurelia-fetch-client", "aurelia-api"], function (_export, _context) {
+System.register(["./authFilterValueConverter", "./authenticatedValueConverter", "./authenticatedFilterValueConverter", "extend", "aurelia-logging", "jwt-decode", "aurelia-pal", "aurelia-path", "aurelia-dependency-injection", "aurelia-metadata", "aurelia-event-aggregator", "aurelia-templating-resources", "aurelia-api", "aurelia-router", "aurelia-fetch-client"], function (_export, _context) {
   "use strict";
 
-  var AuthFilterValueConverter, AuthenticatedValueConverter, AuthenticatedFilterValueConverter, extend, LogManager, jwtDecode, PLATFORM, DOM, parseQueryString, join, buildQueryString, inject, Container, deprecated, EventAggregator, BindingSignaler, Redirect, HttpClient, Config, Rest, _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _class5, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _class6, _desc, _value, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class11, _dec15, _class12, _dec16, _class13, _typeof, _createClass, Popup, buildPopupWindowOptions, parseUrl, BaseConfig, Storage, AuthLock, OAuth1, OAuth2, Authentication, AuthService, AuthenticateStep, AuthorizeStep, FetchConfig;
+  var AuthFilterValueConverter, AuthenticatedValueConverter, AuthenticatedFilterValueConverter, extend, LogManager, jwtDecode, PLATFORM, DOM, parseQueryString, join, buildQueryString, inject, Container, deprecated, EventAggregator, BindingSignaler, Rest, Config, Redirect, HttpClient, _dec, _class2, _dec2, _class3, _dec3, _class4, _dec4, _class5, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _class6, _desc, _value, _class7, _dec12, _dec13, _class8, _desc2, _value2, _class9, _dec14, _class11, _dec15, _class12, _dec16, _class13, _typeof, _createClass, Popup, buildPopupWindowOptions, parseUrl, BaseConfig, Storage, AuthLock, OAuth1, OAuth2, Authentication, AuthService, AuthenticateStep, AuthorizeStep, FetchConfig;
 
   function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
     var desc = {};
@@ -140,13 +140,13 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
       EventAggregator = _aureliaEventAggregator.EventAggregator;
     }, function (_aureliaTemplatingResources) {
       BindingSignaler = _aureliaTemplatingResources.BindingSignaler;
+    }, function (_aureliaApi) {
+      Rest = _aureliaApi.Rest;
+      Config = _aureliaApi.Config;
     }, function (_aureliaRouter) {
       Redirect = _aureliaRouter.Redirect;
     }, function (_aureliaFetchClient) {
       HttpClient = _aureliaFetchClient.HttpClient;
-    }, function (_aureliaApi) {
-      Config = _aureliaApi.Config;
-      Rest = _aureliaApi.Rest;
     }],
     execute: function () {
       _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
@@ -347,6 +347,7 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
           this.platform = 'browser';
           this.storage = 'localStorage';
           this.storageKey = 'aurelia_authentication';
+          this.storageChangedReload = false;
           this.getExpirationDateFromResponse = null;
           this.getAccessTokenFromResponse = null;
           this.getRefreshTokenFromResponse = null;
@@ -1196,7 +1197,10 @@ System.register(["./authFilterValueConverter", "./authenticatedValueConverter", 
             if (_this8.config.storageChangedRedirect) {
               PLATFORM.location.href = _this8.config.storageChangedRedirect;
             }
-            PLATFORM.location.reload();
+
+            if (_this8.config.storageChangedReload) {
+              PLATFORM.location.reload();
+            }
           };
 
           this.authentication = authentication;

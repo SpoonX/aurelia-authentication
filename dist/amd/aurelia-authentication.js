@@ -1,4 +1,4 @@
-define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter", "./authenticatedFilterValueConverter", "extend", "aurelia-logging", "jwt-decode", "aurelia-pal", "aurelia-path", "aurelia-dependency-injection", "aurelia-metadata", "aurelia-event-aggregator", "aurelia-templating-resources", "aurelia-router", "aurelia-fetch-client", "aurelia-api"], function (exports, _authFilterValueConverter, _authenticatedValueConverter, _authenticatedFilterValueConverter, _extend, _aureliaLogging, _jwtDecode, _aureliaPal, _aureliaPath, _aureliaDependencyInjection, _aureliaMetadata, _aureliaEventAggregator, _aureliaTemplatingResources, _aureliaRouter, _aureliaFetchClient, _aureliaApi) {
+define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter", "./authenticatedFilterValueConverter", "extend", "aurelia-logging", "jwt-decode", "aurelia-pal", "aurelia-path", "aurelia-dependency-injection", "aurelia-metadata", "aurelia-event-aggregator", "aurelia-templating-resources", "aurelia-api", "aurelia-router", "aurelia-fetch-client"], function (exports, _authFilterValueConverter, _authenticatedValueConverter, _authenticatedFilterValueConverter, _extend, _aureliaLogging, _jwtDecode, _aureliaPal, _aureliaPath, _aureliaDependencyInjection, _aureliaMetadata, _aureliaEventAggregator, _aureliaTemplatingResources, _aureliaApi, _aureliaRouter, _aureliaFetchClient) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -265,6 +265,7 @@ define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter"
       this.platform = 'browser';
       this.storage = 'localStorage';
       this.storageKey = 'aurelia_authentication';
+      this.storageChangedReload = false;
       this.getExpirationDateFromResponse = null;
       this.getAccessTokenFromResponse = null;
       this.getRefreshTokenFromResponse = null;
@@ -1110,7 +1111,10 @@ define(["exports", "./authFilterValueConverter", "./authenticatedValueConverter"
         if (_this8.config.storageChangedRedirect) {
           _aureliaPal.PLATFORM.location.href = _this8.config.storageChangedRedirect;
         }
-        _aureliaPal.PLATFORM.location.reload();
+
+        if (_this8.config.storageChangedReload) {
+          _aureliaPal.PLATFORM.location.reload();
+        }
       };
 
       this.authentication = authentication;

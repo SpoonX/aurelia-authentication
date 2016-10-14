@@ -4,7 +4,7 @@ import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {BindingSignaler} from 'aurelia-templating-resources';
-import * as LogManager from 'aurelia-logging';
+import {logger} from './logger';
 import {Rest} from 'aurelia-api';
 import {Authentication} from './authentication';
 import {BaseConfig} from './baseConfig';
@@ -60,7 +60,7 @@ export class AuthService {
     const oldToken = authentication.storage.get(oldStorageKey);
 
     if (oldToken) {
-      LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
+      logger.info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
       let fakeOldResponse = {};
 
       fakeOldResponse[config.accessTokenProp] = oldToken;
@@ -85,7 +85,7 @@ export class AuthService {
       return;
     }
 
-    LogManager.getLogger('authentication').info('Stored token changed event');
+    logger.info('Stored token changed event');
 
     // IE runs the event handler before updating the storage value. Update it now.
     // An unset storage key in IE is an empty string, where-as chrome is null
@@ -129,7 +129,7 @@ export class AuthService {
    * @deprecated
    */
   get auth(): Authentication {
-    LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
+    logger.warn('AuthService.auth is deprecated. Use .authentication instead.');
 
     return this.authentication;
   }
@@ -146,7 +146,7 @@ export class AuthService {
       if (this.config.autoUpdateToken
         && this.authentication.getAccessToken()
         && this.authentication.getRefreshToken()) {
-        this.updateToken().catch(error => LogManager.getLogger('authentication').warn(error.message));
+        this.updateToken().catch(error => logger.warn(error.message));
 
         return;
       }
@@ -198,7 +198,7 @@ export class AuthService {
       this.bindingSignaler.signal('authentication-change');
       this.eventAggregator.publish('authentication-change', this.authenticated);
 
-      LogManager.getLogger('authentication').info(`Authorization changed to: ${this.authenticated}`);
+      logger.info(`Authorization changed to: ${this.authenticated}`);
     }
   }
 
@@ -285,7 +285,7 @@ export class AuthService {
       && this.authentication.getAccessToken()
       && this.authentication.getRefreshToken()
     ) {
-      this.updateToken().catch(error => LogManager.getLogger('authentication').warn(error.message));
+      this.updateToken().catch(error => logger.warn(error.message));
       authenticated = true;
     }
 

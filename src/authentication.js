@@ -4,7 +4,7 @@ import {buildQueryString} from 'aurelia-path';
 import {inject} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import jwtDecode from 'jwt-decode';
-import * as LogManager from 'aurelia-logging';
+import {logger} from './logger';
 import {BaseConfig}  from './baseConfig';
 import {Storage} from './storage';
 import {OAuth1} from './oAuth1';
@@ -60,18 +60,18 @@ export class Authentication {
   }
 
   get responseObject(): {} {
-    LogManager.getLogger('authentication').warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
+    logger.warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
 
     return this.getResponseObject();
   }
 
   set responseObject(response: {}) {
-    LogManager.getLogger('authentication').warn('Setter Authentication.responseObject is deprecated. Use AuthServive.setResponseObject(response) instead.');
+    logger.warn('Setter Authentication.responseObject is deprecated. Use AuthServive.setResponseObject(response) instead.');
     this.setResponseObject(response);
   }
 
   get hasDataStored(): boolean {
-    LogManager.getLogger('authentication').warn('Authentication.hasDataStored is deprecated. Use Authentication.responseAnalyzed instead.');
+    logger.warn('Authentication.hasDataStored is deprecated. Use Authentication.responseAnalyzed instead.');
 
     return this.responseAnalyzed;
   }
@@ -165,7 +165,7 @@ export class Authentication {
       } catch (e) {
         this.refreshToken = null;
 
-        LogManager.getLogger('authentication').warn('useRefreshToken is set, but could not extract a refresh token');
+        logger.warn('useRefreshToken is set, but could not extract a refresh token');
       }
     }
 
@@ -254,7 +254,7 @@ export class Authentication {
     let oauthType = this.config.providers[name].type;
 
     if (oauthType) {
-      LogManager.getLogger('authentication').warn('DEPRECATED: Setting provider.type is deprecated and replaced by provider.oauthType');
+      logger.warn('DEPRECATED: Setting provider.type is deprecated and replaced by provider.oauthType');
     } else {
       oauthType = this.config.providers[name].oauthType;
     }
@@ -301,13 +301,13 @@ export class Authentication {
   redirect(redirectUrl?: string, defaultRedirectUrl?: string, query?: string) {
     // stupid rule to keep it BC
     if (redirectUrl === true) {
-      LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
+      logger.warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
 
       return;
     }
     // stupid rule to keep it BC
     if (redirectUrl === false) {
-      LogManager.getLogger('authentication').warn('BREAKING CHANGE: Setting redirectUrl === false to actually *do redirect* is deprecated. Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
+      logger.warn('BREAKING CHANGE: Setting redirectUrl === false to actually *do redirect* is deprecated. Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
     }
     // BC hack. explicit 0 means don't redirect. false will be added later and 0 deprecated
     if (redirectUrl === 0) {

@@ -3,7 +3,7 @@ import {HttpClient} from 'aurelia-fetch-client';
 import {Config, Rest} from 'aurelia-api';
 import {BaseConfig} from './baseConfig';
 import {FetchConfig} from './fetchClientConfig';
-import * as LogManager from 'aurelia-logging';
+import {logger} from './logger';
 import {Container} from 'aurelia-dependency-injection';
 
 // added for bundling
@@ -36,7 +36,7 @@ export function configure(frameworkConfig: { container: Container, globalResourc
   // after baseConfig was configured
   for (let converter of baseConfig.globalValueConverters) {
     frameworkConfig.globalResources(`./${converter}`);
-    LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${converter}`);
+    logger.info(`Add globalResources value-converter: ${converter}`);
   }
   const fetchConfig  = frameworkConfig.container.get(FetchConfig);
   const clientConfig = frameworkConfig.container.get(Config);

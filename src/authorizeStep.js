@@ -1,12 +1,12 @@
 import {inject} from 'aurelia-dependency-injection';
 import {Redirect} from 'aurelia-router';
-import * as LogManager from 'aurelia-logging';
+import {logger} from './logger';
 import {AuthService} from './authService';
 
 @inject(AuthService)
 export class AuthorizeStep {
   constructor(authService: AuthService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticateStep instead.');
+    logger.warn('AuthorizeStep is deprecated. Use AuthenticateStep instead.');
 
     this.authService = authService;
   }

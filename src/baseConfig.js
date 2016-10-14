@@ -2,7 +2,7 @@
 import {PLATFORM} from 'aurelia-pal';
 import {join} from 'aurelia-path';
 import extend from 'extend';
-import * as LogManager from 'aurelia-logging';
+import {logger} from './logger';
 
 export class BaseConfig {
   /**
@@ -322,7 +322,7 @@ export class BaseConfig {
    * @deprecated
    */
   set authToken(authToken) {
-    LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
+    logger.warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
     this._authTokenType = authToken;
     this.authTokenType = authToken;
 
@@ -337,7 +337,7 @@ export class BaseConfig {
    * @deprecated
    */
   set responseTokenProp(responseTokenProp) {
-    LogManager.getLogger('authentication').warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
+    logger.warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
     this._responseTokenProp = responseTokenProp;
     this.accessTokenProp = responseTokenProp;
 
@@ -352,7 +352,7 @@ export class BaseConfig {
    * @deprecated
    */
   set tokenRoot(tokenRoot) {
-    LogManager.getLogger('authentication').warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
+    logger.warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
     this._tokenRoot = tokenRoot;
     this.accessTokenRoot = tokenRoot;
 
@@ -367,7 +367,7 @@ export class BaseConfig {
    * @deprecated
    */
   set tokenName(tokenName) {
-    LogManager.getLogger('authentication').warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
+    logger.warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
     this._tokenName = tokenName;
     this.accessTokenName = tokenName;
 
@@ -382,7 +382,7 @@ export class BaseConfig {
    * @deprecated
    */
   set tokenPrefix(tokenPrefix) {
-    LogManager.getLogger('authentication').warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
+    logger.warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
     this._tokenPrefix = tokenPrefix;
 
     return tokenPrefix;
@@ -395,7 +395,7 @@ export class BaseConfig {
    * @deprecated
    */
   get current() {
-    LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
+    logger.warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
 
     return this;
   }
@@ -407,7 +407,7 @@ export class BaseConfig {
    * @deprecated
    */
   get _current() {
-    LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
+    logger.warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
 
     return this;
   }

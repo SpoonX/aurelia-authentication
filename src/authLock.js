@@ -77,7 +77,7 @@ export class AuthLock {
           access_token: authResponse.idToken
         });
       });
-      this.lock.on('authorization_error', err => {
+      this.lock.on('unrecoverable_error', err => {
         reject(err);
       });
       this.lock.show();

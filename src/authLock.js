@@ -78,6 +78,10 @@ export class AuthLock {
         });
       });
       this.lock.on('unrecoverable_error', err => {
+        if (!lockOptions.auth.redirect) {
+          // hides the lock popup, as it doesn't do so automatically
+          this.lock.hide();
+        }
         reject(err);
       });
       this.lock.show();

@@ -291,28 +291,38 @@ export class Authentication {
   /**
    * Redirect (page reload if applicable for the browsers save password option)
    *
-   * @param {[string]} redirectUrl The redirect url
-   * @param {[string]} defaultRedirectUrl The defaultRedirectUrl
+   * @param {string}   redirectUrl The redirect url. To not redirect use an empty string.
+   * @param {[string]} defaultRedirectUrl The defaultRedirectUrl. Used when redirectUrl is undefined
    * @param {[string]} query The optional query string to add the the url
    * @returns {undefined} undefined
    *
    * @memberOf Authentication
    */
-  redirect(redirectUrl?: string, defaultRedirectUrl?: string, query?: string) {
+  redirect(redirectUrl: string, defaultRedirectUrl?: string, query?: string) {
     // stupid rule to keep it BC
     if (redirectUrl === true) {
-      logger.warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
+      logger.warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === \'\' instead.');
 
       return;
     }
+
     // stupid rule to keep it BC
     if (redirectUrl === false) {
       logger.warn('BREAKING CHANGE: Setting redirectUrl === false to actually *do redirect* is deprecated. Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
     }
-    // BC hack. explicit 0 means don't redirect. false will be added later and 0 deprecated
+
+    // BC hack. explicit 0 means don't redirect. deprecated in favor of an empty string
     if (redirectUrl === 0) {
+      logger.warn('BREAKING CHANGE: Setting redirectUrl === 0 is deprecated. Set redirectUrl to \'\' instead.');
+
       return;
     }
+
+    // Empty string means don't redirect overwrite.
+    if (redirectUrl === '') {
+      return;
+    }
+
     if (typeof redirectUrl === 'string') {
       PLATFORM.location.href = encodeURI(redirectUrl + (query ? `?${buildQueryString(query)}` : ''));
     } else if (defaultRedirectUrl) {

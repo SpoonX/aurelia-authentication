@@ -12,9 +12,11 @@
     "url": "https://github.com/spoonx/aurelia-authentication/issues"
   },
   "license": "MIT",
-  "author": "RWOverdijk <wesley@spoonx.nl> (http://spoonx.nl/)",
+  "author": "SpoonX (http://spoonx.nl/)",
   "contributors": [
-    "Dirk Eisinger <doktordirk@outlook.de>"
+    "RWOverdijk <wesley@spoonx.nl>",
+    "Dirk Eisinger <doktordirk@outlook.de>",
+    "Paolo Furini (https://github.com/nexbit)"
   ],
   "main": "dist/commonjs/aurelia-authentication.js",
   "typings": "dist/aurelia-authentication.d.ts",
@@ -88,8 +90,7 @@
     "jwt-decode": "^2.0.0"
   },
   "devDependencies": {
-    "gulp-json-format": "^1.0.0",
-    "spoonx-tools": "^0.3.0"
+    "spoonx-tools": "^0.4.0"
   },
   "aurelia": {
     "build": {

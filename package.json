@@ -90,7 +90,7 @@
     "jwt-decode": "^2.0.0"
   },
   "devDependencies": {
-    "spoonx-tools": "^0.4.0"
+    "spoonx-tools": "^1.0.0-0"
   },
   "aurelia": {
     "build": {

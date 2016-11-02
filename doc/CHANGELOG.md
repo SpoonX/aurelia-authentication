@@ -1,3 +1,21 @@
+<a name="3.1.0"></a>
+# [3.1.0](https://github.com/spoonx/aurelia-authentication/compare/v3.0.3...v3.1.0) (2016-11-02)
+
+
+### Bug Fixes
+
+* **auth0:** Close popup after an unrecoverable error ([36aa441](https://github.com/spoonx/aurelia-authentication/commit/36aa441))
+* **auth0:** Fix auth rejection for non severe errors ([9a91ef2](https://github.com/spoonx/aurelia-authentication/commit/9a91ef2))
+
+
+### Features
+
+* **authService:** Add focus handler to check token expiration ([38381c3](https://github.com/spoonx/aurelia-authentication/commit/38381c3))
+* **authService:** changed redirection overwrite to empty string ([cc8b79e](https://github.com/spoonx/aurelia-authentication/commit/cc8b79e))
+* **authService:** optional callback for isAuthenticated ([fdbe4b5](https://github.com/spoonx/aurelia-authentication/commit/fdbe4b5))
+
+
+
 <a name="3.0.3"></a>
 ## [3.0.3](https://github.com/spoonx/aurelia-authentication/compare/v3.0.2...v3.0.3) (2016-10-14)
 

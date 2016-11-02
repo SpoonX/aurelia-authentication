@@ -1,6 +1,6 @@
-import * as LogManager from 'aurelia-logging';
 import {PLATFORM,DOM} from 'aurelia-pal';
 import {parseQueryString,join,buildQueryString} from 'aurelia-path';
+import {getLogger} from 'aurelia-logging';
 import {inject,Container} from 'aurelia-dependency-injection';
 import {deprecated} from 'aurelia-metadata';
 import {EventAggregator} from 'aurelia-event-aggregator';
@@ -15,6 +15,7 @@ export declare class Popup {
   eventListener(redirectUri: string): Promise<any>;
   pollPopup(): Promise<any>;
 }
+export declare const logger: any;
 
 /* eslint-disable max-lines */
 export declare class BaseConfig {
@@ -315,10 +316,10 @@ export declare class Authentication {
   getRefreshToken(): string;
   getIdToken(): string;
   getPayload(): {};
-  getExp(): Number;
+  getExp(): number;
   
   /* get status from data */
-  getTtl(): Number;
+  getTtl(): number;
   isTokenExpired(): boolean;
   isAuthenticated(): boolean;
   
@@ -343,7 +344,7 @@ export declare class Authentication {
   /**
      * Authenticate with third-party
      *
-     * @param {String}    name        Name of the provider
+     * @param {string}    name        Name of the provider
      * @param {[{}]}      [userData]  Additional data send to the authentication server
      *
      * @return {Promise<any>} The authentication server response
@@ -363,14 +364,14 @@ export declare class Authentication {
   /**
      * Redirect (page reload if applicable for the browsers save password option)
      *
-     * @param {[string]} redirectUrl The redirect url
-     * @param {[string]} defaultRedirectUrl The defaultRedirectUrl
+     * @param {string}   redirectUrl The redirect url. To not redirect use an empty string.
+     * @param {[string]} defaultRedirectUrl The defaultRedirectUrl. Used when redirectUrl is undefined
      * @param {[string]} query The optional query string to add the the url
      * @returns {undefined} undefined
      *
      * @memberOf Authentication
      */
-  redirect(redirectUrl?: string, defaultRedirectUrl?: string, query?: string): any;
+  redirect(redirectUrl: string, defaultRedirectUrl?: string, query?: string): any;
 }
 
 /* eslint-disable max-lines */
@@ -393,16 +394,16 @@ export declare class AuthService {
   /**
      * The current login status
      *
-     * @param  {Boolean}
+     * @param  {boolean}
      */
-  authenticated: Boolean;
+  authenticated: boolean;
   
   /**
      * The currently set timeoutID
      *
-     * @param  {Number}
+     * @param  {number}
      */
-  timeoutID: Number;
+  timeoutID: number;
   
   /**
      *  Create an AuthService instance
@@ -439,9 +440,9 @@ export declare class AuthService {
   /**
      * Sets the login timeout
      *
-     * @param  {Number} ttl  Timeout time in ms
+     * @param  {number} ttl  Timeout time in ms
      */
-  setTimeout(ttl: Number): any;
+  setTimeout(ttl: number): any;
   
   /**
      * Clears the login timeout
@@ -463,72 +464,74 @@ export declare class AuthService {
   /**
      * Get current user profile from server
      *
-     * @param {({}|Number|String)} [criteriaOrId] (optional) An object or a Number|String converted to {id: criteriaOrId}
+     * @param {({}|number|string)} [criteriaOrId] (optional) An object or a number|string converted to {id: criteriaOrId}
      * @returns {Promise<any>} The server response
      *
      * @memberOf AuthService
      */
-  getMe(criteriaOrId?: {} | Number | String): Promise<any>;
+  getMe(criteriaOrId?: {} | number | string): Promise<any>;
   
   /**
      * Send current user profile update to server
      *
      * @param {{}}                body           Request body with data.
-     * @param {{}|Number|String}  [criteriaOrId] (optional) An object or a Number|String converted to {id: criteriaOrId}
+     * @param {{}|number|string}  [criteriaOrId] (optional) An object or a number|string converted to {id: criteriaOrId}
      *
      * @return {Promise<any>} The server response
      */
-  updateMe(body: {}, criteriaOrId?: {} | Number | String): Promise<any>;
+  updateMe(body: {}, criteriaOrId?: {} | number | string): Promise<any>;
   
   /**
      * Get accessToken from storage
      *
-     * @returns {String} Current accessToken
+     * @returns {string} Current accessToken
      */
-  getAccessToken(): String;
-  getCurrentToken(): String;
+  getAccessToken(): string;
+  getCurrentToken(): string;
   
   /**
      * Get refreshToken from storage
      *
-     * @returns {String} Current refreshToken
+     * @returns {string} Current refreshToken
      */
-  getRefreshToken(): String;
+  getRefreshToken(): string;
   
   /**
      * Get idToken from storage
      *
-     * @returns {String} Current idToken
+     * @returns {string} Current idToken
      */
-  getIdToken(): String;
+  getIdToken(): string;
   
   /**
     * Gets authentication status from storage
     *
-    * @returns {Boolean} For Non-JWT and unexpired JWT: true, else: false
+    * @param {[Function]} [callback] optional callback (authenticated: boolean) => void executed once the status is determined
+    *
+    * @returns {boolean} For Non-JWT and unexpired JWT: true, else: false
     */
-  isAuthenticated(): Boolean;
+  isAuthenticated(callback?: ((authenticated: boolean) => void)): boolean;
   
   /**
      * Gets exp in milliseconds
      *
-     * @returns {Number} Exp for JWT tokens, NaN for all other tokens
+     * @returns {number} Exp for JWT tokens, NaN for all other tokens
      */
-  getExp(): Number;
+  getExp(): number;
   
   /**
      * Gets ttl in seconds
      *
-     * @returns {Number} Ttl for JWT tokens, NaN for all other tokens
+     * @returns {number} Ttl for JWT tokens, NaN for all other tokens
      */
-  getTtl(): Number;
+  getTtl(): number;
   
   /**
     * Gets exp from token payload and compares to current time
     *
-    * @returns {Boolean} Returns (ttl > 0)? for JWT, undefined other tokens
+    * @returns {boolean} Returns (ttl > 0)? for JWT, undefined other tokens
     */
-  isTokenExpired(): Boolean;
+  isTokenExpired(): boolean;
   
   /**
     * Get payload from tokens
@@ -547,59 +550,60 @@ export declare class AuthService {
   /**
      * Signup locally. Login and redirect depending on config
      *
-     * @param {String|{}}   displayNameOrCredentials displayName | object with signup data.
-     * @param {[String]|{}} emailOrOptions           [email | options for post request]
-     * @param {[String]}    passwordOrRedirectUri    [password | optional redirectUri overwrite]
+     * @param {string|{}}   displayNameOrCredentials displayName | object with signup data.
+     * @param {[string]|{}} emailOrOptions           [email | options for post request]
+     * @param {[string]}    passwordOrRedirectUri    [password | optional redirectUri overwrite]
      * @param {[{}]}        options                  [options]
-     * @param {[String]}    redirectUri              [optional redirectUri overwrite]
+     * @param {[string]}    [redirectUri]            [optional redirectUri overwrite, ''= no redirection]
      *
      * @return {Promise<any>} Server response as Object
      */
-  signup(displayNameOrCredentials: String | {}, emailOrOptions?: String | {}, passwordOrRedirectUri?: String, options?: {}, redirectUri?: String): Promise<any>;
+  signup(displayNameOrCredentials: string | {}, emailOrOptions?: string | {}, passwordOrRedirectUri?: string, options?: {}, redirectUri?: string): Promise<any>;
   
   /**
      * Login locally. Redirect depending on config
      *
-     * @param {[String]|{}} emailOrCredentials      email | object with signup data.
-     * @param {[String]}    [passwordOrOptions]     [password | options for post request]
+     * @param {[string]|{}} emailOrCredentials      email | object with signup data.
+     * @param {[string]}    [passwordOrOptions]     [password | options for post request]
      * @param {[{}]}        [optionsOrRedirectUri]  [options | redirectUri overwrite]]
-     * @param {[String]}    [redirectUri]           [optional redirectUri overwrite]
+     * @param {[string]}    [redirectUri]           [optional redirectUri overwrite, ''= no redirection]
      *
      * @return {Promise<Object>|Promise<Error>}    Server response as Object
      */
-  login(emailOrCredentials: String | {}, passwordOrOptions?: String, optionsOrRedirectUri?: {}, redirectUri?: String): Promise<any>;
+  login(emailOrCredentials: string | {}, passwordOrOptions?: string, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any>;
   
   /**
-     * Logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
+     * Logout locally and redirect to redirectUri (if set) or redirectUri of config.
+     * Sends logout request first, if set in config
      *
-     * @param {[String]}    [redirectUri]                     [optional redirectUri overwrite]
-     * @param {[String]}    [query]                           [optional query]
-     * @param {[String]}    [name]                            [optional name Name of the provider]
+     * @param {[string]}    [redirectUri]    [optional redirectUri overwrite, ''= no redirection]
+     * @param {[string]}    [query]          [optional query string for the uri]
+     * @param {[string]}    [name]           [optional name Name of the provider]
      *
      * @return {Promise<any>}     Server response as Object
      */
-  logout(redirectUri?: String, query?: String, name?: String): Promise<any>;
+  logout(redirectUri?: string, query?: string, name?: string): Promise<any>;
   
   /**
      * Authenticate with third-party and redirect to redirectUri (if set) or redirectUri of config
      *
-     * @param {String}    name          Name of the provider
-     * @param {[String]}  [redirectUri] [optional redirectUri overwrite]
+     * @param {string}    name          Name of the provider
+     * @param {[string]}  [redirectUri] [optional redirectUri overwrite]
      * @param {[{}]}      [userData]    [optional userData for the local authentication server]
      *
      * @return {Promise<any>} Server response as Object
      */
-  authenticate(name: String, redirectUri?: String, userData?: {}): Promise<any>;
+  authenticate(name: string, redirectUri?: string, userData?: {}): Promise<any>;
   
   /**
      * Unlink third-party
      *
-     * @param {String}    name          Name of the provider
-     * @param {[String]}  [redirectUri] [optional redirectUri overwrite]
+     * @param {string}    name          Name of the provider
+     * @param {[string]}  [redirectUri] [optional redirectUri overwrite]
      *
      * @return {Promise<any>}  Server response as Object
      */
-  unlink(name: String, redirectUri?: String): Promise<any>;
+  unlink(name: string, redirectUri?: string): Promise<any>;
 }
 export declare class AuthenticateStep {
   constructor(authService: AuthService);
@@ -656,10 +660,10 @@ export declare class AuthFilterValueConverter {
   /**
      * route toView predictator on route.config.auth === isAuthenticated
      * @param  {RouteConfig}  routes            the routes array to convert
-     * @param  {Boolean}      isAuthenticated   authentication status
-     * @return {Boolean}      show/hide element
+     * @param  {boolean}      isAuthenticated   authentication status
+     * @return {boolean}      show/hide element
      */
-  toView(routes: RouteConfig, isAuthenticated: Boolean): Boolean;
+  toView(routes: RouteConfig, isAuthenticated: boolean): boolean;
 }
 export declare class AuthenticatedFilterValueConverter {
   constructor(authService: AuthService);
@@ -667,17 +671,17 @@ export declare class AuthenticatedFilterValueConverter {
   /**
      * route toView predictator on route.config.auth === (parameter || authService.isAuthenticated())
      * @param  {RouteConfig}  routes            the routes array to convert
-     * @param  {[Boolean]}    [isAuthenticated] optional isAuthenticated value. default: this.authService.authenticated
-     * @return {Boolean}      show/hide element
+     * @param  {[boolean]}    [isAuthenticated] optional isAuthenticated value. default: this.authService.authenticated
+     * @return {boolean}      show/hide element
      */
-  toView(routes: RouteConfig, isAuthenticated?: Boolean): Boolean;
+  toView(routes: RouteConfig, isAuthenticated?: boolean): boolean;
 }
 export declare class AuthenticatedValueConverter {
   constructor(authService?: any);
   
   /**
      * element toView predictator on authService.isAuthenticated()
-     * @return {Boolean}  show/hide element
+     * @return {boolean}  show/hide element
      */
   toView(): any;
 }

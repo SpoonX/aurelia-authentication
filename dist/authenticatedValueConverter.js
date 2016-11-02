@@ -9,7 +9,7 @@ export class AuthenticatedValueConverter {
 
   /**
    * element toView predictator on authService.isAuthenticated()
-   * @return {Boolean}  show/hide element
+   * @return {boolean}  show/hide element
    */
   toView() {
     return this.authService.authenticated;

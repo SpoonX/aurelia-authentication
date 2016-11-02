@@ -29,14 +29,11 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
   return desc;
 }
 
-import { AuthFilterValueConverter } from "./authFilterValueConverter";
-import { AuthenticatedValueConverter } from "./authenticatedValueConverter";
-import { AuthenticatedFilterValueConverter } from "./authenticatedFilterValueConverter";
 import extend from 'extend';
-import * as LogManager from 'aurelia-logging';
 import jwtDecode from 'jwt-decode';
 import { PLATFORM, DOM } from 'aurelia-pal';
 import { parseQueryString, join, buildQueryString } from 'aurelia-path';
+import { getLogger } from 'aurelia-logging';
 import { inject, Container } from 'aurelia-dependency-injection';
 import { deprecated } from 'aurelia-metadata';
 import { EventAggregator } from 'aurelia-event-aggregator';
@@ -44,6 +41,10 @@ import { BindingSignaler } from 'aurelia-templating-resources';
 import { Rest, Config } from 'aurelia-api';
 import { Redirect } from 'aurelia-router';
 import { HttpClient } from 'aurelia-fetch-client';
+
+import { AuthFilterValueConverter } from "./authFilterValueConverter";
+import { AuthenticatedValueConverter } from "./authenticatedValueConverter";
+import { AuthenticatedFilterValueConverter } from "./authenticatedFilterValueConverter";
 
 export let Popup = class Popup {
   constructor() {
@@ -162,6 +163,8 @@ const parseUrl = url => {
 
   return extend(true, {}, parseQueryString(url.search), parseQueryString(hash));
 };
+
+export const logger = getLogger('aurelia-authentication');
 
 export let BaseConfig = class BaseConfig {
   constructor() {
@@ -363,7 +366,7 @@ export let BaseConfig = class BaseConfig {
   }
 
   set authToken(authToken) {
-    LogManager.getLogger('authentication').warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
+    logger.warn('BaseConfig.authToken is deprecated. Use BaseConfig.authTokenType instead.');
     this._authTokenType = authToken;
     this.authTokenType = authToken;
 
@@ -374,7 +377,7 @@ export let BaseConfig = class BaseConfig {
   }
 
   set responseTokenProp(responseTokenProp) {
-    LogManager.getLogger('authentication').warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
+    logger.warn('BaseConfig.responseTokenProp is deprecated. Use BaseConfig.accessTokenProp instead.');
     this._responseTokenProp = responseTokenProp;
     this.accessTokenProp = responseTokenProp;
 
@@ -385,7 +388,7 @@ export let BaseConfig = class BaseConfig {
   }
 
   set tokenRoot(tokenRoot) {
-    LogManager.getLogger('authentication').warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
+    logger.warn('BaseConfig.tokenRoot is deprecated. Use BaseConfig.accessTokenRoot instead.');
     this._tokenRoot = tokenRoot;
     this.accessTokenRoot = tokenRoot;
 
@@ -396,7 +399,7 @@ export let BaseConfig = class BaseConfig {
   }
 
   set tokenName(tokenName) {
-    LogManager.getLogger('authentication').warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
+    logger.warn('BaseConfig.tokenName is deprecated. Use BaseConfig.accessTokenName instead.');
     this._tokenName = tokenName;
     this.accessTokenName = tokenName;
 
@@ -407,7 +410,7 @@ export let BaseConfig = class BaseConfig {
   }
 
   set tokenPrefix(tokenPrefix) {
-    LogManager.getLogger('authentication').warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
+    logger.warn('BaseConfig.tokenPrefix is obsolete. Use BaseConfig.storageKey instead.');
     this._tokenPrefix = tokenPrefix;
 
     return tokenPrefix;
@@ -417,7 +420,7 @@ export let BaseConfig = class BaseConfig {
   }
 
   get current() {
-    LogManager.getLogger('authentication').warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
+    logger.warn('Getter BaseConfig.current is deprecated. Use BaseConfig directly instead.');
 
     return this;
   }
@@ -426,7 +429,7 @@ export let BaseConfig = class BaseConfig {
   }
 
   get _current() {
-    LogManager.getLogger('authentication').warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
+    logger.warn('Getter BaseConfig._current is deprecated. Use BaseConfig directly instead.');
 
     return this;
   }
@@ -528,7 +531,10 @@ export let AuthLock = (_dec2 = inject(Storage, BaseConfig), _dec2(_class3 = clas
           access_token: authResponse.idToken
         });
       });
-      this.lock.on('authorization_error', err => {
+      this.lock.on('unrecoverable_error', err => {
+        if (!lockOptions.auth.redirect) {
+          this.lock.hide();
+        }
         reject(err);
       });
       this.lock.show();
@@ -752,18 +758,18 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
   }
 
   get responseObject() {
-    LogManager.getLogger('authentication').warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
+    logger.warn('Getter Authentication.responseObject is deprecated. Use Authentication.getResponseObject() instead.');
 
     return this.getResponseObject();
   }
 
   set responseObject(response) {
-    LogManager.getLogger('authentication').warn('Setter Authentication.responseObject is deprecated. Use AuthServive.setResponseObject(response) instead.');
+    logger.warn('Setter Authentication.responseObject is deprecated. Use AuthServive.setResponseObject(response) instead.');
     this.setResponseObject(response);
   }
 
   get hasDataStored() {
-    LogManager.getLogger('authentication').warn('Authentication.hasDataStored is deprecated. Use Authentication.responseAnalyzed instead.');
+    logger.warn('Authentication.hasDataStored is deprecated. Use Authentication.responseAnalyzed instead.');
 
     return this.responseAnalyzed;
   }
@@ -847,7 +853,7 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
       } catch (e) {
         this.refreshToken = null;
 
-        LogManager.getLogger('authentication').warn('useRefreshToken is set, but could not extract a refresh token');
+        logger.warn('useRefreshToken is set, but could not extract a refresh token');
       }
     }
 
@@ -913,7 +919,7 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
     let oauthType = this.config.providers[name].type;
 
     if (oauthType) {
-      LogManager.getLogger('authentication').warn('DEPRECATED: Setting provider.type is deprecated and replaced by provider.oauthType');
+      logger.warn('DEPRECATED: Setting provider.type is deprecated and replaced by provider.oauthType');
     } else {
       oauthType = this.config.providers[name].oauthType;
     }
@@ -941,25 +947,32 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
 
   redirect(redirectUrl, defaultRedirectUrl, query) {
     if (redirectUrl === true) {
-      LogManager.getLogger('authentication').warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === 0 instead.');
+      logger.warn('DEPRECATED: Setting redirectUrl === true to actually *not redirect* is deprecated. Set redirectUrl === \'\' instead.');
 
       return;
     }
 
     if (redirectUrl === false) {
-      LogManager.getLogger('authentication').warn('BREAKING CHANGE: Setting redirectUrl === false to actually *do redirect* is deprecated. Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
+      logger.warn('BREAKING CHANGE: Setting redirectUrl === false to actually *do redirect* is deprecated. Set redirectUrl to undefined or null to use the defaultRedirectUrl if so desired.');
     }
 
     if (redirectUrl === 0) {
+      logger.warn('BREAKING CHANGE: Setting redirectUrl === 0 is deprecated. Set redirectUrl to \'\' instead.');
+
       return;
     }
+
+    if (redirectUrl === '') {
+      return;
+    }
+
     if (typeof redirectUrl === 'string') {
       PLATFORM.location.href = encodeURI(redirectUrl + (query ? `?${ buildQueryString(query) }` : ''));
     } else if (defaultRedirectUrl) {
       PLATFORM.location.href = defaultRedirectUrl + (query ? `?${ buildQueryString(query) }` : '');
     }
   }
-}, (_applyDecoratedDescriptor(_class7.prototype, "getLoginRoute", [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, "getLoginRoute"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getLoginRedirect", [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, "getLoginRedirect"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getLoginUrl", [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, "getLoginUrl"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getSignupUrl", [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, "getSignupUrl"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getProfileUrl", [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, "getProfileUrl"), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, "getToken", [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, "getToken"), _class7.prototype)), _class7)) || _class6);
+}, (_applyDecoratedDescriptor(_class7.prototype, 'getLoginRoute', [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRoute'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginRedirect', [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRedirect'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginUrl', [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getSignupUrl', [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, 'getSignupUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getProfileUrl', [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, 'getProfileUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getToken', [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, 'getToken'), _class7.prototype)), _class7)) || _class6);
 
 export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSignaler, EventAggregator), _dec13 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec12(_class8 = (_class9 = class AuthService {
   constructor(authentication, config, bindingSignaler, eventAggregator) {
@@ -971,7 +984,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
         return;
       }
 
-      LogManager.getLogger('authentication').info('Stored token changed event');
+      logger.info('Stored token changed event');
 
       if (event.newValue) {
         this.authentication.storage.set(this.config.storageKey, event.newValue);
@@ -1006,7 +1019,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     const oldToken = authentication.storage.get(oldStorageKey);
 
     if (oldToken) {
-      LogManager.getLogger('authentication').info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
+      logger.info('Found token with deprecated format in storage. Converting it to new format. No further action required.');
       let fakeOldResponse = {};
 
       fakeOldResponse[config.accessTokenProp] = oldToken;
@@ -1024,7 +1037,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
   }
 
   get auth() {
-    LogManager.getLogger('authentication').warn('AuthService.auth is deprecated. Use .authentication instead.');
+    logger.warn('AuthService.auth is deprecated. Use .authentication instead.');
 
     return this.authentication;
   }
@@ -1032,9 +1045,9 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
   setTimeout(ttl) {
     this.clearTimeout();
 
-    this.timeoutID = PLATFORM.global.setTimeout(() => {
+    const expiredTokenHandler = () => {
       if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-        this.updateToken().catch(error => LogManager.getLogger('authentication').warn(error.message));
+        this.updateToken().catch(error => logger.warn(error.message));
 
         return;
       }
@@ -1044,7 +1057,14 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       if (this.config.expiredRedirect) {
         PLATFORM.location.assign(this.config.expiredRedirect);
       }
-    }, ttl);
+    };
+
+    this.timeoutID = PLATFORM.global.setTimeout(expiredTokenHandler, ttl);
+    PLATFORM.addEventListener('focus', () => {
+      if (this.isTokenExpired()) {
+        expiredTokenHandler();
+      }
+    });
   }
 
   clearTimeout() {
@@ -1075,7 +1095,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       this.bindingSignaler.signal('authentication-change');
       this.eventAggregator.publish('authentication-change', this.authenticated);
 
-      LogManager.getLogger('authentication').info(`Authorization changed to: ${ this.authenticated }`);
+      logger.info(`Authorization changed to: ${ this.authenticated }`);
     }
   }
 
@@ -1114,14 +1134,27 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     return this.authentication.getIdToken();
   }
 
-  isAuthenticated() {
+  isAuthenticated(callback) {
     this.authentication.responseAnalyzed = false;
 
     let authenticated = this.authentication.isAuthenticated();
 
     if (!authenticated && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-      this.updateToken().catch(error => LogManager.getLogger('authentication').warn(error.message));
+      this.updateToken().then(() => {
+        if (typeof callback === 'function') {
+          callback(this.authenticated);
+        }
+      }).catch(error => logger.warn(error.message));
+
       authenticated = true;
+    } else if (typeof callback === 'function') {
+      PLATFORM.global.setTimeout(() => {
+        try {
+          callback(authenticated);
+        } catch (error) {
+          logger.warn(error.message);
+        }
+      }, 1);
     }
 
     return authenticated;
@@ -1272,7 +1305,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       return response;
     });
   }
-}, (_applyDecoratedDescriptor(_class9.prototype, "getCurrentToken", [_dec13], Object.getOwnPropertyDescriptor(_class9.prototype, "getCurrentToken"), _class9.prototype)), _class9)) || _class8);
+}, (_applyDecoratedDescriptor(_class9.prototype, 'getCurrentToken', [_dec13], Object.getOwnPropertyDescriptor(_class9.prototype, 'getCurrentToken'), _class9.prototype)), _class9)) || _class8);
 
 export let AuthenticateStep = (_dec14 = inject(AuthService), _dec14(_class11 = class AuthenticateStep {
   constructor(authService) {
@@ -1297,7 +1330,7 @@ export let AuthenticateStep = (_dec14 = inject(AuthService), _dec14(_class11 = c
 
 export let AuthorizeStep = (_dec15 = inject(AuthService), _dec15(_class12 = class AuthorizeStep {
   constructor(authService) {
-    LogManager.getLogger('authentication').warn('AuthorizeStep is deprecated. Use AuthenticateStep instead.');
+    logger.warn('AuthorizeStep is deprecated. Use AuthenticateStep instead.');
 
     this.authService = authService;
   }
@@ -1418,7 +1451,7 @@ export function configure(frameworkConfig, config) {
 
   for (let converter of baseConfig.globalValueConverters) {
     frameworkConfig.globalResources(`./${ converter }`);
-    LogManager.getLogger('authentication').info(`Add globalResources value-converter: ${ converter }`);
+    logger.info(`Add globalResources value-converter: ${ converter }`);
   }
   const fetchConfig = frameworkConfig.container.get(FetchConfig);
   const clientConfig = frameworkConfig.container.get(Config);

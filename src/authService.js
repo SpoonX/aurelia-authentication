@@ -395,7 +395,7 @@ export class AuthService {
    * @param {[string]|{}} emailOrOptions           [email | options for post request]
    * @param {[string]}    passwordOrRedirectUri    [password | optional redirectUri overwrite]
    * @param {[{}]}        options                  [options]
-   * @param {[string]}    redirectUri              [optional redirectUri overwrite]
+   * @param {[string]}    [redirectUri]            [optional redirectUri overwrite, ''= no redirection]
    *
    * @return {Promise<any>} Server response as Object
    */
@@ -433,7 +433,7 @@ export class AuthService {
    * @param {[string]|{}} emailOrCredentials      email | object with signup data.
    * @param {[string]}    [passwordOrOptions]     [password | options for post request]
    * @param {[{}]}        [optionsOrRedirectUri]  [options | redirectUri overwrite]]
-   * @param {[string]}    [redirectUri]           [optional redirectUri overwrite]
+   * @param {[string]}    [redirectUri]           [optional redirectUri overwrite, ''= no redirection]
    *
    * @return {Promise<Object>|Promise<Error>}    Server response as Object
    */
@@ -468,11 +468,12 @@ export class AuthService {
   }
 
   /**
-   * Logout locally and redirect to redirectUri (if set) or redirectUri of config. Sends logout request first, if set in config
+   * Logout locally and redirect to redirectUri (if set) or redirectUri of config.
+   * Sends logout request first, if set in config
    *
-   * @param {[string]}    [redirectUri]                     [optional redirectUri overwrite]
-   * @param {[string]}    [query]                           [optional query]
-   * @param {[string]}    [name]                            [optional name Name of the provider]
+   * @param {[string]}    [redirectUri]    [optional redirectUri overwrite, ''= no redirection]
+   * @param {[string]}    [query]          [optional query string for the uri]
+   * @param {[string]}    [name]           [optional name Name of the provider]
    *
    * @return {Promise<any>}     Server response as Object
    */

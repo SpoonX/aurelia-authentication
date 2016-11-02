@@ -88,7 +88,7 @@ describe('OAuth1', () => {
           expect(res.path).toBe('/auth/twitter');
           expect(res.body.access_token).toBe('someToken');
           expect(res.body.userData).toBe('some');
-          expect(popup.popupWindow.location).toBe('https://api.twitter.com/oauth/authenticate?contentType=application%2Fjson&method=POST&path=%2Fauth%2Ftwitter');
+          expect(popup.popupWindow.location).toContain('https://api.twitter.com/oauth/authenticate');
 
           done();
         })

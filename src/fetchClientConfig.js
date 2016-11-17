@@ -44,19 +44,24 @@ export class FetchConfig {
       },
       response: (response, request) => {
         return new Promise((resolve, reject) => {
+          // resolve success
           if (response.ok) {
             return resolve(response);
           }
+          // resolve all non-authorization errors
           if (response.status !== 401) {
             return resolve(response);
           }
+          // resolve unexpected authorization errors (not a managed request or token not expired)
           if (!this.config.httpInterceptor || !this.authService.isTokenExpired()) {
             return resolve(response);
           }
+          // resolve expected authorization error without refresh_token setup
           if (!this.config.useRefreshToken || !this.authService.getRefreshToken()) {
             return resolve(response);
           }
 
+          // refresh token and try again
           return this.authService.updateToken().then(() => {
             let token = this.authService.getAccessToken();
 
@@ -66,7 +71,7 @@ export class FetchConfig {
 
             request.headers.set(this.config.authHeader, token);
 
-            return this.client.fetch(request).then(resolve);
+            return this.httpClient.fetch(request).then(resolve);
           });
         });
       }

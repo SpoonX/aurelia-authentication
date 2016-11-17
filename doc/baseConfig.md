@@ -125,8 +125,8 @@ storage = 'localStorage';
 storageKey = 'aurelia_authentication';
 // full page reload if authorization changed in another tab (recommended to set it to 'true')
 storageChangedReload = false;
-// optional function to extract the expiration date. Takes the server response as parameter and returns number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch) 
-// eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in / 1000;
+// optional function to extract the expiration date. Takes the server response as parameter and returns NumericDate = number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch) 
+// eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() / 1000 + serverResponse.expires_in;
 getExpirationDateFromResponse = null;
 // optional function to extract the access token from the response. Takes the server response as parameter and returns a token
 // eg: getAccessTokenFromResponse = serverResponse => serverResponse.data[0].access_token;

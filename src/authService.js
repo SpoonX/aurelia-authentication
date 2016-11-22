@@ -437,7 +437,7 @@ export class AuthService {
    *
    * @return {Promise<Object>|Promise<Error>}    Server response as Object
    */
-  login(emailOrCredentials: string|{}, passwordOrOptions?: string, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any> {
+  login(emailOrCredentials: string|{}, passwordOrOptions?: string|{}, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any> {
     let normalized = {};
 
     if (typeof emailOrCredentials === 'object') {

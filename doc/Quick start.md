@@ -85,7 +85,7 @@ export function configure(aurelia) {
 
 There are two options:
 
-* authService.isAuthenticated(): This function gets the current token on each call from the window storage to calucate the current authentication status. Since it's a function, Aurelia will use dirty checking, if you bind to it.
+* authService.isAuthenticated(): This function gets the current token on each call from the window storage to calculate the current authentication status. Since it's a function, Aurelia will use dirty checking, if you bind to it.
 * authService.authenticated: This property gets updated by timeout and storage events to keep it accurate all the time. No dirty-checking is needed, but you might not like that there is magic used to keep it updated.
 
 ### Provide a UI for a login, signup and profile

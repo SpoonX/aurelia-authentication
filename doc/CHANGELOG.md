@@ -1,3 +1,14 @@
+<a name="3.2.0"></a>
+# [3.2.0](https://github.com/spoonx/aurelia-authentication/compare/v3.1.0...v3.2.0) (2017-01-13)
+
+
+### Bug Fixes
+
+* **authService:** allow object passed as second arg to authService.login() ([da294c4](https://github.com/spoonx/aurelia-authentication/commit/da294c4))
+* **interceptor:** fix automatic refresh token usage ([62d61de](https://github.com/spoonx/aurelia-authentication/commit/62d61de))
+
+
+
 <a name="3.1.0"></a>
 # [3.1.0](https://github.com/spoonx/aurelia-authentication/compare/v3.0.3...v3.1.0) (2016-11-02)
 

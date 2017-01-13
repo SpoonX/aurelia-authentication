@@ -175,8 +175,8 @@ export declare class BaseConfig {
   // full page reload if authorization changed in another tab (recommended to set it to 'true')
   storageChangedReload: any;
   
-  // optional function to extract the expiration date. Takes the server response as parameter and returns number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch)
-  // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in * 1000;
+  // optional function to extract the expiration date. Takes the server response as parameter and returns NumericDate = number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch)
+  // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() / 1000 + serverResponse.expires_in;
   getExpirationDateFromResponse: any;
   
   // optional function to extract the access token from the response. Takes the server response as parameter and returns a token
@@ -570,7 +570,7 @@ export declare class AuthService {
      *
      * @return {Promise<Object>|Promise<Error>}    Server response as Object
      */
-  login(emailOrCredentials: string | {}, passwordOrOptions?: string, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any>;
+  login(emailOrCredentials: string | {}, passwordOrOptions?: string | {}, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any>;
   
   /**
      * Logout locally and redirect to redirectUri (if set) or redirectUri of config.

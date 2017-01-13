@@ -1001,7 +1001,7 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
         };
 
         Authentication.prototype.isAuthenticated = function isAuthenticated() {
-          return !!this.accessToken && !this.isTokenExpired();
+          return !!this.getAccessToken() && !this.isTokenExpired();
         };
 
         Authentication.prototype.getDataFromResponse = function getDataFromResponse(response) {
@@ -1696,12 +1696,15 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
                   if (response.ok) {
                     return resolve(response);
                   }
+
                   if (response.status !== 401) {
                     return resolve(response);
                   }
+
                   if (!_this18.config.httpInterceptor || !_this18.authService.isTokenExpired()) {
                     return resolve(response);
                   }
+
                   if (!_this18.config.useRefreshToken || !_this18.authService.getRefreshToken()) {
                     return resolve(response);
                   }
@@ -1715,7 +1718,7 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
 
                     request.headers.set(_this18.config.authHeader, token);
 
-                    return _this18.client.fetch(request).then(resolve);
+                    return _this18.httpClient.fetch(request).then(resolve);
                   });
                 });
               })

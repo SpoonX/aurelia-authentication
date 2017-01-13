@@ -838,7 +838,7 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
   }
 
   isAuthenticated() {
-    return !!this.accessToken && !this.isTokenExpired();
+    return !!this.getAccessToken() && !this.isTokenExpired();
   }
 
   getDataFromResponse(response) {
@@ -1380,12 +1380,15 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
           if (response.ok) {
             return resolve(response);
           }
+
           if (response.status !== 401) {
             return resolve(response);
           }
+
           if (!this.config.httpInterceptor || !this.authService.isTokenExpired()) {
             return resolve(response);
           }
+
           if (!this.config.useRefreshToken || !this.authService.getRefreshToken()) {
             return resolve(response);
           }
@@ -1399,7 +1402,7 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
 
             request.headers.set(this.config.authHeader, token);
 
-            return this.client.fetch(request).then(resolve);
+            return this.httpClient.fetch(request).then(resolve);
           });
         });
       }

@@ -286,8 +286,8 @@ export class BaseConfig {
   storageKey = 'aurelia_authentication';
   // full page reload if authorization changed in another tab (recommended to set it to 'true')
   storageChangedReload = false;
-  // optional function to extract the expiration date. Takes the server response as parameter and returns number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch)
-  // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() + serverResponse.expires_in * 1000;
+  // optional function to extract the expiration date. Takes the server response as parameter and returns NumericDate = number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch)
+  // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() / 1000 + serverResponse.expires_in;
   getExpirationDateFromResponse = null;
   // optional function to extract the access token from the response. Takes the server response as parameter and returns a token
   // eg: getAccessTokenFromResponse = serverResponse => serverResponse.data[0].access_token;
@@ -1060,7 +1060,7 @@ export class Authentication {
   }
 
   isAuthenticated(): boolean {
-    return !!this.accessToken && !this.isTokenExpired();
+    return !!this.getAccessToken() && !this.isTokenExpired();
   }
 
   /* get and set from response */
@@ -1677,7 +1677,7 @@ export class AuthService {
    *
    * @return {Promise<Object>|Promise<Error>}    Server response as Object
    */
-  login(emailOrCredentials: string|{}, passwordOrOptions?: string, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any> {
+  login(emailOrCredentials: string|{}, passwordOrOptions?: string|{}, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any> {
     let normalized = {};
 
     if (typeof emailOrCredentials === 'object') {
@@ -1875,19 +1875,24 @@ export class FetchConfig {
       },
       response: (response, request) => {
         return new Promise((resolve, reject) => {
+          // resolve success
           if (response.ok) {
             return resolve(response);
           }
+          // resolve all non-authorization errors
           if (response.status !== 401) {
             return resolve(response);
           }
+          // resolve unexpected authorization errors (not a managed request or token not expired)
           if (!this.config.httpInterceptor || !this.authService.isTokenExpired()) {
             return resolve(response);
           }
+          // resolve expected authorization error without refresh_token setup
           if (!this.config.useRefreshToken || !this.authService.getRefreshToken()) {
             return resolve(response);
           }
 
+          // refresh token and try again
           return this.authService.updateToken().then(() => {
             let token = this.authService.getAccessToken();
 
@@ -1897,7 +1902,7 @@ export class FetchConfig {
 
             request.headers.set(this.config.authHeader, token);
 
-            return this.client.fetch(request).then(resolve);
+            return this.httpClient.fetch(request).then(resolve);
           });
         });
       }

@@ -369,10 +369,10 @@ export class AuthService {
         grant_type: 'refresh_token'
       };
 
-      if(this.config.clientId) {
+      if (this.config.clientId) {
         content.client_id = this.config.clientId;
       }
-      if(this.config.clientSecret) {
+      if (this.config.clientSecret) {
         content.client_secret = this.config.clientSecret;
       }
 
@@ -463,7 +463,7 @@ export class AuthService {
       normalized.credentials.client_id = this.config.clientId;
     }
 
-    if(this.config.clientSecret) {
+    if (this.config.clientSecret) {
       normalized.credentials.client_secret = this.config.clientSecret;
     }
 

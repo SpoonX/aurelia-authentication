@@ -82,6 +82,8 @@ useRefreshToken = false;
 autoUpdateToken = true;
 // Oauth Client Id
 clientId = false;
+// Oauth Client secret
+clientSecret = null;
 // The property from which to get the refresh token after a successful token refresh
 refreshTokenProp = 'refresh_token';
 
@@ -138,6 +140,10 @@ getRefreshTokenFromResponse = null;
 // List of value-converters to make global
 globalValueConverters = ['authFilterValueConverter'];
 
+ // Default headers for login and token-update endpoint
+defaultHeadersForTokenRequests = {
+  'Content-Type': 'application/json'
+}
 
 //OAuth provider specific related configuration
 // ============================================

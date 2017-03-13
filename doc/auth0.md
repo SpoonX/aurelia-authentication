@@ -50,7 +50,7 @@ const config = {
         auth0: {
             name: 'auth0',
             oauthType: 'auth0-lock',
-            responseType: 'id_token token',
+            responseType: 'token',
             clientId: '.......',
             clientDomain: '..........auth0.com',
             lockOptions: {

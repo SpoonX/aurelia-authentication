@@ -1197,6 +1197,12 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
               return;
             }
 
+            if (_this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
+              _this8.authentication.updateAuthenticated();
+
+              return;
+            }
+
             logger.info('Stored token changed event');
 
             if (event.newValue) {

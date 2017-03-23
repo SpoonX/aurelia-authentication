@@ -1072,6 +1072,12 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
         return;
       }
 
+      if (_this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
+        _this8.authentication.updateAuthenticated();
+
+        return;
+      }
+
       logger.info('Stored token changed event');
 
       if (event.newValue) {

@@ -994,6 +994,12 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
         return;
       }
 
+      if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+        this.authentication.updateAuthenticated();
+
+        return;
+      }
+
       logger.info('Stored token changed event');
 
       if (event.newValue) {

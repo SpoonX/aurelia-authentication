@@ -1096,6 +1096,12 @@ var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjectio
         return;
       }
 
+      if (_this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
+        _this8.authentication.updateAuthenticated();
+
+        return;
+      }
+
       logger.info('Stored token changed event');
 
       if (event.newValue) {

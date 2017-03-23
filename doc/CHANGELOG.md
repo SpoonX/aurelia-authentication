@@ -1,3 +1,13 @@
+<a name="3.4.1"></a>
+## [3.4.1](https://github.com/spoonx/aurelia-authentication/compare/v3.4.0...v3.4.1) (2017-03-23)
+
+
+### Bug Fixes
+
+* **authService:** storageEventHandler change ([01d3662](https://github.com/spoonx/aurelia-authentication/commit/01d3662))
+
+
+
 <a name="3.4.0"></a>
 # [3.4.0](https://github.com/spoonx/aurelia-authentication/compare/v3.3.0...v3.4.0) (2017-03-20)
 

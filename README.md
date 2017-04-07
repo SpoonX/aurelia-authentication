@@ -30,7 +30,7 @@ The [changelog](doc/changelog.md) provides you with information about important 
 
 ## Installation
 
-### Aureli-Cli
+### Aurelia-Cli
 
 Run `npm i aurelia-authentication --save` from your project root.
 
@@ -113,7 +113,7 @@ Set your custom configuration. You can find all options and the default values i
 /* authConfig.js */
 var baseConfig = {
     endpoint: 'auth',             // use 'auth' endpoint for the auth server
-    configureEndpoints: ['auth']  // add Authorization header to 'auth' endpoint
+    configureEndpoints: ['auth'], // add Authorization header to 'auth' endpoint
     facebook: {
         clientId: 'your client id' // set your third-party providers client ids
     }

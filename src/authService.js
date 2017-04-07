@@ -85,6 +85,14 @@ export class AuthService {
       return;
     }
 
+    // in case auto refresh tokens are enabled
+    if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+      // we just need to check the status of the updated token we have in storage
+      this.authentication.updateAuthenticated();
+
+      return;
+    }
+
     logger.info('Stored token changed event');
 
     // IE runs the event handler before updating the storage value. Update it now.
@@ -443,14 +451,14 @@ export class AuthService {
    *
    * @return {Promise<Object>|Promise<Error>}    Server response as Object
    */
-  login(emailOrCredentials: string|{}, passwordOrOptions?: string|{}, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any> {
+  login(emailOrCredentials?: string|{}, passwordOrOptions?: string|{}, optionsOrRedirectUri?: {}, redirectUri?: string): Promise<any> {
     let normalized = {};
 
     if (typeof emailOrCredentials === 'object') {
       normalized.credentials = emailOrCredentials;
       normalized.options     = this.config.getOptionsForTokenRequests(passwordOrOptions);
       normalized.redirectUri = optionsOrRedirectUri;
-    } else {
+    } else if (typeof emailOrCredentials === 'string') {
       normalized.credentials = {
         'email'   : emailOrCredentials,
         'password': passwordOrOptions
@@ -513,8 +521,10 @@ export class AuthService {
           });
       }
     } else {
-      return this.config.logoutUrl
-        ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl)).then(localLogout)
+     return this.config.logoutUrl
+        ? this.client.request(this.config.logoutMethod, this.config.joinBase(this.config.logoutUrl))
+            .then(localLogout)
+            .catch(localLogout)
         : localLogout();
     }
   }

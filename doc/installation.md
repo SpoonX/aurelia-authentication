@@ -1,6 +1,6 @@
 # Installation
 
-## Aurelis-Cli
+## Aurelia-Cli
 
 Run `npm i aurelia-authentication --save` from your project root.
 

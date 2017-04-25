@@ -214,6 +214,7 @@ export var BaseConfig = function () {
     this.useRefreshToken = false;
     this.autoUpdateToken = true;
     this.clientId = false;
+    this.clientSecret = null;
     this.refreshTokenProp = 'refresh_token';
     this.refreshTokenSubmitProp = 'refresh_token';
     this.refreshTokenName = 'token';
@@ -231,6 +232,9 @@ export var BaseConfig = function () {
     this.getAccessTokenFromResponse = null;
     this.getRefreshTokenFromResponse = null;
     this.globalValueConverters = ['authFilterValueConverter'];
+    this.defaultHeadersForTokenRequests = {
+      'Content-Type': 'application/json'
+    };
     this.providers = {
       facebook: {
         name: 'facebook',
@@ -381,6 +385,12 @@ export var BaseConfig = function () {
         }
       }
     }
+  };
+
+  BaseConfig.prototype.getOptionsForTokenRequests = function getOptionsForTokenRequests() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    return extend(true, {}, { headers: this.defaultHeadersForTokenRequests }, options);
   };
 
   _createClass(BaseConfig, [{
@@ -1277,13 +1287,19 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
 
     if (this.authentication.updateTokenCallstack.length === 0) {
       var content = {
-        grant_type: 'refresh_token',
-        client_id: this.config.clientId ? this.config.clientId : undefined
+        grant_type: 'refresh_token'
       };
+
+      if (this.config.clientId) {
+        content.client_id = this.config.clientId;
+      }
+      if (this.config.clientSecret) {
+        content.client_secret = this.config.clientSecret;
+      }
 
       content[this.config.refreshTokenSubmitProp] = this.authentication.getRefreshToken();
 
-      this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(function (response) {
+      this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content, this.config.getOptionsForTokenRequests()).then(function (response) {
         _this11.setResponseObject(response);
         _this11.authentication.resolveUpdateTokenCallstack(_this11.isAuthenticated());
       }).catch(function (error) {
@@ -1331,19 +1347,23 @@ export var AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
 
     if ((typeof emailOrCredentials === 'undefined' ? 'undefined' : _typeof(emailOrCredentials)) === 'object') {
       normalized.credentials = emailOrCredentials;
-      normalized.options = passwordOrOptions;
+      normalized.options = this.config.getOptionsForTokenRequests(passwordOrOptions);
       normalized.redirectUri = optionsOrRedirectUri;
     } else if (typeof emailOrCredentials === 'string') {
       normalized.credentials = {
         'email': emailOrCredentials,
         'password': passwordOrOptions
       };
-      normalized.options = optionsOrRedirectUri;
+      normalized.options = this.config.getOptionsForTokenRequests(optionsOrRedirectUri);
       normalized.redirectUri = redirectUri;
     }
 
     if (this.config.clientId) {
       normalized.credentials.client_id = this.config.clientId;
+    }
+
+    if (this.config.clientSecret) {
+      normalized.credentials.client_secret = this.config.clientSecret;
     }
 
     return this.client.post(this.config.joinBase(this.config.loginUrl), normalized.credentials, normalized.options).then(function (response) {
@@ -1543,7 +1563,7 @@ export var FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
 
       return {
         request: function (_request) {
-          function request(_x2) {
+          function request(_x3) {
             return _request.apply(this, arguments);
           }
 
@@ -1567,7 +1587,7 @@ export var FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
           return request;
         }),
         response: function (_response) {
-          function response(_x3, _x4) {
+          function response(_x4, _x5) {
             return _response.apply(this, arguments);
           }
 

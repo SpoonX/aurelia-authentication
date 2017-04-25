@@ -167,6 +167,10 @@ export class BaseConfig {
     }
   }
 
+  getOptionsForTokenRequests(options?:{} = {}): {} {
+      return extend(true, {}, {headers: this.defaultHeadersForTokenRequests}, options);
+  }
+
   /* ----------- default  config ----------- */
 
   // Used internally. The used Rest instance; set during configuration (see index.js)
@@ -250,6 +254,8 @@ export class BaseConfig {
   autoUpdateToken = true;
   // Oauth Client Id
   clientId = false;
+  // Oauth Client secret
+  clientSecret = null;
   // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
   refreshTokenProp = 'refresh_token';
   // The property name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
@@ -298,6 +304,11 @@ export class BaseConfig {
 
   // List of value-converters to make global
   globalValueConverters = ['authFilterValueConverter'];
+
+  // Default headers for login and token-update endpoint
+  defaultHeadersForTokenRequests = {
+    'Content-Type': 'application/json'
+  }
 
   //OAuth provider specific related configuration
   // ============================================
@@ -1628,15 +1639,21 @@ export class AuthService {
 
     if (this.authentication.updateTokenCallstack.length === 0) {
       let content = {
-        grant_type: 'refresh_token',
-        client_id : this.config.clientId ? this.config.clientId : undefined
+        grant_type: 'refresh_token'
       };
+
+      if (this.config.clientId) {
+        content.client_id = this.config.clientId;
+      }
+      if (this.config.clientSecret) {
+        content.client_secret = this.config.clientSecret;
+      }
 
       content[this.config.refreshTokenSubmitProp] = this.authentication.getRefreshToken();
 
       this.client.post(this.config.joinBase(this.config.refreshTokenUrl
                                             ? this.config.refreshTokenUrl
-                                            : this.config.loginUrl), content)
+                                            : this.config.loginUrl), content, this.config.getOptionsForTokenRequests())
         .then(response => {
           this.setResponseObject(response);
           this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
@@ -1704,19 +1721,23 @@ export class AuthService {
 
     if (typeof emailOrCredentials === 'object') {
       normalized.credentials = emailOrCredentials;
-      normalized.options     = passwordOrOptions;
+      normalized.options     = this.config.getOptionsForTokenRequests(passwordOrOptions);
       normalized.redirectUri = optionsOrRedirectUri;
     } else if (typeof emailOrCredentials === 'string') {
       normalized.credentials = {
         'email'   : emailOrCredentials,
         'password': passwordOrOptions
       };
-      normalized.options     = optionsOrRedirectUri;
+      normalized.options     = this.config.getOptionsForTokenRequests(optionsOrRedirectUri);
       normalized.redirectUri = redirectUri;
     }
 
     if (this.config.clientId) {
       normalized.credentials.client_id = this.config.clientId;
+    }
+
+    if (this.config.clientSecret) {
+      normalized.credentials.client_secret = this.config.clientSecret;
     }
 
     return this.client.post(this.config.joinBase(this.config.loginUrl), normalized.credentials, normalized.options)

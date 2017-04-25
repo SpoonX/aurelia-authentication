@@ -196,6 +196,7 @@ export let BaseConfig = class BaseConfig {
     this.useRefreshToken = false;
     this.autoUpdateToken = true;
     this.clientId = false;
+    this.clientSecret = null;
     this.refreshTokenProp = 'refresh_token';
     this.refreshTokenSubmitProp = 'refresh_token';
     this.refreshTokenName = 'token';
@@ -213,6 +214,9 @@ export let BaseConfig = class BaseConfig {
     this.getAccessTokenFromResponse = null;
     this.getRefreshTokenFromResponse = null;
     this.globalValueConverters = ['authFilterValueConverter'];
+    this.defaultHeadersForTokenRequests = {
+      'Content-Type': 'application/json'
+    };
     this.providers = {
       facebook: {
         name: 'facebook',
@@ -363,6 +367,10 @@ export let BaseConfig = class BaseConfig {
         }
       }
     }
+  }
+
+  getOptionsForTokenRequests(options = {}) {
+    return extend(true, {}, { headers: this.defaultHeadersForTokenRequests }, options);
   }
 
   set authToken(authToken) {
@@ -1199,13 +1207,19 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
 
     if (this.authentication.updateTokenCallstack.length === 0) {
       let content = {
-        grant_type: 'refresh_token',
-        client_id: this.config.clientId ? this.config.clientId : undefined
+        grant_type: 'refresh_token'
       };
+
+      if (this.config.clientId) {
+        content.client_id = this.config.clientId;
+      }
+      if (this.config.clientSecret) {
+        content.client_secret = this.config.clientSecret;
+      }
 
       content[this.config.refreshTokenSubmitProp] = this.authentication.getRefreshToken();
 
-      this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content).then(response => {
+      this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content, this.config.getOptionsForTokenRequests()).then(response => {
         this.setResponseObject(response);
         this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
       }).catch(error => {
@@ -1249,19 +1263,23 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
 
     if (typeof emailOrCredentials === 'object') {
       normalized.credentials = emailOrCredentials;
-      normalized.options = passwordOrOptions;
+      normalized.options = this.config.getOptionsForTokenRequests(passwordOrOptions);
       normalized.redirectUri = optionsOrRedirectUri;
     } else if (typeof emailOrCredentials === 'string') {
       normalized.credentials = {
         'email': emailOrCredentials,
         'password': passwordOrOptions
       };
-      normalized.options = optionsOrRedirectUri;
+      normalized.options = this.config.getOptionsForTokenRequests(optionsOrRedirectUri);
       normalized.redirectUri = redirectUri;
     }
 
     if (this.config.clientId) {
       normalized.credentials.client_id = this.config.clientId;
+    }
+
+    if (this.config.clientSecret) {
+      normalized.credentials.client_secret = this.config.clientSecret;
     }
 
     return this.client.post(this.config.joinBase(this.config.loginUrl), normalized.credentials, normalized.options).then(response => {

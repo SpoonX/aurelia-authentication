@@ -1,3 +1,13 @@
+<a name="3.5.0"></a>
+# [3.5.0](https://github.com/spoonx/aurelia-authentication/compare/v3.4.1...v3.5.0) (2017-04-25)
+
+
+### Features
+
+* **authService:** add default headers and clientSecret in config ([863e4a4](https://github.com/spoonx/aurelia-authentication/commit/863e4a4))
+
+
+
 <a name="3.4.1"></a>
 ## [3.4.1](https://github.com/spoonx/aurelia-authentication/compare/v3.4.0...v3.4.1) (2017-03-23)
 

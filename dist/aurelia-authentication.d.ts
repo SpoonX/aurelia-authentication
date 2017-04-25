@@ -32,6 +32,7 @@ export declare class BaseConfig {
      * @param  {Object} incoming Settings object to be merged into the current configuration
      */
   configure(incoming: {}): Config;
+  getOptionsForTokenRequests(options?: {}): {};
   
   /* ----------- default  config ----------- */
   // Used internally. The used Rest instance; set during configuration (see index.js)
@@ -131,6 +132,9 @@ export declare class BaseConfig {
   // Oauth Client Id
   clientId: any;
   
+  // Oauth Client secret
+  clientSecret: any;
+  
   // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
   refreshTokenProp: any;
   
@@ -189,6 +193,9 @@ export declare class BaseConfig {
   
   // List of value-converters to make global
   globalValueConverters: any;
+  
+  // Default headers for login and token-update endpoint
+  defaultHeadersForTokenRequests: any;
   
   //OAuth provider specific related configuration
   // ============================================

@@ -34,6 +34,10 @@ export class BaseConfig {
     }
   }
 
+  getOptionsForTokenRequests(options?:{} = {}): {} {
+      return extend(true, {}, {headers: this.defaultHeadersForTokenRequests}, options);
+  }
+
   /* ----------- default  config ----------- */
 
   // Used internally. The used Rest instance; set during configuration (see index.js)
@@ -117,6 +121,8 @@ export class BaseConfig {
   autoUpdateToken = true;
   // Oauth Client Id
   clientId = false;
+  // Oauth Client secret
+  clientSecret = null;
   // The the property from which to get the refresh token after a successful token refresh. Can also be dotted eg "refreshTokenProp.refreshTokenProp"
   refreshTokenProp = 'refresh_token';
   // The property name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
@@ -165,6 +171,11 @@ export class BaseConfig {
 
   // List of value-converters to make global
   globalValueConverters = ['authFilterValueConverter'];
+
+  // Default headers for login and token-update endpoint
+  defaultHeadersForTokenRequests = {
+    'Content-Type': 'application/json'
+  }
 
   //OAuth provider specific related configuration
   // ============================================

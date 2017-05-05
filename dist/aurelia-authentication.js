@@ -234,6 +234,8 @@ export class BaseConfig {
   authHeader = 'Authorization';
   // The token name used in the header of API requests that require authentication
   authTokenType = 'Bearer';
+  // Logout when the token is invalidated by the server
+  logoutOnInvalidtoken = false;
   // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
   accessTokenProp = 'access_token';
 
@@ -1927,6 +1929,10 @@ export class FetchConfig {
           // resolve all non-authorization errors
           if (response.status !== 401) {
             return resolve(response);
+          }
+          // logout when server invalidated the authorization token but the token itself is still valid
+          if (this.config.httpInterceptor && this.config.logoutOnInvalidtoken && !this.authService.isTokenExpired()) {
+            return reject(this.authService.logout());
           }
           // resolve unexpected authorization errors (not a managed request or token not expired)
           if (!this.config.httpInterceptor || !this.authService.isTokenExpired()) {

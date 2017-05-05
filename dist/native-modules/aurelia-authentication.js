@@ -208,6 +208,7 @@ export var BaseConfig = function () {
     this.refreshTokenUrl = null;
     this.authHeader = 'Authorization';
     this.authTokenType = 'Bearer';
+    this.logoutOnInvalidtoken = false;
     this.accessTokenProp = 'access_token';
     this.accessTokenName = 'token';
     this.accessTokenRoot = false;
@@ -1604,6 +1605,10 @@ export var FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
 
             if (response.status !== 401) {
               return resolve(response);
+            }
+
+            if (_this18.config.httpInterceptor && _this18.config.logoutOnInvalidtoken && !_this18.authService.isTokenExpired()) {
+              return reject(_this18.authService.logout());
             }
 
             if (!_this18.config.httpInterceptor || !_this18.authService.isTokenExpired()) {

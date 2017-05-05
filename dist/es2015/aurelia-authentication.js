@@ -190,6 +190,7 @@ export let BaseConfig = class BaseConfig {
     this.refreshTokenUrl = null;
     this.authHeader = 'Authorization';
     this.authTokenType = 'Bearer';
+    this.logoutOnInvalidtoken = false;
     this.accessTokenProp = 'access_token';
     this.accessTokenName = 'token';
     this.accessTokenRoot = false;
@@ -1417,6 +1418,10 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
 
           if (response.status !== 401) {
             return resolve(response);
+          }
+
+          if (this.config.httpInterceptor && this.config.logoutOnInvalidtoken && !this.authService.isTokenExpired()) {
+            return reject(this.authService.logout());
           }
 
           if (!this.config.httpInterceptor || !this.authService.isTokenExpired()) {

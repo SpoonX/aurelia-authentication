@@ -110,6 +110,9 @@ export declare class BaseConfig {
   // The token name used in the header of API requests that require authentication
   authTokenType: any;
   
+  // Logout when the token is invalidated by the server
+  logoutOnInvalidtoken: any;
+  
   // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
   accessTokenProp: any;
   

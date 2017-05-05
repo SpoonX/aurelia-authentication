@@ -1,3 +1,13 @@
+<a name="3.6.0"></a>
+# [3.6.0](https://github.com/spoonx/aurelia-authentication/compare/v3.5.0...v3.6.0) (2017-05-05)
+
+
+### Features
+
+* **fetchClientConfig:** logout when token is invalidated by server ([ad9b66a](https://github.com/spoonx/aurelia-authentication/commit/ad9b66a))
+
+
+
 <a name="3.5.0"></a>
 # [3.5.0](https://github.com/spoonx/aurelia-authentication/compare/v3.4.1...v3.5.0) (2017-04-25)
 

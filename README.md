@@ -26,7 +26,7 @@ With aurelia-authentication you can:
 
 You can find usage examples and the documentation at the [aurelia-authentication-docs](http://aurelia-authentication.spoonx.org/).
 
-The [changelog](doc/changelog.md) provides you with information about important changes.
+The [changelog](doc/CHANGELOG.md) provides you with information about important changes.
 
 ## Installation
 

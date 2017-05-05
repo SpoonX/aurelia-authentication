@@ -60,6 +60,8 @@ unlinkMethod = 'get';
 authHeader = 'Authorization';
 // The token name used in the header of API requests that require authentication
 authTokenType = 'Bearer';
+// Logout when the token is invalidated by the server
+logoutOnInvalidtoken = false;
 // The property from which to get the access token after a successful login or signup
 accessTokenProp = 'access_token';
 
@@ -127,7 +129,7 @@ storage = 'localStorage';
 storageKey = 'aurelia_authentication';
 // full page reload if authorization changed in another tab (recommended to set it to 'true')
 storageChangedReload = false;
-// optional function to extract the expiration date. Takes the server response as parameter and returns NumericDate = number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch) 
+// optional function to extract the expiration date. Takes the server response as parameter and returns NumericDate = number of seconds! since 1 January 1970 00:00:00 UTC (Unix Epoch)
 // eg (expires_in in sec): getExpirationDateFromResponse = serverResponse => new Date().getTime() / 1000 + serverResponse.expires_in;
 getExpirationDateFromResponse = null;
 // optional function to extract the access token from the response. Takes the server response as parameter and returns a token

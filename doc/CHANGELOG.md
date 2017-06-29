@@ -1,3 +1,19 @@
+<a name="3.7.0"></a>
+# [3.7.0](https://github.com/spoonx/aurelia-authentication/compare/v3.6.0...v3.7.0) (2017-06-29)
+
+
+### Bug Fixes
+
+* **authentication:** prevent logout if there is no identity ([aea4ac8](https://github.com/spoonx/aurelia-authentication/commit/aea4ac8))
+* **authService:** redirect on refresh token failure when configured to do so ([f23fd60](https://github.com/spoonx/aurelia-authentication/commit/f23fd60))
+
+
+### BREAKING CHANGES
+
+* authentication: authentication failures on 401 now return the response in the rejection.
+
+
+
 <a name="3.6.0"></a>
 # [3.6.0](https://github.com/spoonx/aurelia-authentication/compare/v3.5.0...v3.6.0) (2017-05-05)
 

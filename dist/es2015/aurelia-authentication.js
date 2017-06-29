@@ -1222,9 +1222,22 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
 
       this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content, this.config.getOptionsForTokenRequests()).then(response => {
         this.setResponseObject(response);
-        this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
+        if (this.getAccessToken()) {
+          this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
+        } else {
+          this.setResponseObject(null);
+
+          if (this.config.expiredRedirect) {
+            PLATFORM.location.assign(this.config.expiredRedirect);
+          }
+          this.authentication.resolveUpdateTokenCallstack(Promise.reject(new Error('accessToken not found in refreshToken response')));
+        }
       }).catch(error => {
         this.setResponseObject(null);
+
+        if (this.config.expiredRedirect) {
+          PLATFORM.location.assign(this.config.expiredRedirect);
+        }
         this.authentication.resolveUpdateTokenCallstack(Promise.reject(error));
       });
     }
@@ -1418,6 +1431,10 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
 
           if (response.status !== 401) {
             return resolve(response);
+          }
+
+          if (!this.authService.authenticated) {
+            return reject(response);
           }
 
           if (this.config.httpInterceptor && this.config.logoutOnInvalidtoken && !this.authService.isTokenExpired()) {

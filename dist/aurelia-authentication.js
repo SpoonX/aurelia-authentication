@@ -1658,10 +1658,23 @@ export class AuthService {
                                             : this.config.loginUrl), content, this.config.getOptionsForTokenRequests())
         .then(response => {
           this.setResponseObject(response);
-          this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
+          if (this.getAccessToken()) {
+            this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
+          } else {
+            this.setResponseObject(null);
+
+            if (this.config.expiredRedirect) {
+            PLATFORM.location.assign(this.config.expiredRedirect);
+            }
+            this.authentication.resolveUpdateTokenCallstack(Promise.reject(new Error('accessToken not found in refreshToken response')));
+          }
         })
         .catch(error => {
           this.setResponseObject(null);
+
+          if (this.config.expiredRedirect) {
+            PLATFORM.location.assign(this.config.expiredRedirect);
+          }
           this.authentication.resolveUpdateTokenCallstack(Promise.reject(error));
         });
     }
@@ -1929,6 +1942,10 @@ export class FetchConfig {
           // resolve all non-authorization errors
           if (response.status !== 401) {
             return resolve(response);
+          }
+          // when we get a 401 and are not logged in, there's not much to do except reject the request
+          if (!this.authService.authenticated) {
+            return reject(response);
           }
           // logout when server invalidated the authorization token but the token itself is still valid
           if (this.config.httpInterceptor && this.config.logoutOnInvalidtoken && !this.authService.isTokenExpired()) {

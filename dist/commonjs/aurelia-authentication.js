@@ -1326,9 +1326,22 @@ var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjectio
 
       this.client.post(this.config.joinBase(this.config.refreshTokenUrl ? this.config.refreshTokenUrl : this.config.loginUrl), content, this.config.getOptionsForTokenRequests()).then(function (response) {
         _this11.setResponseObject(response);
-        _this11.authentication.resolveUpdateTokenCallstack(_this11.isAuthenticated());
+        if (_this11.getAccessToken()) {
+          _this11.authentication.resolveUpdateTokenCallstack(_this11.isAuthenticated());
+        } else {
+          _this11.setResponseObject(null);
+
+          if (_this11.config.expiredRedirect) {
+            _aureliaPal.PLATFORM.location.assign(_this11.config.expiredRedirect);
+          }
+          _this11.authentication.resolveUpdateTokenCallstack(Promise.reject(new Error('accessToken not found in refreshToken response')));
+        }
       }).catch(function (error) {
         _this11.setResponseObject(null);
+
+        if (_this11.config.expiredRedirect) {
+          _aureliaPal.PLATFORM.location.assign(_this11.config.expiredRedirect);
+        }
         _this11.authentication.resolveUpdateTokenCallstack(Promise.reject(error));
       });
     }
@@ -1626,6 +1639,10 @@ var FetchConfig = exports.FetchConfig = (_dec16 = (0, _aureliaDependencyInjectio
 
             if (response.status !== 401) {
               return resolve(response);
+            }
+
+            if (!_this18.authService.authenticated) {
+              return reject(response);
             }
 
             if (_this18.config.httpInterceptor && _this18.config.logoutOnInvalidtoken && !_this18.authService.isTokenExpired()) {

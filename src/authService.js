@@ -391,10 +391,23 @@ export class AuthService {
                                             : this.config.loginUrl), content, this.config.getOptionsForTokenRequests())
         .then(response => {
           this.setResponseObject(response);
-          this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
+          if (this.getAccessToken()) {
+            this.authentication.resolveUpdateTokenCallstack(this.isAuthenticated());
+          } else {
+            this.setResponseObject(null);
+
+            if (this.config.expiredRedirect) {
+            PLATFORM.location.assign(this.config.expiredRedirect);
+            }
+            this.authentication.resolveUpdateTokenCallstack(Promise.reject(new Error('accessToken not found in refreshToken response')));
+          }
         })
         .catch(error => {
           this.setResponseObject(null);
+
+          if (this.config.expiredRedirect) {
+            PLATFORM.location.assign(this.config.expiredRedirect);
+          }
           this.authentication.resolveUpdateTokenCallstack(Promise.reject(error));
         });
     }

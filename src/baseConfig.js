@@ -132,7 +132,7 @@ export class BaseConfig {
 
   // Option to always store all received properties. This allows to work with a single refresh_token that was received once and the expiration only is extend
   keepOldResponseProperties = false;
-  
+
   // If the property defined by `refreshTokenProp` is an object:
   // -----------------------------------------------------------
 

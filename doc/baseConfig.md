@@ -146,7 +146,7 @@ getRefreshTokenFromResponse : null;
 globalValueConverters : ['authFilterValueConverter'];
 
  // Default headers for login and token-update endpoint
-defaultHeadersForTokenRequests = {
+defaultHeadersForTokenRequests : {
   'Content-Type': 'application/json'
 }
 

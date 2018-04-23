@@ -35,6 +35,7 @@ describe('FetchConfig', function() {
   describe('.intercept()', function() {
     it('Should intercept requests when authenticated.', function(done) {
       let client     = container.get(HttpClient);
+
       client.baseUrl = 'http://localhost:1927/';
       authService.setResponseObject({token: 'xy'});
 
@@ -54,6 +55,7 @@ describe('FetchConfig', function() {
 
     it('Should not intercept requests when unauthenticated.', function(done) {
       let client                 = new HttpClient();
+
       client.baseUrl             = 'http://localhost:1927/';
       authService.accessToken = null;
 
@@ -73,6 +75,7 @@ describe('FetchConfig', function() {
 
     it('Should not intercept requests when authenticated with the httpInterceptor disabled.', function(done) {
       let client                   = new HttpClient();
+
       client.baseUrl               = 'http://localhost:1927/';
       authService.accessToken   = 'xy';
       clientConfig.httpInterceptor = false;
@@ -97,6 +100,7 @@ describe('FetchConfig', function() {
   describe('.configure()', function() {
     it('Should configure the HttpClient singleton without any arguments.', function(done) {
       let client                 = container.get(HttpClient);
+
       client.baseUrl             = 'http://localhost:1927/';
       authService.accessToken = 'xy';
 
@@ -104,6 +108,7 @@ describe('FetchConfig', function() {
       client.fetch('some')
         .then(response => {
           expect(response instanceof Response).toEqual(true);
+
           return response.json();
         })
         .then(response => {
@@ -120,6 +125,7 @@ describe('FetchConfig', function() {
 
     it('Should configure given client as instance of HttpClient.', function(done) {
       let client                 = new HttpClient();
+
       client.baseUrl             = 'http://localhost:1927/';
       authService.accessToken = 'xy';
 
@@ -127,6 +133,7 @@ describe('FetchConfig', function() {
       client.fetch('some')
         .then(response => {
           expect(response instanceof Response).toEqual(true);
+
           return response.json();
         })
         .then(response => {
@@ -143,6 +150,7 @@ describe('FetchConfig', function() {
 
     it('Should configure given client as instance of Rest.', function(done) {
       let rest = clientConfig.getEndpoint('sx/default');
+
       authService.accessToken = 'xy';
 
       fetchConfig.configure(rest);
@@ -163,12 +171,14 @@ describe('FetchConfig', function() {
       let endpoint = 'unknown';
 
       let configureWithTypo = () =>  fetchConfig.configure(endpoint);
+
       expect(configureWithTypo).toThrow();
     });
 
     it('Should configure given client being the default endpoint.', function(done) {
       let rest                   = clientConfig.getEndpoint('sx/default');
       let endpoint               = '';
+
       authService.accessToken = 'xy';
 
       fetchConfig.configure(endpoint);
@@ -188,6 +198,7 @@ describe('FetchConfig', function() {
     it('Should configure given client being an endpoint string.', function(done) {
       let rest                   = clientConfig.getEndpoint('sx/default');
       let endpoint               = 'sx/default';
+
       authService.accessToken = 'xy';
 
       fetchConfig.configure(endpoint);
@@ -206,6 +217,7 @@ describe('FetchConfig', function() {
 
     it('Should configure given client as array of HttpClient instances.', function(done) {
       let clients                = [new HttpClient(), new HttpClient()];
+
       clients[1].baseUrl         = 'http://localhost:1927/';
       authService.accessToken = 'xy';
 
@@ -213,6 +225,7 @@ describe('FetchConfig', function() {
       clients[1].fetch('some')
         .then(response => {
           expect(response instanceof Response).toEqual(true);
+
           return response.json();
         })
         .then(response => {
@@ -229,6 +242,7 @@ describe('FetchConfig', function() {
 
     it('Should configure given client as array of Rest instances.', function(done) {
       let rests                  = [clientConfig.getEndpoint('sx/default'), clientConfig.getEndpoint('sx/custom')];
+
       rests[1]                   = clientConfig.getEndpoint('sx/default');
       authService.accessToken = 'xy';
 
@@ -249,6 +263,7 @@ describe('FetchConfig', function() {
     it('Should configure given client as array of strings.', function(done) {
       let endpoints              = ['sx/default', 'sx/custom'];
       let rest                   = clientConfig.getEndpoint('sx/default');
+
       authService.accessToken = 'xy';
 
       fetchConfig.configure(endpoints);

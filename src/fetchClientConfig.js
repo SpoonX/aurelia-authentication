@@ -57,7 +57,7 @@ export class FetchConfig {
             return reject(response);
           }
           // logout when server invalidated the authorization token but the token itself is still valid
-          if (this.config.httpInterceptor && this.config.logoutOnInvalidtoken && !this.authService.isTokenExpired()) {
+          if (this.config.httpInterceptor && this.config.logoutOnInvalidToken && !this.authService.isTokenExpired()) {
             return reject(this.authService.logout());
           }
           // resolve unexpected authorization errors (not a managed request or token not expired)

@@ -5,6 +5,15 @@ import {Config} from 'aurelia-api';
 import {FetchConfig} from '../src/fetchClientConfig';
 import {AuthService} from '../src/authService';
 
+const tokenFuture = {
+  payload: {
+    name : 'tokenFuture',
+    admin: true,
+    exp  : '2460017154'
+  },
+  jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9rZW5GdXR1cmUiLCJhZG1pbiI6dHJ1ZSwiZXhwIjoiMjQ2MDAxNzE1NCJ9.iHXLzWGY5U9WwVT4IVRLuKTf65XpgrA1Qq_Jlynv6bc'
+};
+
 function getContainer() {
   let container = new Container();
   let config    = container.get(Config);
@@ -252,6 +261,68 @@ describe('FetchConfig', function() {
         .catch(err => {
           expect(err).toBeUndefined();
           expect(true).toBe(false);
+          done();
+        });
+    });
+
+    it('Should not logout on invalid token (default)', function(done) {
+      let client                 = new HttpClient();
+
+      client.baseUrl             = 'http://localhost:1927/';
+      authService.setResponseObject({access_token: tokenFuture.jwt});
+      fetchConfig.configure(client);
+
+      client.fetch('unauthorized')
+        .then(response => {
+          expect(authService.isAuthenticated()).toBe(true);
+
+          done();
+        })
+        .catch(err => {
+          expect(true).toBe(false);
+
+          done();
+        });
+    });
+
+    it('Should logout on invalid token (logoutOnInvalidToken = true)', function(done) {
+      let client                 = new HttpClient();
+
+      client.baseUrl             = 'http://localhost:1927/';
+      authService.setResponseObject({access_token: tokenFuture.jwt});
+      authService.config.logoutOnInvalidToken = true;
+      fetchConfig.configure(client);
+
+      client.fetch('unauthorized')
+        .then(response => {
+          expect(true).toBe(false);
+
+          done();
+        })
+        .catch(err => {
+          expect(authService.isAuthenticated()).toBe(false);
+
+          done();
+        });
+    });
+
+    it('Should logout on invalid token (logoutOnInvalidtoken = true) (deprecated)', function(done) {
+      let client                 = new HttpClient();
+
+      client.baseUrl             = 'http://localhost:1927/';
+      authService.setResponseObject({access_token: tokenFuture.jwt});
+      authService.config.logoutOnInvalidtoken = true;
+      fetchConfig.configure(client);
+
+      client.fetch('unauthorized')
+        .then(response => {
+          expect(true).toBe(false);
+
+          done();
+        })
+        .catch(err => {
+          expect(authService.isAuthenticated()).toBe(false);
+
           done();
         });
     });

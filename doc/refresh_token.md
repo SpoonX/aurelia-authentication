@@ -15,7 +15,7 @@ Following are the configuration options for the refresh token. Most importantly,
 // =====================
 
 // The API endpoint to which refreshToken requests are sent. null = loginUrl
-refreshTokenUrl = null;
+refreshTokenUrl : null;
 
 // Option to turn refresh tokens On/Off
 useRefreshToken: false,
@@ -26,7 +26,7 @@ clientId: false,
 // The the property from which to get the refresh token after a successful token refresh
 refreshTokenProp: 'refresh_token',
 // The proprety name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
-refreshTokenSubmitProp = 'refresh_token';
+refreshTokenSubmitProp : 'refresh_token';
 
 // If the property defined by `refreshTokenProp` is an object:
 // -----------------------------------------------------------

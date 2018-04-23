@@ -130,7 +130,7 @@ export class BaseConfig {
   // The property name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
   refreshTokenSubmitProp = 'refresh_token';
 
-  // Option to always store all received properties. This allows to work with a single refresh_token that was received once and the expiration only is extend
+  // Option to maintain unchanged response properties This allows to work with a single refresh_token that was received once and the expiration only is extend
   keepOldResponseProperties = false;
 
   // If the property defined by `refreshTokenProp` is an object:

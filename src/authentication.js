@@ -123,6 +123,12 @@ export class Authentication {
     return this.payload;
   }
 
+  getIdPayload(): {} {
+    if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
+    return this.idPayload;
+  }
+
   getExp(): number {
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
 
@@ -176,10 +182,8 @@ export class Authentication {
       this.idToken = null;
     }
 
-    this.payload = null;
-    try {
-      this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
-    } catch (_) {} // eslint-disable-line no-empty
+    this.payload   = getPayload(this.accessToken);
+    this.idPayload = getPayload(this.idToken);
 
     // get exp either with from jwt or with supplied function
     this.exp = parseInt((typeof this.config.getExpirationDateFromResponse === 'function'
@@ -343,4 +347,15 @@ export class Authentication {
       PLATFORM.location.href = defaultRedirectUrl + (query ? `?${buildQueryString(query)}` : '');
     }
   }
+}
+
+/* get payload from a token */
+function getPayload(token: string): {} {
+  let payload = null;
+
+  try {
+    payload =token ? jwtDecode(token) : null;
+  } catch (_) {} // eslint-disable-line no-empty
+
+  return payload;
 }

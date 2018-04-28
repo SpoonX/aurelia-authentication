@@ -176,6 +176,37 @@ describe('Authentication', () => {
     });
   });
 
+  describe('.getIdPayload()', () => {
+    const container      = new Container();
+    const authentication = container.get(Authentication);
+
+    afterEach(() => {
+      authentication.setResponseObject(null);
+    });
+
+    it('Should return null for JWT-like token', () => {
+      authentication.setResponseObject({token: tokenFuture.jwt, id_token: 'xx.yy.zz'});
+      const payload = authentication.idPayload;
+
+      expect(payload).toBe(null);
+    });
+
+    it('Should return null for non-JWT-like token', () => {
+      authentication.setResponseObject({'token': tokenFuture.jwt, id_token: 'some'});
+      const payload = authentication.idPayload;
+
+      expect(payload).toBe(null);
+    });
+
+    it('Should analyze response first and return payload', () => {
+      authentication.setResponseObject({token: 'some', id_token: tokenFuture.jwt});
+
+      const payload = authentication.getIdPayload();
+      expect(typeof payload === 'object').toBe(true);
+      expect(JSON.stringify(payload)).toBe(JSON.stringify(tokenFuture.payload));
+    });
+  });
+
   describe('.getExp()', () => {
     const container      = new Container();
     const authentication = container.get(Authentication);

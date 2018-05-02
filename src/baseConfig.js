@@ -295,6 +295,18 @@ export class BaseConfig {
       oauthType            : '2.0',
       popupOptions         : {width: 1028, height: 529}
     },
+    azure_ad: {
+      name                 : 'azure_ad',
+      url                  : '/auth/azure_ad',
+      authorizationEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+      redirectUri          : window.location.origin,
+      logoutEndpoint       : 'https://login.microsoftonline.com/common/oauth2/v2.0/logout',
+      postLogoutRedirectUri: window.location.origin,
+      requiredUrlParams    : ['scope'],
+      scope                : ['user.read'],
+      scopeDelimiter       : ' ',
+      oauthType            : '2.0'
+    },
     auth0: {
       name        : 'auth0',
       oauthType   : 'auth0-lock',

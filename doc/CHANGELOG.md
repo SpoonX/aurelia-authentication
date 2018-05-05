@@ -1,3 +1,24 @@
+<a name="3.7.1"></a>
+## [3.7.1](https://github.com/spoonx/aurelia-authentication/compare/v3.7.0...v3.7.1) (2018-05-05)
+
+
+### Bug Fixes
+
+* **authService:** detect logout events in different tabs when using autoupdate of tokens. ([75029b2](https://github.com/spoonx/aurelia-authentication/commit/75029b2)), closes [#379](https://github.com/spoonx/aurelia-authentication/issues/379)
+* **authService:** limit setTimeout to it's maximum value of about ca 24.85d ([3c51df6](https://github.com/spoonx/aurelia-authentication/commit/3c51df6)), closes [#375](https://github.com/spoonx/aurelia-authentication/issues/375)
+* **authService:** use proper update method ([0283882](https://github.com/spoonx/aurelia-authentication/commit/0283882))
+* **baseConfig:** logoutOnInvalidtoken -> logoutOnInvalidToken ([16bb54b](https://github.com/spoonx/aurelia-authentication/commit/16bb54b))
+* **index:** use PLATFORM.moduleName for globalResources ([ec84731](https://github.com/spoonx/aurelia-authentication/commit/ec84731))
+
+
+### Features
+
+* **authentication:** add option to always store all received properties ([be7c530](https://github.com/spoonx/aurelia-authentication/commit/be7c530))
+* **authService:** added getIdTokenPayload method ([0651f00](https://github.com/spoonx/aurelia-authentication/commit/0651f00))
+* **baseConfig:** added azure ad configuration ([554da43](https://github.com/spoonx/aurelia-authentication/commit/554da43))
+
+
+
 <a name="3.7.0"></a>
 # [3.7.0](https://github.com/spoonx/aurelia-authentication/compare/v3.6.0...v3.7.0) (2017-06-29)
 

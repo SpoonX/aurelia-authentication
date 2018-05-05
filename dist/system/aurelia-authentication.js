@@ -48,6 +48,16 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
     });
   }
 
+  function getPayload(token) {
+    var payload = null;
+
+    try {
+      payload = token ? jwtDecode(token) : null;
+    } catch (_) {}
+
+    return payload;
+  }
+
   function configure(frameworkConfig, config) {
     if (!PLATFORM.location.origin) {
       PLATFORM.location.origin = PLATFORM.location.protocol + '//' + PLATFORM.location.hostname + (PLATFORM.location.port ? ':' + PLATFORM.location.port : '');
@@ -75,7 +85,7 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
 
       var converter = _ref;
 
-      frameworkConfig.globalResources('./' + converter);
+      frameworkConfig.globalResources(PLATFORM.moduleName('./' + converter));
       logger.info('Add globalResources value-converter: ' + converter);
     }
     var fetchConfig = frameworkConfig.container.get(FetchConfig);
@@ -333,7 +343,7 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
           this.refreshTokenUrl = null;
           this.authHeader = 'Authorization';
           this.authTokenType = 'Bearer';
-          this.logoutOnInvalidtoken = false;
+          this.logoutOnInvalidToken = false;
           this.accessTokenProp = 'access_token';
           this.accessTokenName = 'token';
           this.accessTokenRoot = false;
@@ -343,6 +353,7 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
           this.clientSecret = null;
           this.refreshTokenProp = 'refresh_token';
           this.refreshTokenSubmitProp = 'refresh_token';
+          this.keepOldResponseProperties = false;
           this.refreshTokenName = 'token';
           this.refreshTokenRoot = false;
           this.idTokenProp = 'id_token';
@@ -475,6 +486,18 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
               oauthType: '2.0',
               popupOptions: { width: 1028, height: 529 }
             },
+            azure_ad: {
+              name: 'azure_ad',
+              url: '/auth/azure_ad',
+              authorizationEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+              redirectUri: window.location.origin,
+              logoutEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/logout',
+              postLogoutRedirectUri: window.location.origin,
+              requiredUrlParams: ['scope'],
+              scope: ['user.read'],
+              scopeDelimiter: ' ',
+              oauthType: '2.0'
+            },
             auth0: {
               name: 'auth0',
               oauthType: 'auth0-lock',
@@ -491,6 +514,7 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
           this._tokenName = 'token';
           this._tokenRoot = false;
           this._tokenPrefix = 'aurelia';
+          this._logoutOnInvalidtoken = false;
         }
 
         BaseConfig.prototype.joinBase = function joinBase(url) {
@@ -597,6 +621,18 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
           },
           set: function set(_) {
             throw new Error('Setter BaseConfig._current has been removed. Use BaseConfig directly instead.');
+          }
+        }, {
+          key: 'logoutOnInvalidtoken',
+          set: function set(logoutOnInvalidtoken) {
+            logger.warn('BaseConfig.logoutOnInvalidtoken is obsolete. Use BaseConfig.logoutOnInvalidToken instead.');
+            this._logoutOnInvalidtoken = logoutOnInvalidtoken;
+            this.logoutOnInvalidToken = logoutOnInvalidtoken;
+
+            return logoutOnInvalidtoken;
+          },
+          get: function get() {
+            return this._logoutOnInvalidtoken;
           }
         }]);
 
@@ -954,6 +990,11 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
 
         Authentication.prototype.setResponseObject = function setResponseObject(response) {
           if (response) {
+            if (this.config.keepOldResponseProperties) {
+              var oldResponse = this.getResponseObject();
+
+              response = Object.assign({}, oldResponse, response);
+            }
             this.getDataFromResponse(response);
             this.storage.set(this.config.storageKey, JSON.stringify(response));
 
@@ -991,6 +1032,12 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
           if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
 
           return this.payload;
+        };
+
+        Authentication.prototype.getIdPayload = function getIdPayload() {
+          if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
+          return this.idPayload;
         };
 
         Authentication.prototype.getExp = function getExp() {
@@ -1038,10 +1085,9 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
             this.idToken = null;
           }
 
-          this.payload = null;
-          try {
-            this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
-          } catch (_) {}
+          this.payload = getPayload(this.accessToken);
+          this.idPayload = getPayload(this.idToken);
+
           this.exp = parseInt(typeof this.config.getExpirationDateFromResponse === 'function' ? this.config.getExpirationDateFromResponse(response) : this.payload && this.payload.exp, 10) || NaN;
 
           this.responseAnalyzed = true;
@@ -1208,8 +1254,8 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
               return;
             }
 
-            if (_this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
-              _this8.authentication.updateAuthenticated();
+            if (event.newValue && _this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
+              _this8.updateAuthenticated();
 
               return;
             }
@@ -1264,6 +1310,12 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
 
         AuthService.prototype.setTimeout = function setTimeout(ttl) {
           var _this9 = this;
+
+          var maxTimeout = 2147483647;
+          if (ttl > maxTimeout) {
+            ttl = maxTimeout;
+            logger.warn('Token timeout limited to ', maxTimeout, ' ms (ca 24.85d).');
+          }
 
           this.clearTimeout();
 
@@ -1402,6 +1454,10 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
 
         AuthService.prototype.getTokenPayload = function getTokenPayload() {
           return this.authentication.getPayload();
+        };
+
+        AuthService.prototype.getIdTokenPayload = function getIdTokenPayload() {
+          return this.authentication.getIdPayload();
         };
 
         AuthService.prototype.updateToken = function updateToken() {
@@ -1668,19 +1724,13 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
           var _this17 = this;
 
           if (Array.isArray(client)) {
-            var _ret = function () {
-              var configuredClients = [];
+            var configuredClients = [];
 
-              client.forEach(function (toConfigure) {
-                configuredClients.push(_this17.configure(toConfigure));
-              });
+            client.forEach(function (toConfigure) {
+              configuredClients.push(_this17.configure(toConfigure));
+            });
 
-              return {
-                v: configuredClients
-              };
-            }();
-
-            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+            return configuredClients;
           }
 
           if (typeof client === 'string') {
@@ -1755,7 +1805,7 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
                     return reject(response);
                   }
 
-                  if (_this18.config.httpInterceptor && _this18.config.logoutOnInvalidtoken && !_this18.authService.isTokenExpired()) {
+                  if (_this18.config.httpInterceptor && _this18.config.logoutOnInvalidToken && !_this18.authService.isTokenExpired()) {
                     return reject(_this18.authService.logout());
                   }
 

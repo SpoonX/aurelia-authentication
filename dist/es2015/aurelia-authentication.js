@@ -190,7 +190,7 @@ export let BaseConfig = class BaseConfig {
     this.refreshTokenUrl = null;
     this.authHeader = 'Authorization';
     this.authTokenType = 'Bearer';
-    this.logoutOnInvalidtoken = false;
+    this.logoutOnInvalidToken = false;
     this.accessTokenProp = 'access_token';
     this.accessTokenName = 'token';
     this.accessTokenRoot = false;
@@ -200,6 +200,7 @@ export let BaseConfig = class BaseConfig {
     this.clientSecret = null;
     this.refreshTokenProp = 'refresh_token';
     this.refreshTokenSubmitProp = 'refresh_token';
+    this.keepOldResponseProperties = false;
     this.refreshTokenName = 'token';
     this.refreshTokenRoot = false;
     this.idTokenProp = 'id_token';
@@ -332,6 +333,18 @@ export let BaseConfig = class BaseConfig {
         oauthType: '2.0',
         popupOptions: { width: 1028, height: 529 }
       },
+      azure_ad: {
+        name: 'azure_ad',
+        url: '/auth/azure_ad',
+        authorizationEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+        redirectUri: window.location.origin,
+        logoutEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/logout',
+        postLogoutRedirectUri: window.location.origin,
+        requiredUrlParams: ['scope'],
+        scope: ['user.read'],
+        scopeDelimiter: ' ',
+        oauthType: '2.0'
+      },
       auth0: {
         name: 'auth0',
         oauthType: 'auth0-lock',
@@ -348,6 +361,7 @@ export let BaseConfig = class BaseConfig {
     this._tokenName = 'token';
     this._tokenRoot = false;
     this._tokenPrefix = 'aurelia';
+    this._logoutOnInvalidtoken = false;
   }
 
   joinBase(url) {
@@ -444,6 +458,17 @@ export let BaseConfig = class BaseConfig {
   }
   set _current(_) {
     throw new Error('Setter BaseConfig._current has been removed. Use BaseConfig directly instead.');
+  }
+
+  set logoutOnInvalidtoken(logoutOnInvalidtoken) {
+    logger.warn('BaseConfig.logoutOnInvalidtoken is obsolete. Use BaseConfig.logoutOnInvalidToken instead.');
+    this._logoutOnInvalidtoken = logoutOnInvalidtoken;
+    this.logoutOnInvalidToken = logoutOnInvalidtoken;
+
+    return logoutOnInvalidtoken;
+  }
+  get logoutOnInvalidtoken() {
+    return this._logoutOnInvalidtoken;
   }
 };
 
@@ -789,6 +814,11 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
 
   setResponseObject(response) {
     if (response) {
+      if (this.config.keepOldResponseProperties) {
+        let oldResponse = this.getResponseObject();
+
+        response = Object.assign({}, oldResponse, response);
+      }
       this.getDataFromResponse(response);
       this.storage.set(this.config.storageKey, JSON.stringify(response));
 
@@ -826,6 +856,12 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
 
     return this.payload;
+  }
+
+  getIdPayload() {
+    if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
+    return this.idPayload;
   }
 
   getExp() {
@@ -873,10 +909,9 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
       this.idToken = null;
     }
 
-    this.payload = null;
-    try {
-      this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
-    } catch (_) {}
+    this.payload = getPayload(this.accessToken);
+    this.idPayload = getPayload(this.idToken);
+
     this.exp = parseInt(typeof this.config.getExpirationDateFromResponse === 'function' ? this.config.getExpirationDateFromResponse(response) : this.payload && this.payload.exp, 10) || NaN;
 
     this.responseAnalyzed = true;
@@ -986,12 +1021,22 @@ export let Authentication = (_dec5 = inject(Storage, BaseConfig, OAuth1, OAuth2,
     }
 
     if (typeof redirectUrl === 'string') {
-      PLATFORM.location.href = encodeURI(redirectUrl + (query ? `?${ buildQueryString(query) }` : ''));
+      PLATFORM.location.href = encodeURI(redirectUrl + (query ? `?${buildQueryString(query)}` : ''));
     } else if (defaultRedirectUrl) {
-      PLATFORM.location.href = defaultRedirectUrl + (query ? `?${ buildQueryString(query) }` : '');
+      PLATFORM.location.href = defaultRedirectUrl + (query ? `?${buildQueryString(query)}` : '');
     }
   }
 }, (_applyDecoratedDescriptor(_class7.prototype, 'getLoginRoute', [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRoute'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginRedirect', [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRedirect'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginUrl', [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getSignupUrl', [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, 'getSignupUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getProfileUrl', [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, 'getProfileUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getToken', [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, 'getToken'), _class7.prototype)), _class7)) || _class6);
+
+function getPayload(token) {
+  let payload = null;
+
+  try {
+    payload = token ? jwtDecode(token) : null;
+  } catch (_) {}
+
+  return payload;
+}
 
 export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSignaler, EventAggregator), _dec13 = deprecated({ message: 'Use .getAccessToken() instead.' }), _dec12(_class8 = (_class9 = class AuthService {
   constructor(authentication, config, bindingSignaler, eventAggregator) {
@@ -1003,8 +1048,8 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
         return;
       }
 
-      if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-        this.authentication.updateAuthenticated();
+      if (event.newValue && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+        this.updateAuthenticated();
 
         return;
       }
@@ -1040,7 +1085,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
     this.bindingSignaler = bindingSignaler;
     this.eventAggregator = eventAggregator;
 
-    const oldStorageKey = config.tokenPrefix ? `${ config.tokenPrefix }_${ config.tokenName }` : config.tokenName;
+    const oldStorageKey = config.tokenPrefix ? `${config.tokenPrefix}_${config.tokenName}` : config.tokenName;
     const oldToken = authentication.storage.get(oldStorageKey);
 
     if (oldToken) {
@@ -1068,6 +1113,12 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
   }
 
   setTimeout(ttl) {
+    const maxTimeout = 2147483647;
+    if (ttl > maxTimeout) {
+      ttl = maxTimeout;
+      logger.warn('Token timeout limited to ', maxTimeout, ' ms (ca 24.85d).');
+    }
+
     this.clearTimeout();
 
     const expiredTokenHandler = () => {
@@ -1120,7 +1171,7 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
       this.bindingSignaler.signal('authentication-change');
       this.eventAggregator.publish('authentication-change', this.authenticated);
 
-      logger.info(`Authorization changed to: ${ this.authenticated }`);
+      logger.info(`Authorization changed to: ${this.authenticated}`);
     }
   }
 
@@ -1199,6 +1250,10 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
 
   getTokenPayload() {
     return this.authentication.getPayload();
+  }
+
+  getIdTokenPayload() {
+    return this.authentication.getIdPayload();
   }
 
   updateToken() {
@@ -1416,7 +1471,7 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
         let token = this.authService.getAccessToken();
 
         if (this.config.authTokenType) {
-          token = `${ this.config.authTokenType } ${ token }`;
+          token = `${this.config.authTokenType} ${token}`;
         }
 
         request.headers.set(this.config.authHeader, token);
@@ -1437,7 +1492,7 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
             return reject(response);
           }
 
-          if (this.config.httpInterceptor && this.config.logoutOnInvalidtoken && !this.authService.isTokenExpired()) {
+          if (this.config.httpInterceptor && this.config.logoutOnInvalidToken && !this.authService.isTokenExpired()) {
             return reject(this.authService.logout());
           }
 
@@ -1453,7 +1508,7 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
             let token = this.authService.getAccessToken();
 
             if (this.config.authTokenType) {
-              token = `${ this.config.authTokenType } ${ token }`;
+              token = `${this.config.authTokenType} ${token}`;
             }
 
             request.headers.set(this.config.authHeader, token);
@@ -1480,7 +1535,7 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
       const endpoint = this.clientConfig.getEndpoint(client);
 
       if (!endpoint) {
-        throw new Error(`There is no '${ client || 'default' }' endpoint registered.`);
+        throw new Error(`There is no '${client || 'default'}' endpoint registered.`);
       }
       client = endpoint.client;
     } else if (client instanceof Rest) {
@@ -1509,8 +1564,8 @@ export function configure(frameworkConfig, config) {
   }
 
   for (let converter of baseConfig.globalValueConverters) {
-    frameworkConfig.globalResources(`./${ converter }`);
-    logger.info(`Add globalResources value-converter: ${ converter }`);
+    frameworkConfig.globalResources(PLATFORM.moduleName(`./${converter}`));
+    logger.info(`Add globalResources value-converter: ${converter}`);
   }
   const fetchConfig = frameworkConfig.container.get(FetchConfig);
   const clientConfig = frameworkConfig.container.get(Config);
@@ -1528,7 +1583,7 @@ export function configure(frameworkConfig, config) {
       const endpoint = clientConfig.getEndpoint(baseConfig.endpoint);
 
       if (!endpoint) {
-        throw new Error(`There is no '${ baseConfig.endpoint || 'default' }' endpoint registered.`);
+        throw new Error(`There is no '${baseConfig.endpoint || 'default'}' endpoint registered.`);
       }
       client = endpoint;
     } else if (baseConfig.endpoint instanceof HttpClient) {

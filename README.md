@@ -83,7 +83,23 @@ jspm resolve --only npm:aurelia-dependency-injection@1.0.0-beta.2.1.0
 
 Run `npm i aurelia-authentication --save` from your project root.
 
-Add `'aurelia-authentication'` in the `coreBundles.aurelia section` of your `webpack.config.js`.
+The `authFilter` needs to be added to the `webpack.config.js`.
+
+Run `npm i ModuleDependenciesPlugin --save-dev` from your root project and include it the `webpack.config.js`, eg:
+
+```js
+const { AureliaPlugin, ModuleDependenciesPlugin  } = require('aurelia-webpack-plugin');`
+```
+
+In the `plugins` section add the `authFilter`, eg:
+
+```js
+  plugins: [
+    new AureliaPlugin(),
+    new ModuleDependenciesPlugin({
+      "aurelia-authentication": [ "./authFilterValueConverter" ],
+    }),
+```
 
 Aurelia-authentication needs an [aurelia-api](https://www.npmjs.com/package/aurelia-api). It also has submodules. They are listed as resources in the package.json. So, no further action is required.
 

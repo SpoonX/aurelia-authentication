@@ -35,7 +35,7 @@ export function configure(frameworkConfig: { container: Container, globalResourc
 
   // after baseConfig was configured
   for (let converter of baseConfig.globalValueConverters) {
-    frameworkConfig.globalResources(`./${converter}`);
+    frameworkConfig.globalResources(PLATFORM.moduleName(`./${converter}`));
     logger.info(`Add globalResources value-converter: ${converter}`);
   }
   const fetchConfig  = frameworkConfig.container.get(FetchConfig);

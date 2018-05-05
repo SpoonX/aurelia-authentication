@@ -7,6 +7,10 @@ require('require-dir')('node_modules/spoonx-tools/build-plugin/tasks');
 // the testing express server can be imported and routes added
 var app = require('./node_modules/spoonx-tools/build-plugin/tasks/server').app;
 
+// unauthorized test path
+app.all('/unauthorized', function(req, res) {
+  res.sendStatus(401);
+});
 
 // default: all routes, all methods
 app.all('*', function(req, res) {

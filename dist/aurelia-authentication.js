@@ -235,7 +235,7 @@ export class BaseConfig {
   // The token name used in the header of API requests that require authentication
   authTokenType = 'Bearer';
   // Logout when the token is invalidated by the server
-  logoutOnInvalidtoken = false;
+  logoutOnInvalidToken = false;
   // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
   accessTokenProp = 'access_token';
 
@@ -262,6 +262,9 @@ export class BaseConfig {
   refreshTokenProp = 'refresh_token';
   // The property name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
   refreshTokenSubmitProp = 'refresh_token';
+
+  // Option to maintain unchanged response properties This allows to work with a single refresh_token that was received once and the expiration only is extend
+  keepOldResponseProperties = false;
 
   // If the property defined by `refreshTokenProp` is an object:
   // -----------------------------------------------------------
@@ -428,6 +431,18 @@ export class BaseConfig {
       oauthType            : '2.0',
       popupOptions         : {width: 1028, height: 529}
     },
+    azure_ad: {
+      name                 : 'azure_ad',
+      url                  : '/auth/azure_ad',
+      authorizationEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+      redirectUri          : window.location.origin,
+      logoutEndpoint       : 'https://login.microsoftonline.com/common/oauth2/v2.0/logout',
+      postLogoutRedirectUri: window.location.origin,
+      requiredUrlParams    : ['scope'],
+      scope                : ['user.read'],
+      scopeDelimiter       : ' ',
+      oauthType            : '2.0'
+    },
     auth0: {
       name        : 'auth0',
       oauthType   : 'auth0-lock',
@@ -461,6 +476,10 @@ export class BaseConfig {
    * @deprecated
    */
   _tokenPrefix = 'aurelia';
+ /**
+   * @deprecated
+   */
+  _logoutOnInvalidtoken = false;
 
   /* deprecated methods and parameters */
   /**
@@ -559,6 +578,21 @@ export class BaseConfig {
   }
   set _current(_) {
     throw new Error('Setter BaseConfig._current has been removed. Use BaseConfig directly instead.');
+  }
+
+  /**
+   * @param {string} logoutOnInvalidtoken
+   * @deprecated
+   */
+  set logoutOnInvalidtoken(logoutOnInvalidtoken) {
+    logger.warn('BaseConfig.logoutOnInvalidtoken is obsolete. Use BaseConfig.logoutOnInvalidToken instead.');
+    this._logoutOnInvalidtoken = logoutOnInvalidtoken;
+    this.logoutOnInvalidToken = logoutOnInvalidtoken;
+
+    return logoutOnInvalidtoken;
+  }
+  get logoutOnInvalidtoken() {
+    return this._logoutOnInvalidtoken;
   }
 }
 
@@ -1013,6 +1047,11 @@ export class Authentication {
 
   setResponseObject(response: {}) {
     if (response) {
+      if (this.config.keepOldResponseProperties) {
+        let oldResponse = this.getResponseObject();
+
+        response = Object.assign({}, oldResponse, response);
+      }
       this.getDataFromResponse(response);
       this.storage.set(this.config.storageKey, JSON.stringify(response));
 
@@ -1051,6 +1090,12 @@ export class Authentication {
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
 
     return this.payload;
+  }
+
+  getIdPayload(): {} {
+    if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
+    return this.idPayload;
   }
 
   getExp(): number {
@@ -1106,10 +1151,8 @@ export class Authentication {
       this.idToken = null;
     }
 
-    this.payload = null;
-    try {
-      this.payload = this.accessToken ? jwtDecode(this.accessToken) : null;
-    } catch (_) {} // eslint-disable-line no-empty
+    this.payload   = getPayload(this.accessToken);
+    this.idPayload = getPayload(this.idToken);
 
     // get exp either with from jwt or with supplied function
     this.exp = parseInt((typeof this.config.getExpirationDateFromResponse === 'function'
@@ -1275,6 +1318,17 @@ export class Authentication {
   }
 }
 
+/* get payload from a token */
+function getPayload(token: string): {} {
+  let payload = null;
+
+  try {
+    payload =token ? jwtDecode(token) : null;
+  } catch (_) {} // eslint-disable-line no-empty
+
+  return payload;
+}
+
 /* eslint-disable max-lines */
 @inject(Authentication, BaseConfig, BindingSignaler, EventAggregator)
 export class AuthService {
@@ -1352,10 +1406,11 @@ export class AuthService {
       return;
     }
 
-    // in case auto refresh tokens are enabled
-    if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+    // in case auto refresh tokens are enabled, tokens are allowed to differ
+    // logouts (event.newValue===null) and logins (authentication.getAccessToken()===null), need to be handled bellow though
+    if (event.newValue && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
       // we just need to check the status of the updated token we have in storage
-      this.authentication.updateAuthenticated();
+      this.updateAuthenticated();
 
       return;
     }
@@ -1415,6 +1470,14 @@ export class AuthService {
    * @param  {number} ttl  Timeout time in ms
    */
   setTimeout(ttl: number) {
+    const maxTimeout = 2147483647; // maximum period in ms (ca. 24.85d) for windows.setTimeout
+
+    // limit timer ttl to max value allowed for windows.setTimeout function
+    if (ttl > maxTimeout) {
+      ttl = maxTimeout;
+      logger.warn('Token timeout limited to ', maxTimeout, ' ms (ca 24.85d).');
+    }
+
     this.clearTimeout();
 
     const expiredTokenHandler = () => {
@@ -1621,12 +1684,21 @@ export class AuthService {
   }
 
   /**
-  * Get payload from tokens
+  * Get payload from access token
   *
   * @returns {{}} Payload for JWT, else null
   */
   getTokenPayload(): {} {
     return this.authentication.getPayload();
+  }
+
+  /**
+  * Get payload from id token
+  *
+  * @returns {{}} Payload for JWT, else null
+  */
+  getIdTokenPayload(): {} {
+    return this.authentication.getIdPayload();
   }
 
   /**
@@ -1948,7 +2020,7 @@ export class FetchConfig {
             return reject(response);
           }
           // logout when server invalidated the authorization token but the token itself is still valid
-          if (this.config.httpInterceptor && this.config.logoutOnInvalidtoken && !this.authService.isTokenExpired()) {
+          if (this.config.httpInterceptor && this.config.logoutOnInvalidToken && !this.authService.isTokenExpired()) {
             return reject(this.authService.logout());
           }
           // resolve unexpected authorization errors (not a managed request or token not expired)
@@ -2043,7 +2115,7 @@ export function configure(frameworkConfig: { container: Container, globalResourc
 
   // after baseConfig was configured
   for (let converter of baseConfig.globalValueConverters) {
-    frameworkConfig.globalResources(`./${converter}`);
+    frameworkConfig.globalResources(PLATFORM.moduleName(`./${converter}`));
     logger.info(`Add globalResources value-converter: ${converter}`);
   }
   const fetchConfig  = frameworkConfig.container.get(FetchConfig);

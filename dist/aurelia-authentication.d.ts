@@ -111,7 +111,7 @@ export declare class BaseConfig {
   authTokenType: any;
   
   // Logout when the token is invalidated by the server
-  logoutOnInvalidtoken: any;
+  logoutOnInvalidToken: any;
   
   // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
   accessTokenProp: any;
@@ -143,6 +143,9 @@ export declare class BaseConfig {
   
   // The property name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
   refreshTokenSubmitProp: any;
+  
+  // Option to maintain unchanged response properties This allows to work with a single refresh_token that was received once and the expiration only is extend
+  keepOldResponseProperties: any;
   
   // If the property defined by `refreshTokenProp` is an object:
   // -----------------------------------------------------------
@@ -199,9 +202,6 @@ export declare class BaseConfig {
   
   // Default headers for login and token-update endpoint
   defaultHeadersForTokenRequests: any;
-  
-  //OAuth provider specific related configuration
-  // ============================================
   providers: any;
   authToken: any;
   responseTokenProp: any;
@@ -213,6 +213,7 @@ export declare class BaseConfig {
      * @deprecated
      */
   current: any;
+  logoutOnInvalidtoken: any;
 }
 export declare class Storage {
   constructor(config: BaseConfig);
@@ -326,6 +327,7 @@ export declare class Authentication {
   getRefreshToken(): string;
   getIdToken(): string;
   getPayload(): {};
+  getIdPayload(): {};
   getExp(): number;
   
   /* get status from data */
@@ -544,11 +546,18 @@ export declare class AuthService {
   isTokenExpired(): boolean;
   
   /**
-    * Get payload from tokens
+    * Get payload from access token
     *
     * @returns {{}} Payload for JWT, else null
     */
   getTokenPayload(): {};
+  
+  /**
+    * Get payload from id token
+    *
+    * @returns {{}} Payload for JWT, else null
+    */
+  getIdTokenPayload(): {};
   
   /**
      * Request new access token
@@ -665,16 +674,6 @@ export declare class FetchConfig {
  *
  */
 export declare function configure(frameworkConfig: { container: Container, globalResources: (() => any) }, config: {} | Function): any;
-export declare class AuthFilterValueConverter {
-  
-  /**
-     * route toView predictator on route.config.auth === isAuthenticated
-     * @param  {RouteConfig}  routes            the routes array to convert
-     * @param  {boolean}      isAuthenticated   authentication status
-     * @return {boolean}      show/hide element
-     */
-  toView(routes: RouteConfig, isAuthenticated: boolean): boolean;
-}
 export declare class AuthenticatedFilterValueConverter {
   constructor(authService: AuthService);
   
@@ -694,4 +693,14 @@ export declare class AuthenticatedValueConverter {
      * @return {boolean}  show/hide element
      */
   toView(): any;
+}
+export declare class AuthFilterValueConverter {
+  
+  /**
+     * route toView predictator on route.config.auth === isAuthenticated
+     * @param  {RouteConfig}  routes            the routes array to convert
+     * @param  {boolean}      isAuthenticated   authentication status
+     * @return {boolean}      show/hide element
+     */
+  toView(routes: RouteConfig, isAuthenticated: boolean): boolean;
 }

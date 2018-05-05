@@ -236,7 +236,7 @@ var BaseConfig = exports.BaseConfig = function () {
     this.refreshTokenUrl = null;
     this.authHeader = 'Authorization';
     this.authTokenType = 'Bearer';
-    this.logoutOnInvalidtoken = false;
+    this.logoutOnInvalidToken = false;
     this.accessTokenProp = 'access_token';
     this.accessTokenName = 'token';
     this.accessTokenRoot = false;
@@ -246,6 +246,7 @@ var BaseConfig = exports.BaseConfig = function () {
     this.clientSecret = null;
     this.refreshTokenProp = 'refresh_token';
     this.refreshTokenSubmitProp = 'refresh_token';
+    this.keepOldResponseProperties = false;
     this.refreshTokenName = 'token';
     this.refreshTokenRoot = false;
     this.idTokenProp = 'id_token';
@@ -378,6 +379,18 @@ var BaseConfig = exports.BaseConfig = function () {
         oauthType: '2.0',
         popupOptions: { width: 1028, height: 529 }
       },
+      azure_ad: {
+        name: 'azure_ad',
+        url: '/auth/azure_ad',
+        authorizationEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+        redirectUri: window.location.origin,
+        logoutEndpoint: 'https://login.microsoftonline.com/common/oauth2/v2.0/logout',
+        postLogoutRedirectUri: window.location.origin,
+        requiredUrlParams: ['scope'],
+        scope: ['user.read'],
+        scopeDelimiter: ' ',
+        oauthType: '2.0'
+      },
       auth0: {
         name: 'auth0',
         oauthType: 'auth0-lock',
@@ -394,6 +407,7 @@ var BaseConfig = exports.BaseConfig = function () {
     this._tokenName = 'token';
     this._tokenRoot = false;
     this._tokenPrefix = 'aurelia';
+    this._logoutOnInvalidtoken = false;
   }
 
   BaseConfig.prototype.joinBase = function joinBase(url) {
@@ -500,6 +514,18 @@ var BaseConfig = exports.BaseConfig = function () {
     },
     set: function set(_) {
       throw new Error('Setter BaseConfig._current has been removed. Use BaseConfig directly instead.');
+    }
+  }, {
+    key: 'logoutOnInvalidtoken',
+    set: function set(logoutOnInvalidtoken) {
+      logger.warn('BaseConfig.logoutOnInvalidtoken is obsolete. Use BaseConfig.logoutOnInvalidToken instead.');
+      this._logoutOnInvalidtoken = logoutOnInvalidtoken;
+      this.logoutOnInvalidToken = logoutOnInvalidtoken;
+
+      return logoutOnInvalidtoken;
+    },
+    get: function get() {
+      return this._logoutOnInvalidtoken;
     }
   }]);
 
@@ -856,6 +882,11 @@ var Authentication = exports.Authentication = (_dec5 = (0, _aureliaDependencyInj
 
   Authentication.prototype.setResponseObject = function setResponseObject(response) {
     if (response) {
+      if (this.config.keepOldResponseProperties) {
+        var oldResponse = this.getResponseObject();
+
+        response = Object.assign({}, oldResponse, response);
+      }
       this.getDataFromResponse(response);
       this.storage.set(this.config.storageKey, JSON.stringify(response));
 
@@ -893,6 +924,12 @@ var Authentication = exports.Authentication = (_dec5 = (0, _aureliaDependencyInj
     if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
 
     return this.payload;
+  };
+
+  Authentication.prototype.getIdPayload = function getIdPayload() {
+    if (!this.responseAnalyzed) this.getDataFromResponse(this.getResponseObject());
+
+    return this.idPayload;
   };
 
   Authentication.prototype.getExp = function getExp() {
@@ -940,10 +977,9 @@ var Authentication = exports.Authentication = (_dec5 = (0, _aureliaDependencyInj
       this.idToken = null;
     }
 
-    this.payload = null;
-    try {
-      this.payload = this.accessToken ? (0, _jwtDecode2.default)(this.accessToken) : null;
-    } catch (_) {}
+    this.payload = getPayload(this.accessToken);
+    this.idPayload = getPayload(this.idToken);
+
     this.exp = parseInt(typeof this.config.getExpirationDateFromResponse === 'function' ? this.config.getExpirationDateFromResponse(response) : this.payload && this.payload.exp, 10) || NaN;
 
     this.responseAnalyzed = true;
@@ -1093,6 +1129,17 @@ var Authentication = exports.Authentication = (_dec5 = (0, _aureliaDependencyInj
 
   return Authentication;
 }(), (_applyDecoratedDescriptor(_class7.prototype, 'getLoginRoute', [_dec6], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRoute'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginRedirect', [_dec7], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginRedirect'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getLoginUrl', [_dec8], Object.getOwnPropertyDescriptor(_class7.prototype, 'getLoginUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getSignupUrl', [_dec9], Object.getOwnPropertyDescriptor(_class7.prototype, 'getSignupUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getProfileUrl', [_dec10], Object.getOwnPropertyDescriptor(_class7.prototype, 'getProfileUrl'), _class7.prototype), _applyDecoratedDescriptor(_class7.prototype, 'getToken', [_dec11], Object.getOwnPropertyDescriptor(_class7.prototype, 'getToken'), _class7.prototype)), _class7)) || _class6);
+
+function getPayload(token) {
+  var payload = null;
+
+  try {
+    payload = token ? (0, _jwtDecode2.default)(token) : null;
+  } catch (_) {}
+
+  return payload;
+}
+
 var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjection.inject)(Authentication, BaseConfig, _aureliaTemplatingResources.BindingSignaler, _aureliaEventAggregator.EventAggregator), _dec13 = (0, _aureliaMetadata.deprecated)({ message: 'Use .getAccessToken() instead.' }), _dec12(_class8 = (_class9 = function () {
   function AuthService(authentication, config, bindingSignaler, eventAggregator) {
     var _this8 = this;
@@ -1107,8 +1154,8 @@ var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjectio
         return;
       }
 
-      if (_this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
-        _this8.authentication.updateAuthenticated();
+      if (event.newValue && _this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
+        _this8.updateAuthenticated();
 
         return;
       }
@@ -1163,6 +1210,12 @@ var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjectio
 
   AuthService.prototype.setTimeout = function setTimeout(ttl) {
     var _this9 = this;
+
+    var maxTimeout = 2147483647;
+    if (ttl > maxTimeout) {
+      ttl = maxTimeout;
+      logger.warn('Token timeout limited to ', maxTimeout, ' ms (ca 24.85d).');
+    }
 
     this.clearTimeout();
 
@@ -1301,6 +1354,10 @@ var AuthService = exports.AuthService = (_dec12 = (0, _aureliaDependencyInjectio
 
   AuthService.prototype.getTokenPayload = function getTokenPayload() {
     return this.authentication.getPayload();
+  };
+
+  AuthService.prototype.getIdTokenPayload = function getIdTokenPayload() {
+    return this.authentication.getIdPayload();
   };
 
   AuthService.prototype.updateToken = function updateToken() {
@@ -1558,19 +1615,13 @@ var FetchConfig = exports.FetchConfig = (_dec16 = (0, _aureliaDependencyInjectio
     var _this17 = this;
 
     if (Array.isArray(client)) {
-      var _ret = function () {
-        var configuredClients = [];
+      var configuredClients = [];
 
-        client.forEach(function (toConfigure) {
-          configuredClients.push(_this17.configure(toConfigure));
-        });
+      client.forEach(function (toConfigure) {
+        configuredClients.push(_this17.configure(toConfigure));
+      });
 
-        return {
-          v: configuredClients
-        };
-      }();
-
-      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      return configuredClients;
     }
 
     if (typeof client === 'string') {
@@ -1645,7 +1696,7 @@ var FetchConfig = exports.FetchConfig = (_dec16 = (0, _aureliaDependencyInjectio
               return reject(response);
             }
 
-            if (_this18.config.httpInterceptor && _this18.config.logoutOnInvalidtoken && !_this18.authService.isTokenExpired()) {
+            if (_this18.config.httpInterceptor && _this18.config.logoutOnInvalidToken && !_this18.authService.isTokenExpired()) {
               return reject(_this18.authService.logout());
             }
 
@@ -1703,7 +1754,7 @@ function configure(frameworkConfig, config) {
 
     var converter = _ref;
 
-    frameworkConfig.globalResources('./' + converter);
+    frameworkConfig.globalResources(_aureliaPal.PLATFORM.moduleName('./' + converter));
     logger.info('Add globalResources value-converter: ' + converter);
   }
   var fetchConfig = frameworkConfig.container.get(FetchConfig);

@@ -102,7 +102,7 @@ export class BaseConfig {
   // The token name used in the header of API requests that require authentication
   authTokenType = 'Bearer';
   // Logout when the token is invalidated by the server
-  logoutOnInvalidtoken = false;
+  logoutOnInvalidToken = false;
   // The the property from which to get the access token after a successful login or signup. Can also be dotted eg "accessTokenProp.accessTokenName"
   accessTokenProp = 'access_token';
 
@@ -129,6 +129,9 @@ export class BaseConfig {
   refreshTokenProp = 'refresh_token';
   // The property name used to send the existing token when refreshing `{ "refreshTokenSubmitProp": '...' }`
   refreshTokenSubmitProp = 'refresh_token';
+
+  // Option to maintain unchanged response properties This allows to work with a single refresh_token that was received once and the expiration only is extend
+  keepOldResponseProperties = false;
 
   // If the property defined by `refreshTokenProp` is an object:
   // -----------------------------------------------------------
@@ -340,6 +343,10 @@ export class BaseConfig {
    * @deprecated
    */
   _tokenPrefix = 'aurelia';
+ /**
+   * @deprecated
+   */
+  _logoutOnInvalidtoken = false;
 
   /* deprecated methods and parameters */
   /**
@@ -438,6 +445,21 @@ export class BaseConfig {
   }
   set _current(_) {
     throw new Error('Setter BaseConfig._current has been removed. Use BaseConfig directly instead.');
+  }
+
+  /**
+   * @param {string} logoutOnInvalidtoken
+   * @deprecated
+   */
+  set logoutOnInvalidtoken(logoutOnInvalidtoken) {
+    logger.warn('BaseConfig.logoutOnInvalidtoken is obsolete. Use BaseConfig.logoutOnInvalidToken instead.');
+    this._logoutOnInvalidtoken = logoutOnInvalidtoken;
+    this.logoutOnInvalidToken = logoutOnInvalidtoken;
+
+    return logoutOnInvalidtoken;
+  }
+  get logoutOnInvalidtoken() {
+    return this._logoutOnInvalidtoken;
   }
 }
 

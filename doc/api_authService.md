@@ -95,6 +95,8 @@ Sets the login timeout.
 
 CAUTION: .authenticated and isAuthenticated() might get different results when set manually.
 
+WARNING: Maximum timeout is 2^31 - 1 ms (ca. 24.85d).
+
 #### Parameters
 
 | Parameter | Type     | Description        |
@@ -314,7 +316,23 @@ A `Object` for JWT or `null` for other tokens.
 #### Example
 
 ```js
-let isExpired = this.authService.getTokenPayload();
+let payload = this.authService.getTokenPayload();
+```
+
+----------
+
+### .getIdTokenPayload()
+
+Gets the current id token payload from storage
+
+#### Returns
+
+A `Object` for JWT or `null` for other tokens.
+
+#### Example
+
+```js
+let payload = this.authService.getIdTokenPayload();
 ```
 
 ----------

@@ -5,6 +5,15 @@ import {Config} from 'aurelia-api';
 import {FetchConfig} from '../src/fetchClientConfig';
 import {AuthService} from '../src/authService';
 
+const tokenFuture = {
+  payload: {
+    name : 'tokenFuture',
+    admin: true,
+    exp  : '2460017154'
+  },
+  jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9rZW5GdXR1cmUiLCJhZG1pbiI6dHJ1ZSwiZXhwIjoiMjQ2MDAxNzE1NCJ9.iHXLzWGY5U9WwVT4IVRLuKTf65XpgrA1Qq_Jlynv6bc'
+};
+
 function getContainer() {
   let container = new Container();
   let config    = container.get(Config);
@@ -26,6 +35,7 @@ describe('FetchConfig', function() {
   describe('.intercept()', function() {
     it('Should intercept requests when authenticated.', function(done) {
       let client     = container.get(HttpClient);
+
       client.baseUrl = 'http://localhost:1927/';
       authService.setResponseObject({token: 'xy'});
 
@@ -45,6 +55,7 @@ describe('FetchConfig', function() {
 
     it('Should not intercept requests when unauthenticated.', function(done) {
       let client                 = new HttpClient();
+
       client.baseUrl             = 'http://localhost:1927/';
       authService.accessToken = null;
 
@@ -64,6 +75,7 @@ describe('FetchConfig', function() {
 
     it('Should not intercept requests when authenticated with the httpInterceptor disabled.', function(done) {
       let client                   = new HttpClient();
+
       client.baseUrl               = 'http://localhost:1927/';
       authService.accessToken   = 'xy';
       clientConfig.httpInterceptor = false;
@@ -88,6 +100,7 @@ describe('FetchConfig', function() {
   describe('.configure()', function() {
     it('Should configure the HttpClient singleton without any arguments.', function(done) {
       let client                 = container.get(HttpClient);
+
       client.baseUrl             = 'http://localhost:1927/';
       authService.accessToken = 'xy';
 
@@ -95,6 +108,7 @@ describe('FetchConfig', function() {
       client.fetch('some')
         .then(response => {
           expect(response instanceof Response).toEqual(true);
+
           return response.json();
         })
         .then(response => {
@@ -111,6 +125,7 @@ describe('FetchConfig', function() {
 
     it('Should configure given client as instance of HttpClient.', function(done) {
       let client                 = new HttpClient();
+
       client.baseUrl             = 'http://localhost:1927/';
       authService.accessToken = 'xy';
 
@@ -118,6 +133,7 @@ describe('FetchConfig', function() {
       client.fetch('some')
         .then(response => {
           expect(response instanceof Response).toEqual(true);
+
           return response.json();
         })
         .then(response => {
@@ -134,6 +150,7 @@ describe('FetchConfig', function() {
 
     it('Should configure given client as instance of Rest.', function(done) {
       let rest = clientConfig.getEndpoint('sx/default');
+
       authService.accessToken = 'xy';
 
       fetchConfig.configure(rest);
@@ -154,12 +171,14 @@ describe('FetchConfig', function() {
       let endpoint = 'unknown';
 
       let configureWithTypo = () =>  fetchConfig.configure(endpoint);
+
       expect(configureWithTypo).toThrow();
     });
 
     it('Should configure given client being the default endpoint.', function(done) {
       let rest                   = clientConfig.getEndpoint('sx/default');
       let endpoint               = '';
+
       authService.accessToken = 'xy';
 
       fetchConfig.configure(endpoint);
@@ -179,6 +198,7 @@ describe('FetchConfig', function() {
     it('Should configure given client being an endpoint string.', function(done) {
       let rest                   = clientConfig.getEndpoint('sx/default');
       let endpoint               = 'sx/default';
+
       authService.accessToken = 'xy';
 
       fetchConfig.configure(endpoint);
@@ -197,6 +217,7 @@ describe('FetchConfig', function() {
 
     it('Should configure given client as array of HttpClient instances.', function(done) {
       let clients                = [new HttpClient(), new HttpClient()];
+
       clients[1].baseUrl         = 'http://localhost:1927/';
       authService.accessToken = 'xy';
 
@@ -204,6 +225,7 @@ describe('FetchConfig', function() {
       clients[1].fetch('some')
         .then(response => {
           expect(response instanceof Response).toEqual(true);
+
           return response.json();
         })
         .then(response => {
@@ -220,6 +242,7 @@ describe('FetchConfig', function() {
 
     it('Should configure given client as array of Rest instances.', function(done) {
       let rests                  = [clientConfig.getEndpoint('sx/default'), clientConfig.getEndpoint('sx/custom')];
+
       rests[1]                   = clientConfig.getEndpoint('sx/default');
       authService.accessToken = 'xy';
 
@@ -240,6 +263,7 @@ describe('FetchConfig', function() {
     it('Should configure given client as array of strings.', function(done) {
       let endpoints              = ['sx/default', 'sx/custom'];
       let rest                   = clientConfig.getEndpoint('sx/default');
+
       authService.accessToken = 'xy';
 
       fetchConfig.configure(endpoints);
@@ -252,6 +276,68 @@ describe('FetchConfig', function() {
         .catch(err => {
           expect(err).toBeUndefined();
           expect(true).toBe(false);
+          done();
+        });
+    });
+
+    it('Should not logout on invalid token (default)', function(done) {
+      let client                 = new HttpClient();
+
+      client.baseUrl             = 'http://localhost:1927/';
+      authService.setResponseObject({access_token: tokenFuture.jwt});
+      fetchConfig.configure(client);
+
+      client.fetch('unauthorized')
+        .then(response => {
+          expect(authService.isAuthenticated()).toBe(true);
+
+          done();
+        })
+        .catch(err => {
+          expect(true).toBe(false);
+
+          done();
+        });
+    });
+
+    it('Should logout on invalid token (logoutOnInvalidToken = true)', function(done) {
+      let client                 = new HttpClient();
+
+      client.baseUrl             = 'http://localhost:1927/';
+      authService.setResponseObject({access_token: tokenFuture.jwt});
+      authService.config.logoutOnInvalidToken = true;
+      fetchConfig.configure(client);
+
+      client.fetch('unauthorized')
+        .then(response => {
+          expect(true).toBe(false);
+
+          done();
+        })
+        .catch(err => {
+          expect(authService.isAuthenticated()).toBe(false);
+
+          done();
+        });
+    });
+
+    it('Should logout on invalid token (logoutOnInvalidtoken = true) (deprecated)', function(done) {
+      let client                 = new HttpClient();
+
+      client.baseUrl             = 'http://localhost:1927/';
+      authService.setResponseObject({access_token: tokenFuture.jwt});
+      authService.config.logoutOnInvalidtoken = true;
+      fetchConfig.configure(client);
+
+      client.fetch('unauthorized')
+        .then(response => {
+          expect(true).toBe(false);
+
+          done();
+        })
+        .catch(err => {
+          expect(authService.isAuthenticated()).toBe(false);
+
           done();
         });
     });

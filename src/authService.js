@@ -85,10 +85,11 @@ export class AuthService {
       return;
     }
 
-    // in case auto refresh tokens are enabled
-    if (this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+    // in case auto refresh tokens are enabled, tokens are allowed to differ
+    // logouts (event.newValue===null) and logins (authentication.getAccessToken()===null), need to be handled bellow though
+    if (event.newValue && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
       // we just need to check the status of the updated token we have in storage
-      this.authentication.updateAuthenticated();
+      this.updateAuthenticated();
 
       return;
     }
@@ -148,6 +149,14 @@ export class AuthService {
    * @param  {number} ttl  Timeout time in ms
    */
   setTimeout(ttl: number) {
+    const maxTimeout = 2147483647; // maximum period in ms (ca. 24.85d) for windows.setTimeout
+
+    // limit timer ttl to max value allowed for windows.setTimeout function
+    if (ttl > maxTimeout) {
+      ttl = maxTimeout;
+      logger.warn('Token timeout limited to ', maxTimeout, ' ms (ca 24.85d).');
+    }
+
     this.clearTimeout();
 
     const expiredTokenHandler = () => {
@@ -354,12 +363,21 @@ export class AuthService {
   }
 
   /**
-  * Get payload from tokens
+  * Get payload from access token
   *
   * @returns {{}} Payload for JWT, else null
   */
   getTokenPayload(): {} {
     return this.authentication.getPayload();
+  }
+
+  /**
+  * Get payload from id token
+  *
+  * @returns {{}} Payload for JWT, else null
+  */
+  getIdTokenPayload(): {} {
+    return this.authentication.getIdPayload();
   }
 
   /**

@@ -608,6 +608,19 @@ describe('AuthService', () => {
     });
   });
 
+  describe('.getIdTokenPayload()', () => {
+    const container   = getContainer();
+    const authService = container.get(AuthService);
+
+    it('should return authentication.getIdTokenPayload() result ', () => {
+      spyOn(authService.authentication, 'getIdPayload').and.returnValue('payload');
+
+      const payload = authService.getIdTokenPayload();
+
+      expect(payload).toBe('payload');
+    });
+  });
+
   describe('.updateToken()', () => {
     const container   = new Container();
     const authService = container.get(AuthService);

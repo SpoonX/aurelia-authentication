@@ -83,6 +83,11 @@ export class Authentication {
 
   setResponseObject(response: {}) {
     if (response) {
+      if (this.config.keepOldResponseProperties) {
+        let oldResponse = this.getResponseObject();
+
+        response = Object.assign({}, oldResponse, response);
+      }
       this.getDataFromResponse(response);
       this.storage.set(this.config.storageKey, JSON.stringify(response));
 

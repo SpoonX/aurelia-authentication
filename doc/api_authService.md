@@ -316,7 +316,23 @@ A `Object` for JWT or `null` for other tokens.
 #### Example
 
 ```js
-let isExpired = this.authService.getTokenPayload();
+let payload = this.authService.getTokenPayload();
+```
+
+----------
+
+### .getIdTokenPayload()
+
+Gets the current id token payload from storage
+
+#### Returns
+
+A `Object` for JWT or `null` for other tokens.
+
+#### Example
+
+```js
+let payload = this.authService.getIdTokenPayload();
 ```
 
 ----------

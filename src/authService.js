@@ -363,12 +363,21 @@ export class AuthService {
   }
 
   /**
-  * Get payload from tokens
+  * Get payload from access token
   *
   * @returns {{}} Payload for JWT, else null
   */
   getTokenPayload(): {} {
     return this.authentication.getPayload();
+  }
+
+  /**
+  * Get payload from id token
+  *
+  * @returns {{}} Payload for JWT, else null
+  */
+  getIdTokenPayload(): {} {
+    return this.authentication.getIdPayload();
   }
 
   /**

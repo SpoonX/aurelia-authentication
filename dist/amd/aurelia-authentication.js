@@ -1702,7 +1702,7 @@ define(['exports', 'extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurel
                 return resolve(response);
               }
 
-              return _this18.authService.updateToken().then(function () {
+              resolve(_this18.authService.updateToken().then(function () {
                 var token = _this18.authService.getAccessToken();
 
                 if (_this18.config.authTokenType) {
@@ -1712,7 +1712,7 @@ define(['exports', 'extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurel
                 request.headers.set(_this18.config.authHeader, token);
 
                 return _this18.httpClient.fetch(request).then(resolve);
-              });
+              }));
             });
           })
         };

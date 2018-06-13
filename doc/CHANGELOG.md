@@ -1,10 +1,14 @@
+<a name="3.8.1"></a>
+## [3.8.1](https://github.com/spoonx/aurelia-authentication/compare/v3.8.0...v3.8.1) (2018-06-13)
+
+
+### Bug Fixes
+
+* **fetchClientConfig:** do not break promises chain ([c1cd0f2](https://github.com/spoonx/aurelia-authentication/commit/c1cd0f2))
+
+
 <a name="3.8.0"></a>
 # [3.8.0](https://github.com/spoonx/aurelia-authentication/compare/v3.7.1...v3.8.0) (2018-05-28)
-
-
-
-<a name="3.7.1"></a>
-## [3.7.1](https://github.com/spoonx/aurelia-authentication/compare/v3.7.0...v3.7.1) (2018-05-05)
 
 
 ### Bug Fixes

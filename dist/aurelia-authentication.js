@@ -2033,7 +2033,7 @@ export class FetchConfig {
           }
 
           // refresh token and try again
-          return this.authService.updateToken().then(() => {
+          resolve(this.authService.updateToken().then(() => {
             let token = this.authService.getAccessToken();
 
             if (this.config.authTokenType) {
@@ -2043,7 +2043,7 @@ export class FetchConfig {
             request.headers.set(this.config.authHeader, token);
 
             return this.httpClient.fetch(request).then(resolve);
-          });
+          }));
         });
       }
     };

@@ -1504,7 +1504,7 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
             return resolve(response);
           }
 
-          return this.authService.updateToken().then(() => {
+          resolve(this.authService.updateToken().then(() => {
             let token = this.authService.getAccessToken();
 
             if (this.config.authTokenType) {
@@ -1514,7 +1514,7 @@ export let FetchConfig = (_dec16 = inject(HttpClient, Config, AuthService, BaseC
             request.headers.set(this.config.authHeader, token);
 
             return this.httpClient.fetch(request).then(resolve);
-          });
+          }));
         });
       }
     };

@@ -1817,7 +1817,7 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
                     return resolve(response);
                   }
 
-                  return _this18.authService.updateToken().then(function () {
+                  resolve(_this18.authService.updateToken().then(function () {
                     var token = _this18.authService.getAccessToken();
 
                     if (_this18.config.authTokenType) {
@@ -1827,7 +1827,7 @@ System.register(['extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurelia
                     request.headers.set(_this18.config.authHeader, token);
 
                     return _this18.httpClient.fetch(request).then(resolve);
-                  });
+                  }));
                 });
               })
             };

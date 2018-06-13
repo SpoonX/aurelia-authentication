@@ -80,7 +80,8 @@ export class FetchConfig {
             request.headers.set(this.config.authHeader, token);
 
             return this.httpClient.fetch(request).then(resolve);
-          });
+          })
+          .catch(e => reject(e));
         });
       }
     };

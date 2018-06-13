@@ -70,7 +70,7 @@ export class FetchConfig {
           }
 
           // refresh token and try again
-          return resolve(this.authService.updateToken().then(() => {
+          resolve(this.authService.updateToken().then(() => {
             let token = this.authService.getAccessToken();
 
             if (this.config.authTokenType) {

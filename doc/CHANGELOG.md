@@ -1,3 +1,15 @@
+<a name="3.8.3"></a>
+## [3.8.3](https://github.com/spoonx/aurelia-authentication/compare/v3.8.2...v3.8.3) (2019-05-01)
+
+
+### Bug Fixes
+
+* **authService:** add tests ([dcf3b09](https://github.com/spoonx/aurelia-authentication/commit/dcf3b09))
+* **authService:** move IE relevant code higher ([3f428e1](https://github.com/spoonx/aurelia-authentication/commit/3f428e1))
+* **authService:** update internal authentication fields ([86620c0](https://github.com/spoonx/aurelia-authentication/commit/86620c0))
+
+
+
 <a name="3.8.2"></a>
 ## [3.8.2](https://github.com/spoonx/aurelia-authentication/compare/v3.8.1...v3.8.2) (2018-09-24)
 

@@ -1149,19 +1149,19 @@ define(['exports', 'extend', 'jwt-decode', 'aurelia-pal', 'aurelia-path', 'aurel
           return;
         }
 
-        if (event.newValue && _this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
-          _this8.updateAuthenticated();
-
-          return;
-        }
-
-        logger.info('Stored token changed event');
-
         if (event.newValue) {
           _this8.authentication.storage.set(_this8.config.storageKey, event.newValue);
         } else {
           _this8.authentication.storage.remove(_this8.config.storageKey);
         }
+
+        if (event.newValue && _this8.config.autoUpdateToken && _this8.authentication.getAccessToken() && _this8.authentication.getRefreshToken()) {
+          _this8.setResponseObject(_this8.authentication.getResponseObject());
+
+          return;
+        }
+
+        logger.info('Stored token changed event');
 
         var wasAuthenticated = _this8.authenticated;
 

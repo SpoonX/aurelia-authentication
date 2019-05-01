@@ -1049,19 +1049,19 @@ export let AuthService = (_dec12 = inject(Authentication, BaseConfig, BindingSig
         return;
       }
 
-      if (event.newValue && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-        this.updateAuthenticated();
-
-        return;
-      }
-
-      logger.info('Stored token changed event');
-
       if (event.newValue) {
         this.authentication.storage.set(this.config.storageKey, event.newValue);
       } else {
         this.authentication.storage.remove(this.config.storageKey);
       }
+
+      if (event.newValue && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+        this.setResponseObject(this.authentication.getResponseObject());
+
+        return;
+      }
+
+      logger.info('Stored token changed event');
 
       let wasAuthenticated = this.authenticated;
 

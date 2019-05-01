@@ -92,13 +92,14 @@ export class AuthService {
     } else {
       this.authentication.storage.remove(this.config.storageKey);
     }
-    
+
     // in case auto refresh tokens are enabled, tokens are allowed to differ
     // logouts (event.newValue===null) and logins (authentication.getAccessToken()===null), need to be handled bellow though
     if (event.newValue && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
       // we need to set the whole response object again so that this.authentication.exp gets updated too
       // this is critical for a scenario when two browser windows are open and one of them refreshes a token
       this.setResponseObject(this.authentication.getResponseObject());
+
       return;
     }
 

@@ -997,4 +997,61 @@ describe('AuthService', () => {
         });
     });
   });
+
+  describe('.getExp()', () => {
+    const container   = getContainer();
+    const authService = container.get(AuthService);
+
+    it('Should return exp of the new token set directly in storage.', done => {
+      authService.config.autoUpdateToken = true;
+      authService.config.useRefreshToken = true;
+      authService.setResponseObject({access_token: tokenFuture.jwt, refresh_token: tokenFuture.jwt});
+      const newToken = {
+        payload: {
+          name : 'newToken',
+          admin: true,
+          exp  : '2460017155'
+        },
+        jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9rZW5GdXR1cmUiLCJhZG1pbiI6dHJ1ZSwiZXhwIjoiMjQ2MDAxNzE1NSJ9.0BOonoj0DWMRMFFrmv4nrqtcsSE1olFEX7C1_Tnl8a8'
+      };
+
+      const oldValue = window.localStorage.getItem('aurelia_authentication');
+      const newValue = JSON.stringify({access_token: newToken.jwt, refresh_token: newToken.jwt});
+
+      window.localStorage.setItem('aurelia_authentication', newValue);
+      // no events, call manually
+      authService.storageEventHandler(new StorageEvent('storage', {key: 'aurelia_authentication', newValue, oldValue }));
+
+      const exp = authService.getExp();
+      expect(exp).toBe(parseInt(newToken.payload.exp));
+      done();
+    });
+
+    it('Should return exp of the new token set directly in IE storage.', done => {
+      authService.config.autoUpdateToken = true;
+      authService.config.useRefreshToken = true;
+      authService.setResponseObject({access_token: tokenFuture.jwt, refresh_token: tokenFuture.jwt});
+      const newToken = {
+        payload: {
+          name : 'newToken',
+          admin: true,
+          exp  : '2460017155'
+        },
+        jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9rZW5GdXR1cmUiLCJhZG1pbiI6dHJ1ZSwiZXhwIjoiMjQ2MDAxNzE1NSJ9.0BOonoj0DWMRMFFrmv4nrqtcsSE1olFEX7C1_Tnl8a8'
+      };
+
+      const oldValue = window.localStorage.getItem('aurelia_authentication');
+      const newValue = JSON.stringify({access_token: newToken.jwt, refresh_token: newToken.jwt});
+
+      // in IE event is dispatched before a key is set
+      // no events, call manually
+      authService.storageEventHandler(new StorageEvent('storage', {key: 'aurelia_authentication', newValue, oldValue }));
+      const exp = authService.getExp();
+      window.localStorage.setItem('aurelia_authentication', newValue);
+
+      expect(exp).toBe(parseInt(newToken.payload.exp));
+      done();
+    });
+  });
+
 });

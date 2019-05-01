@@ -85,17 +85,6 @@ export class AuthService {
       return;
     }
 
-    // in case auto refresh tokens are enabled, tokens are allowed to differ
-    // logouts (event.newValue===null) and logins (authentication.getAccessToken()===null), need to be handled bellow though
-    if (event.newValue && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
-      // we just need to check the status of the updated token we have in storage
-      this.updateAuthenticated();
-
-      return;
-    }
-
-    logger.info('Stored token changed event');
-
     // IE runs the event handler before updating the storage value. Update it now.
     // An unset storage key in IE is an empty string, where-as chrome is null
     if (event.newValue) {
@@ -103,6 +92,18 @@ export class AuthService {
     } else {
       this.authentication.storage.remove(this.config.storageKey);
     }
+
+    // in case auto refresh tokens are enabled, tokens are allowed to differ
+    // logouts (event.newValue===null) and logins (authentication.getAccessToken()===null), need to be handled bellow though
+    if (event.newValue && this.config.autoUpdateToken && this.authentication.getAccessToken() && this.authentication.getRefreshToken()) {
+      // we need to set the whole response object again so that this.authentication.exp gets updated too
+      // this is critical for a scenario when two browser windows are open and one of them refreshes a token
+      this.setResponseObject(this.authentication.getResponseObject());
+
+      return;
+    }
+
+    logger.info('Stored token changed event');
 
     let wasAuthenticated = this.authenticated;
 

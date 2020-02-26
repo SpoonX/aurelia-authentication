@@ -23,10 +23,10 @@ loginRoute : '/login';
 loginOnSignup : true;
 // If loginOnSignup == false: The SPA url to which the user is redirected after a successful signup (else loginRedirect is used)
 signupRedirect : '#/login';
-// reload page when token expires. 0 = don't reload (default), 1 = do reload page
-expiredReload : 0;
-// reload page when storage changed aka login/logout in other tabs/windows. 0 = don't reload (default), 1 = do reload page
-storageChangedReload : 0;
+// The SPA url to load when the token expires (null = don't redirect)
+expiredRedirect = '#/';
+// The SPA url to load when the authentication status changed in other tabs/windows (detected through storageEvents) (null = don't redirect)
+storageChangedRedirect = '#/';
 
 
 // API related options
@@ -51,7 +51,8 @@ profileMethod : 'put';
 unlinkUrl : '/auth/unlink/';
 // The HTTP method used for 'unlink' requests (Options: 'get' or 'post')
 unlinkMethod : 'get';
-
+// The API endpoint to which refreshToken requests are sent. null = loginUrl
+refreshTokenUrl = null;
 
 // Token Options
 // =============
@@ -61,7 +62,7 @@ authHeader : 'Authorization';
 // The token name used in the header of API requests that require authentication
 authTokenType : 'Bearer';
 // Logout when the token is invalidated by the server
-logoutOnInvalidtoken : false;
+logoutOnInvalidToken : false;
 // The property from which to get the access token after a successful login or signup
 accessTokenProp : 'access_token';
 

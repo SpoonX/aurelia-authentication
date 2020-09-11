@@ -215,7 +215,7 @@ authService
   // manually refresh authentication. Needs refreshToken options to be configured
   .updateToken()
   // link third-party account or log into server via third-party authentication. Stores response if successful
-  authenticate(name, redirectUri, userData)
+  authenticate(name, userData)
   // unlink third-party
   unlink(name, redirectUri)
   // get profile
